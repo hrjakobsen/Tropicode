@@ -1,4 +1,3 @@
-
 /*
  *     Copyright (C) 2021.  Mathias Jakobsen <m.jakobsen.1@research.gla.ac.uk>
  *
@@ -16,23 +15,19 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package simplecall;
+package JVM.Instructions;
 
-import Annotations.Protocol;
+import JVM.JvmContex;
+import JVM.JvmOpCode;
+import JVM.JvmValue;
 
-@Protocol("rec X.{question; X stop; end}")
-public class C1 {
-    public Answer question() {
-        return Answer.YES;
+public class JvmCONST extends JvmOperation {
+    public JvmCONST(JvmOpCode opcode) {
+        super(opcode);
     }
 
-    public void Branch1() {
-        System.out.println("Branch 1 chosen");
+    @Override
+    public void evaluateInstruction(JvmContex ctx) {
+        ctx.push(JvmValue.UNKNOWN);
     }
-
-    public void Branch2() {
-        System.out.println("Branch 2 chosen");
-    }
-
-    public void stop() {}
 }

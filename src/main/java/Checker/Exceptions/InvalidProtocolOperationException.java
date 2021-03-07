@@ -1,4 +1,3 @@
-
 /*
  *     Copyright (C) 2021.  Mathias Jakobsen <m.jakobsen.1@research.gla.ac.uk>
  *
@@ -16,23 +15,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package simplecall;
+package Checker.Exceptions;
 
-import Annotations.Protocol;
-
-@Protocol("rec X.{question; X stop; end}")
-public class C1 {
-    public Answer question() {
-        return Answer.YES;
+public class InvalidProtocolOperationException extends CheckerException {
+    public InvalidProtocolOperationException(String message) {
+        super(message);
     }
-
-    public void Branch1() {
-        System.out.println("Branch 1 chosen");
-    }
-
-    public void Branch2() {
-        System.out.println("Branch 2 chosen");
-    }
-
-    public void stop() {}
 }

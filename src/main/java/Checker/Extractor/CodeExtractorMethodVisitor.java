@@ -44,6 +44,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
         switch (jvmop) {
             case NOP:
+                break;
             case ACONST_NULL:
             case ICONST_M1:
             case ICONST_0:
@@ -59,6 +60,8 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case FCONST_2:
             case DCONST_0:
             case DCONST_1:
+                this.method.getInstructions().add(new JvmCONST(jvmop));
+                break;
             case IALOAD:
             case LALOAD:
             case FALOAD:
@@ -165,6 +168,8 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         switch (jvmop) {
             case BIPUSH:
             case SIPUSH:
+                this.method.getInstructions().add(new JvmCONST(jvmop));
+                break;
             case NEWARRAY:
                 this.method.getInstructions().add(new JvmNoEffectOperation(jvmop));
         }
@@ -243,12 +248,22 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     public void visitJumpInsn(int opcode, Label label) {
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
         switch (jvmop) {
+            case JSR:
+                method.getInstructions().add(new JvmJSR(label));
+                break;
+            case GOTO:
+                method.getInstructions().add(new JvmJUMP(jvmop, label, 0));
+                break;
+            case IFNULL:
+            case IFNONNULL:
             case IFEQ:
             case IFNE:
             case IFLT:
             case IFGE:
             case IFGT:
             case IFLE:
+                method.getInstructions().add(new JvmJUMP(jvmop, label, 1));
+                break;
             case IF_ICMPEQ:
             case IF_ICMPNE:
             case IF_ICMPLT:
@@ -257,11 +272,8 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case IF_ICMPLE:
             case IF_ACMPEQ:
             case IF_ACMPNE:
-            case GOTO:
-            case JSR:
-            case IFNULL:
-            case IFNONNULL:
-                method.getInstructions().add(new JvmNoEffectOperation(jvmop));
+                method.getInstructions().add(new JvmJUMP(jvmop, label, 2));
+                break;
         }
         super.visitJumpInsn(opcode, label);
     }

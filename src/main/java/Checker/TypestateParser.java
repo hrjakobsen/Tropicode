@@ -58,9 +58,11 @@ public class TypestateParser {
         TypestateLexer.Token rec = tokens.pop();
         ensureToken(TypestateLexer.TokenType.REC, rec);
 
-
         TypestateLexer.Token identifier = tokens.pop();
         ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
+
+        TypestateLexer.Token dot = tokens.pop();
+        ensureToken(TypestateLexer.TokenType.DOT, dot);
 
         return new Typestate.Recursive(identifier.getText(), parseU(tokens));
     }
@@ -113,7 +115,7 @@ public class TypestateParser {
         TypestateLexer.Token caretOpen = tokens.pop();
         ensureToken(TypestateLexer.TokenType.CARET_OPEN, caretOpen);
 
-        HashMap<String, Typestate> branches = new HashMap<>();
+        HashMap<String, Typestate> choices = new HashMap<>();
 
         TypestateLexer.Token next = tokens.peek();
         while (next.getType() == TypestateLexer.TokenType.IDENTIFIER) {
@@ -126,7 +128,7 @@ public class TypestateParser {
             ensureToken(TypestateLexer.TokenType.COLON, colon);
 
             Typestate t = parseU(tokens);
-            branches.put(identifier.getText(), t);
+            choices.put(identifier.getText(), t);
 
             next = tokens.peek();
         }
@@ -134,7 +136,7 @@ public class TypestateParser {
         TypestateLexer.Token caretClose = tokens.pop();
         ensureToken(TypestateLexer.TokenType.CARET_CLOSE, caretClose);
 
-        return new Typestate.Branch(branches);
+        return new Typestate.Choice(choices);
     }
 
     private void ensureToken(TypestateLexer.TokenType expected, TypestateLexer.Token actual) {

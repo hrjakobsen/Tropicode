@@ -30,6 +30,7 @@ public class JvmContex {
     private Map<String, JvmObject> heap = new HashMap<>();
     private final JvmValue[] locals = new JvmValue[65536];
     private Map<String, Typestate> protocolStore = new HashMap<>();
+    private Map<String, JvmHeapSnapshot> snapshots = new HashMap<>();
 
     public Map<String, Typestate> getProtocolStore() {
         return protocolStore;
@@ -80,5 +81,22 @@ public class JvmContex {
         return "JvmContex{" +
                     stack.toString()
                 + "}";
+    }
+
+    public void takeSnapshot(String label) {
+        JvmHeapSnapshot snapshot = new JvmHeapSnapshot(heap);
+        this.snapshots.put(label, snapshot);
+    }
+
+    public boolean compareToSnapshot(String label) {
+        if (!snapshots.containsKey(label)) {
+            return false;
+        }
+        JvmHeapSnapshot snapshot = snapshots.get(label);
+        return snapshot.compareTo(heap);
+    }
+
+    public boolean hasSnapshot(String label) {
+        return snapshots.containsKey(label);
     }
 }

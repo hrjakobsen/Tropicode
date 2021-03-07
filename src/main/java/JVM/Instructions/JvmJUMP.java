@@ -18,20 +18,35 @@
 package JVM.Instructions;
 
 import JVM.JvmContex;
+import JVM.JvmOpCode;
+import org.objectweb.asm.Label;
 
-public class JvmLabel extends JvmInstruction {
-    String label;
-    public JvmLabel(String label) {
-        this.label = label;
+public class JvmJUMP extends JvmOperation {
+
+    private final Label label;
+    private final int stackValues;
+
+    public JvmJUMP(JvmOpCode opcode, Label s, int i) {
+        super(opcode);
+        label = s;
+        stackValues = i;
     }
 
-    @Override
-    public String toString() {
-        return label + ":";
+    public Label getLabel() {
+        return label;
     }
 
     @Override
     public void evaluateInstruction(JvmContex ctx) {
-        ctx.takeSnapshot(this.label);
+        for (int i = 0; i < stackValues; i++) {
+            ctx.pop();
+        }
+        if (ctx.hasSnapshot(this.label.toString())) {
+            if (!ctx.compareToSnapshot(this.label.toString())) {
+                throw new IllegalStateException("Snapshot not equals to current heap");
+            }
+        } else {
+            System.out.println("Jump into the future label " + this.label.toString());
+        }
     }
 }

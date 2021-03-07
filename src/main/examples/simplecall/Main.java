@@ -21,8 +21,11 @@ public class Main {
 
     public static void main(String[] args) {
         C1 c1 = new C1();
-        c1.question();
-        c1.question();
+        int i = 0;
+        do {
+            c1.question();
+            i++;
+        } while (i < 10);
         c1.Branch1();
     }
 }

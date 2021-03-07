@@ -40,6 +40,14 @@ public abstract class Typestate implements Cloneable {
 
     public static Typestate END = new End();
 
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof Typestate)) {
+            return false;
+        }
+        return other.toString().equals(this.toString());
+    }
+
     private static class End extends Typestate {
 
         @Override
@@ -87,8 +95,9 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         protected Typestate unfoldRecursive(String identifier, Typestate ts) {
-            branches.replaceAll((a, v) -> branches.get(a).unfoldRecursive(identifier, ts));
-            return this;
+            Branch copy = (Branch) this.deepCopy();
+            copy.branches.replaceAll((a, v) -> copy.branches.get(a).unfoldRecursive(identifier, ts));
+            return copy;
         }
 
         @Override
@@ -103,7 +112,11 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         public Typestate deepCopy()  {
-            return new Branch((HashMap<String, Typestate>) this.branches.clone());
+            HashMap<String, Typestate> newBranches = new HashMap<>();
+            for (String key : this.branches.keySet()) {
+                newBranches.put(key, this.branches.get(key).deepCopy());
+            }
+            return new Branch(newBranches);
         }
 
 
@@ -127,8 +140,9 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         protected Typestate unfoldRecursive(String identifier, Typestate ts) {
-            choices.replaceAll((a, v) -> choices.get(a).unfoldRecursive(identifier, ts));
-            return this;
+            Choice copy = (Choice) this.deepCopy();
+            copy.choices.replaceAll((a, v) -> copy.choices.get(a).unfoldRecursive(identifier, ts));
+            return copy;
         }
 
         @Override
@@ -143,7 +157,11 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         public Typestate deepCopy() {
-            return new Typestate.Branch((HashMap<String, Typestate>) this.choices.clone());
+            HashMap<String, Typestate> newChoices = new HashMap<>();
+            for (String key : this.choices.keySet()) {
+                newChoices.put(key, this.choices.get(key).deepCopy());
+            }
+            return new Choice(newChoices);
         }
     }
 
@@ -163,17 +181,23 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         public boolean isAllowed(String action) {
-            return this.next.isAllowed(action);
+            return this.next.unfoldRecursive(this.identifier, this).isAllowed(action);
         }
 
         @Override
         public Typestate perform(String action) {
-            throw new IllegalArgumentException("Perform not implemented on recursive typestates");
+            return this.next.unfoldRecursive(this.identifier, this).perform(action);
         }
 
         @Override
         protected Typestate unfoldRecursive(String identifier, Typestate ts) {
             return next.unfoldRecursive(identifier, ts);
+        }
+
+
+        @Override
+        public String toString() {
+            return "rec " + identifier + ". " + next.toString();
         }
     }
 
@@ -203,7 +227,7 @@ public abstract class Typestate implements Cloneable {
         @Override
         protected Typestate unfoldRecursive(String identifier, Typestate ts) {
             if (identifier.equals(this.identifier)) {
-                return ts;
+                return ts.deepCopy();
             } else {
                 return this;
             }

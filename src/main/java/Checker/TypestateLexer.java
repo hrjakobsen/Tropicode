@@ -38,7 +38,7 @@ public class TypestateLexer {
         END("end"),
         REC("rec"),
         DOT("\\."),
-        IDENTIFIER("[a-zA-Z_$][a-zA-Z_$0-9]+");
+        IDENTIFIER("[a-zA-Z_$][a-zA-Z_$0-9]*");
 
         private final Pattern pattern;
         public String text;

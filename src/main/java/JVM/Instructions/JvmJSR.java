@@ -1,4 +1,3 @@
-
 /*
  *     Copyright (C) 2021.  Mathias Jakobsen <m.jakobsen.1@research.gla.ac.uk>
  *
@@ -16,23 +15,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package simplecall;
+package JVM.Instructions;
 
-import Annotations.Protocol;
+import JVM.JvmContex;
+import JVM.JvmOpCode;
+import org.objectweb.asm.Label;
 
-@Protocol("rec X.{question; X stop; end}")
-public class C1 {
-    public Answer question() {
-        return Answer.YES;
+public class JvmJSR extends JvmOperation {
+    private final Label label;
+
+    public JvmJSR(Label label) {
+        super(JvmOpCode.JSR);
+        this.label = label;
     }
 
-    public void Branch1() {
-        System.out.println("Branch 1 chosen");
+    @Override
+    public void evaluateInstruction(JvmContex ctx) {
+        throw new IllegalStateException("JSR instruction not supported");
     }
-
-    public void Branch2() {
-        System.out.println("Branch 2 chosen");
-    }
-
-    public void stop() {}
 }
