@@ -17,6 +17,7 @@
 
 package JVM.Instructions;
 
+import Checker.Exceptions.CheckerException;
 import JVM.JvmContex;
 import JVM.JvmObject;
 import JVM.JvmOpCode;
@@ -45,7 +46,7 @@ public class JvmINVOKE extends JvmOperation {
             if (object.getProtocol().isAllowed(name.trim())) {
                 object.setProtocol(object.getProtocol().perform(name));
             } else {
-                throw new IllegalArgumentException("Invalid transition " + name + " for typestate " + object.getProtocol());
+                throw new CheckerException("Invalid transition " + name + " for typestate " + object.getProtocol());
             }
 
         }
@@ -67,7 +68,7 @@ public class JvmINVOKE extends JvmOperation {
 
     private int countParameters(String descriptor) {
         if (descriptor.length() < 2 || descriptor.charAt(0) != '(') {
-            throw new IllegalArgumentException("Invalid parameter string: " + descriptor);
+            throw new CheckerException("Invalid parameter string: " + descriptor);
         }
         char[] chars = descriptor.toCharArray();
         int index = 1;

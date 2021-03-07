@@ -15,12 +15,19 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM;
+package JVM.Instructions;
 
-import Checker.Exceptions.CheckerException;
+import Checker.Exceptions.UnsupportedOperationException;
+import JVM.JvmContex;
+import JVM.JvmOpCode;
 
-public class InvalidOpcodeException extends CheckerException {
-    public InvalidOpcodeException(int opcode) {
-        super("Invalid opcode: " + Integer.toHexString(opcode));
+public class JvmUnsupportedOperation extends JvmOperation {
+    public JvmUnsupportedOperation(JvmOpCode opcode) {
+        super(opcode);
+    }
+
+    @Override
+    public void evaluateInstruction(JvmContex ctx) {
+        throw new UnsupportedOperationException(opcode + " has not been implemented");
     }
 }

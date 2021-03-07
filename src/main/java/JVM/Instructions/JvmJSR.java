@@ -17,6 +17,7 @@
 
 package JVM.Instructions;
 
+import Checker.Exceptions.UnsupportedOperationException;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import org.objectweb.asm.Label;
@@ -31,6 +32,6 @@ public class JvmJSR extends JvmOperation {
 
     @Override
     public void evaluateInstruction(JvmContex ctx) {
-        throw new IllegalStateException("JSR instruction not supported");
+        throw new UnsupportedOperationException("JSR instruction not supported");
     }
 }

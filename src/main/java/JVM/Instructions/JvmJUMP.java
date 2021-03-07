@@ -17,6 +17,7 @@
 
 package JVM.Instructions;
 
+import Checker.Exceptions.CheckerException;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import org.objectweb.asm.Label;
@@ -43,7 +44,7 @@ public class JvmJUMP extends JvmOperation {
         }
         if (ctx.hasSnapshot(this.label.toString())) {
             if (!ctx.compareToSnapshot(this.label.toString())) {
-                throw new IllegalStateException("Snapshot not equals to current heap");
+                throw new CheckerException("Snapshot not equals to current heap");
             }
         } else {
             System.out.println("Jump into the future label " + this.label.toString());

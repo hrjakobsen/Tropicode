@@ -17,6 +17,8 @@
 
 package Checker;
 
+import Checker.Exceptions.CheckerException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -44,7 +46,7 @@ public class TypestateParser {
             case END -> parseEnd(tokens);
             case REC -> parseRec(tokens);
             case IDENTIFIER -> parseVariable(tokens);
-            default -> throw new IllegalArgumentException("Invalid next token " + next.getText());
+            default -> throw new CheckerException("Invalid next token " + next.getText());
         };
     }
 
@@ -141,7 +143,7 @@ public class TypestateParser {
 
     private void ensureToken(TypestateLexer.TokenType expected, TypestateLexer.Token actual) {
         if (actual.getType() != expected) {
-            throw new IllegalArgumentException("Invalid token encountered while parsing " + expected + " token. Got " + actual.getType() + " with text " + actual.getText() );
+            throw new CheckerException("Invalid token encountered while parsing " + expected + " token. Got " + actual.getType() + " with text " + actual.getText() );
         }
     }
 }

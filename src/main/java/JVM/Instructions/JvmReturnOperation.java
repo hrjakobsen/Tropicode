@@ -15,12 +15,19 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM;
+package JVM.Instructions;
 
-import Checker.Exceptions.CheckerException;
+import JVM.JvmContex;
+import JVM.JvmOpCode;
 
-public class InvalidOpcodeException extends CheckerException {
-    public InvalidOpcodeException(int opcode) {
-        super("Invalid opcode: " + Integer.toHexString(opcode));
+public class JvmReturnOperation extends JvmOperation {
+
+    public JvmReturnOperation(JvmOpCode opcode) {
+        super(opcode);
+    }
+
+    @Override
+    public void evaluateInstruction(JvmContex ctx) {
+        // TODO: 07/03/2021 Stack cleanup if needed
     }
 }

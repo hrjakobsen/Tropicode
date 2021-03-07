@@ -17,6 +17,7 @@
 
 package Checker;
 
+import Checker.Exceptions.CheckerException;
 import Checker.Extractor.CodeExtractorVisitor;
 import JVM.Instructions.JvmInstruction;
 import JVM.JvmClass;
@@ -30,24 +31,28 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        ClassReader classReader = new ClassReader("simplecall.Main");
-        CodeExtractorVisitor cv = new CodeExtractorVisitor();
-        classReader.accept(cv, ClassReader.SKIP_DEBUG);
+        try {
+            ClassReader classReader = new ClassReader("simplecall.Main");
+            CodeExtractorVisitor cv = new CodeExtractorVisitor();
+            classReader.accept(cv, ClassReader.SKIP_DEBUG);
 
 
-        Map<String, Typestate> protocols = new HashMap<>();
+            Map<String, Typestate> protocols = new HashMap<>();
 
-        protocols.put("simplecall/C1", getProtocol("simplecall.C1"));
+            protocols.put("simplecall/C1", getProtocol("simplecall.C1"));
 
-        JvmClass klass = cv.getJvmClass();
-        JvmContex ctx = new JvmContex();
-        ctx.setProtocolStore(protocols);
+            JvmClass klass = cv.getJvmClass();
+            JvmContex ctx = new JvmContex();
+            ctx.setProtocolStore(protocols);
 
-        JvmMethod m = klass.getMethods().get(1);
-        for (JvmInstruction instruction : m.getInstructions()) {
-            instruction.evaluateInstruction(ctx);
-            System.out.println(instruction);
-            System.out.println(ctx);
+            JvmMethod m = klass.getMethods().get(1);
+            for (JvmInstruction instruction : m.getInstructions()) {
+                //System.out.println(instruction);
+                instruction.evaluateInstruction(ctx);
+                //System.out.println(ctx);
+            }
+        } catch (CheckerException ex) {
+            System.err.println(ex.toString());
         }
 
     }

@@ -27,6 +27,6 @@ public class JvmNoEffectOperation extends JvmOperation {
 
     @Override
     public void evaluateInstruction(JvmContex ctx) {
-
+        // Nothing should happen to the context
     }
 }

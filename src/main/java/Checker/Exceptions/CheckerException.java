@@ -21,4 +21,22 @@ public class CheckerException extends RuntimeException {
     public CheckerException(String message) {
         super(message);
     }
+
+    @Override
+    public String toString() {
+        final String line = "================================================================================\n";
+        final String title = centerText(80, this.getClass().getName()) + "\n";
+        StringBuilder sb = new StringBuilder(line).append(title);
+        String str = this.getMessage();
+        sb.append(str.replaceAll("(.{80})", "$1\n"));
+        sb.append("\n" + line);
+        return sb.toString();
+    }
+
+    public static String centerText(int width, String text) {
+        int len = text.length();
+        int leftPadding = (width - len) / 2;
+        int rightPadding = width - len - leftPadding;
+        return String.format("%" + leftPadding + "s" + "%s" + "%" + rightPadding + "s", "", text, "");
+    }
 }

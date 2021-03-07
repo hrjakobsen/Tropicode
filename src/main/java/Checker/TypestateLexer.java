@@ -17,6 +17,8 @@
 
 package Checker;
 
+import Checker.Exceptions.CheckerException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -95,7 +97,7 @@ public class TypestateLexer {
             next = nextToken();
         }
         if (!inputString.trim().isEmpty()) {
-            throw new IllegalArgumentException("Typestate could not be parsed. Lexer finished with this remaining: " + inputString);
+            throw new CheckerException("Typestate could not be parsed. Lexer finished with this remaining: " + inputString);
         }
         Stack<Token> tokenStack = new Stack<>();
         Collections.reverse(tokens);

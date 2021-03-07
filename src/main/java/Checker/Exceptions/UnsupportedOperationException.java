@@ -15,12 +15,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM;
+package Checker.Exceptions;
 
-import Checker.Exceptions.CheckerException;
-
-public class InvalidOpcodeException extends CheckerException {
-    public InvalidOpcodeException(int opcode) {
-        super("Invalid opcode: " + Integer.toHexString(opcode));
+public class UnsupportedOperationException extends CheckerException {
+    public UnsupportedOperationException(String message) {
+        super(message);
     }
 }
