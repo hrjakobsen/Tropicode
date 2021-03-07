@@ -15,26 +15,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package simplecall;
+package JVM.Instructions;
 
-import Annotations.Protocol;
+import JVM.JvmContex;
+import JVM.JvmOpCode;
+import JVM.JvmValue;
 
-@Protocol("{question; {Branch1; {stop; end}  Branch2; {stop; end}}}")
-public class C1 {
-    public Answer question() {
-        System.out.println("Question asked");
-        return Answer.YES;
+public class JvmBinaryOperation extends JvmOperation {
+
+    public JvmBinaryOperation(JvmOpCode opcode) {
+        super(opcode);
     }
 
-    public void Branch1() {
-        System.out.println("Branch 1 chosen");
-    }
-
-    public void Branch2() {
-        System.out.println("Branch 2 chosen");
-    }
-
-    public void stop() {
-        System.out.println("Stopped");
+    @Override
+    public void evaluateInstruction(JvmContex ctx) {
+        ctx.pop();
+        ctx.pop();
+        ctx.push(JvmValue.UNKNOWN);
     }
 }

@@ -17,8 +17,16 @@
 
 package Checker.Exceptions;
 
+import Checker.Typestate;
+
 public class InvalidProtocolOperationException extends CheckerException {
-    public InvalidProtocolOperationException(String message) {
-        super(message);
+    public InvalidProtocolOperationException(Typestate typestate, String operation) {
+        super("Invalid transition '" +
+                operation +
+                "' for typestate " +
+                typestate +
+                ". The available operations are: {" +
+                String.join(",", typestate.getOperations()) +
+                "}");
     }
 }

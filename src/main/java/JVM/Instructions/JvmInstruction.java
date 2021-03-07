@@ -21,5 +21,4 @@ import JVM.JvmContex;
 
 public abstract class JvmInstruction {
     public abstract void evaluateInstruction(JvmContex ctx);
-
 }

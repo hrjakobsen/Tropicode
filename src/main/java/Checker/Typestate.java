@@ -19,6 +19,7 @@ package Checker;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class Typestate implements Cloneable {
 
@@ -28,7 +29,6 @@ public abstract class Typestate implements Cloneable {
         Typestate parsedProtocol = parser.parse(lexer.getTokens());
         HashMap<String, Typestate> implicitConstructorCall = new HashMap<>();
         implicitConstructorCall.put("<init>", parsedProtocol);
-        System.out.println("PARSED PROTOCOL: " + parsedProtocol.toString());
         return new Branch(implicitConstructorCall);
     }
 
@@ -48,6 +48,8 @@ public abstract class Typestate implements Cloneable {
         return other.toString().equals(this.toString());
     }
 
+    public abstract List<String> getOperations();
+
     private static class End extends Typestate {
 
         @Override
@@ -66,6 +68,11 @@ public abstract class Typestate implements Cloneable {
         }
 
         @Override
+        public List<String> getOperations() {
+            return new ArrayList<>();
+        }
+
+        @Override
         public String toString() {
             return "end";
         }
@@ -74,6 +81,8 @@ public abstract class Typestate implements Cloneable {
         public Typestate deepCopy()  {
             return this;
         }
+
+
     }
 
     static class Branch extends Typestate {
@@ -98,6 +107,11 @@ public abstract class Typestate implements Cloneable {
             Branch copy = (Branch) this.deepCopy();
             copy.branches.replaceAll((a, v) -> copy.branches.get(a).unfoldRecursive(identifier, ts));
             return copy;
+        }
+
+        @Override
+        public List<String> getOperations() {
+            return new ArrayList<>(branches.keySet());
         }
 
         @Override
@@ -143,6 +157,11 @@ public abstract class Typestate implements Cloneable {
             Choice copy = (Choice) this.deepCopy();
             copy.choices.replaceAll((a, v) -> copy.choices.get(a).unfoldRecursive(identifier, ts));
             return copy;
+        }
+
+        @Override
+        public List<String> getOperations() {
+            return new ArrayList<>(choices.keySet());
         }
 
         @Override
@@ -194,6 +213,11 @@ public abstract class Typestate implements Cloneable {
             return next.unfoldRecursive(identifier, ts);
         }
 
+        @Override
+        public List<String> getOperations() {
+            return next.getOperations();
+        }
+
 
         @Override
         public String toString() {
@@ -231,6 +255,11 @@ public abstract class Typestate implements Cloneable {
             } else {
                 return this;
             }
+        }
+
+        @Override
+        public List<String> getOperations() {
+            return new ArrayList<>();
         }
 
         @Override

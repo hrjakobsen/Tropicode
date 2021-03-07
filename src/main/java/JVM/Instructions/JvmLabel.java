@@ -17,6 +17,7 @@
 
 package JVM.Instructions;
 
+import Checker.Exceptions.CheckerException;
 import JVM.JvmContex;
 
 public class JvmLabel extends JvmInstruction {
@@ -32,6 +33,14 @@ public class JvmLabel extends JvmInstruction {
 
     @Override
     public void evaluateInstruction(JvmContex ctx) {
-        ctx.takeSnapshot(this.label);
+        if (ctx.hasSnapshot(this.label)) {
+            // We have previously seen a forward jump to this label, now ensure that the context is consistent
+            if (!ctx.compareToSnapshot(this.label)) {
+                throw new CheckerException("Invalid snapshot upon reached label");
+            }
+        } else {
+            // First time we see this label, save a snapshot for later jumps back to the label
+            ctx.takeSnapshot(this.label);
+        }
     }
 }

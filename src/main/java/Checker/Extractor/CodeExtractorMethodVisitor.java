@@ -62,6 +62,28 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case DCONST_1:
                 this.method.getInstructions().add(new JvmCONST(jvmop));
                 break;
+            case IADD:
+            case LADD:
+            case FADD:
+            case DADD:
+            case ISUB:
+            case LSUB:
+            case FSUB:
+            case DSUB:
+            case IMUL:
+            case LMUL:
+            case FMUL:
+            case DMUL:
+            case IDIV:
+            case LDIV:
+            case FDIV:
+            case DDIV:
+            case IREM:
+            case LREM:
+            case FREM:
+            case DREM:
+                this.method.getInstructions().add(new JvmBinaryOperation(jvmop));
+                break;
             case IALOAD:
             case LALOAD:
             case FALOAD:
@@ -84,26 +106,6 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case DUP2_X1:
             case DUP2_X2:
             case SWAP:
-            case IADD:
-            case LADD:
-            case FADD:
-            case DADD:
-            case ISUB:
-            case LSUB:
-            case FSUB:
-            case DSUB:
-            case IMUL:
-            case LMUL:
-            case FMUL:
-            case DMUL:
-            case IDIV:
-            case LDIV:
-            case FDIV:
-            case DDIV:
-            case IREM:
-            case LREM:
-            case FREM:
-            case DREM:
             case INEG:
             case LNEG:
             case FNEG:
@@ -159,6 +161,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case ARETURN:
             case RETURN:
                 this.method.getInstructions().add(new JvmReturnOperation(jvmop));
+                break;
         }
         super.visitInsn(opcode);
     }

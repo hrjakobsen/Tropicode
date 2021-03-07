@@ -18,6 +18,7 @@
 package JVM.Instructions;
 
 import Checker.Exceptions.CheckerException;
+import Checker.Exceptions.InvalidProtocolOperationException;
 import JVM.JvmContex;
 import JVM.JvmObject;
 import JVM.JvmOpCode;
@@ -46,7 +47,7 @@ public class JvmINVOKE extends JvmOperation {
             if (object.getProtocol().isAllowed(name.trim())) {
                 object.setProtocol(object.getProtocol().perform(name));
             } else {
-                throw new CheckerException("Invalid transition " + name + " for typestate " + object.getProtocol());
+                throw new InvalidProtocolOperationException(object.getProtocol(), name.trim());
             }
 
         }

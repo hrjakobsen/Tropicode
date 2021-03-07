@@ -23,19 +23,22 @@ import JVM.Instructions.JvmInstruction;
 import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmMethod;
+import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+@Log4j2
 public class Main {
     public static void main(String[] args) throws IOException {
         try {
-            ClassReader classReader = new ClassReader("simplecall.Main");
+            final String ENTRYPOINT = "simplecall.Main";
+            ClassReader classReader = new ClassReader(ENTRYPOINT);
             CodeExtractorVisitor cv = new CodeExtractorVisitor();
             classReader.accept(cv, ClassReader.SKIP_DEBUG);
-
 
             Map<String, Typestate> protocols = new HashMap<>();
 
@@ -46,15 +49,16 @@ public class Main {
             ctx.setProtocolStore(protocols);
 
             JvmMethod m = klass.getMethods().get(1);
-            for (JvmInstruction instruction : m.getInstructions()) {
-                //System.out.println(instruction);
+            List<JvmInstruction> instructions = m.getInstructions();
+            for (int i = 0; i < instructions.size(); i++) {
+                JvmInstruction instruction = instructions.get(i);
+                log.debug(instruction);
                 instruction.evaluateInstruction(ctx);
-                //System.out.println(ctx);
             }
+            simplecall.Main.main(new String[] {});
         } catch (CheckerException ex) {
             System.err.println(ex.toString());
         }
-
     }
 
     // Hack to get typestate before implementing all functionality
