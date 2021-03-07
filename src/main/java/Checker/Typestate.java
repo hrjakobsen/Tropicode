@@ -17,6 +17,7 @@
 
 package Checker;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 public abstract class Typestate implements Cloneable {
@@ -35,6 +36,7 @@ public abstract class Typestate implements Cloneable {
 
     public abstract boolean isAllowed(String action);
     public abstract Typestate perform(String action);
+    protected abstract Typestate unfoldRecursive(String identifier, Typestate ts);
 
     public static Typestate END = new End();
 
@@ -48,6 +50,11 @@ public abstract class Typestate implements Cloneable {
         @Override
         public Typestate perform(String action) {
             return null;
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            return this;
         }
 
         @Override
@@ -76,6 +83,12 @@ public abstract class Typestate implements Cloneable {
         @Override
         public Typestate perform(String action) {
             return branches.getOrDefault(action, null);
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            branches.replaceAll((a, v) -> branches.get(a).unfoldRecursive(identifier, ts));
+            return this;
         }
 
         @Override
@@ -110,6 +123,12 @@ public abstract class Typestate implements Cloneable {
         @Override
         public Typestate perform(String action) {
             return choices.getOrDefault(action, null);
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            choices.replaceAll((a, v) -> choices.get(a).unfoldRecursive(identifier, ts));
+            return this;
         }
 
         @Override
@@ -151,6 +170,11 @@ public abstract class Typestate implements Cloneable {
         public Typestate perform(String action) {
             throw new IllegalArgumentException("Perform not implemented on recursive typestates");
         }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            return next.unfoldRecursive(identifier, ts);
+        }
     }
 
     static class Variable extends Typestate {
@@ -174,6 +198,15 @@ public abstract class Typestate implements Cloneable {
         @Override
         public Typestate perform(String action) {
             return null;
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            if (identifier.equals(this.identifier)) {
+                return ts;
+            } else {
+                return this;
+            }
         }
 
         @Override
