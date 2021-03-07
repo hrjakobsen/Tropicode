@@ -21,9 +21,9 @@ import Checker.Typestate;
 
 public class InvalidProtocolOperationException extends CheckerException {
     public InvalidProtocolOperationException(Typestate typestate, String operation) {
-        super("Invalid transition '" +
+        super("Invalid operation '" +
                 operation +
-                "' for typestate " +
+                "' for protocol " +
                 typestate +
                 ". The available operations are: {" +
                 String.join(",", typestate.getOperations()) +

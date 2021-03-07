@@ -43,6 +43,7 @@ public class Main {
             Map<String, Typestate> protocols = new HashMap<>();
 
             protocols.put("simplecall/C1", getProtocol("simplecall.C1"));
+            log.debug(protocols.get("simplecall/C1"));
 
             JvmClass klass = cv.getJvmClass();
             JvmContex ctx = new JvmContex();
@@ -54,6 +55,7 @@ public class Main {
                 JvmInstruction instruction = instructions.get(i);
                 log.debug(instruction);
                 instruction.evaluateInstruction(ctx);
+                log.debug(ctx);
             }
             simplecall.Main.main(new String[] {});
         } catch (CheckerException ex) {

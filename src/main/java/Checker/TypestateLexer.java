@@ -83,6 +83,11 @@ public class TypestateLexer {
         public String getText() {
             return text;
         }
+
+        @Override
+        public String toString() {
+            return type + " [" + text + "]";
+        }
     }
 
     public TypestateLexer(String s) {

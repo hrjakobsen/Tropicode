@@ -19,7 +19,7 @@ package simplecall;
 
 import Annotations.Protocol;
 
-@Protocol("{question; {Branch1; {stop; end}  Branch2; {stop; end}}}")
+@Protocol("{question; {Branch1; {stop; end}}  Branch2; {stop; end}}")
 public class C1 {
     public Answer question() {
         System.out.println("Question asked");

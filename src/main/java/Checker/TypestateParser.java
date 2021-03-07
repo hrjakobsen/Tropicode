@@ -18,6 +18,7 @@
 package Checker;
 
 import Checker.Exceptions.CheckerException;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,13 +31,15 @@ import java.util.stream.Stream;
 * u ::= { m_i ; w_i } | end | rec X. u | X
 * w ::= < l_i : u_i > | u
 * */
+@Log4j2
 public class TypestateParser {
 
     public TypestateParser() {
     }
 
     public Typestate parse(Stack<TypestateLexer.Token> tokens) {
-        return parseU(tokens);
+        Typestate parsed = parseU(tokens);
+        return parsed;
     }
 
     private Typestate parseU(Stack<TypestateLexer.Token> tokens) {
@@ -93,7 +96,6 @@ public class TypestateParser {
 
             Typestate t = parseW(tokens);
             branches.put(identifier.getText(), t);
-
 
             next = tokens.peek();
         }

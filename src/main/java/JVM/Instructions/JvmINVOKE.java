@@ -23,7 +23,9 @@ import JVM.JvmContex;
 import JVM.JvmObject;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class JvmINVOKE extends JvmOperation {
     private final String owner;
     private final String name;
@@ -40,10 +42,17 @@ public class JvmINVOKE extends JvmOperation {
 
     @Override
     public void evaluateInstruction(JvmContex ctx) {
+        boolean hasOutput = !descriptor.endsWith("V");
+        int numParams = countParameters(this.descriptor);
+        for (int i = 0; i < numParams; i++) {
+            ctx.pop();
+        }
+
         JvmValue.ObjectReference objRef = (JvmValue.ObjectReference)ctx.pop();
         JvmObject object = ctx.getObject(objRef.getIdentifer());
         if (object.getProtocol() != null) {
             // perform typestate check
+            log.debug(object.getProtocol());
             if (object.getProtocol().isAllowed(name.trim())) {
                 object.setProtocol(object.getProtocol().perform(name));
             } else {
@@ -51,15 +60,9 @@ public class JvmINVOKE extends JvmOperation {
             }
 
         }
-        boolean hasOutput = !descriptor.endsWith("V");
-        int numParams = countParameters(this.descriptor);
-        for (int i = 0; i < numParams; i++) {
-            ctx.pop();
-        }
         if (hasOutput) {
             ctx.push(JvmValue.UNKNOWN);
         }
-
     }
 
     @Override
