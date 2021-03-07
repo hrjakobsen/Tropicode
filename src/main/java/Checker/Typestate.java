@@ -22,20 +22,13 @@ import java.util.*;
 public abstract class Typestate implements Cloneable {
 
     public static Typestate fromString(String protocol) {
-        String[] methods = protocol.split(";");
-        LinkedList ll = new LinkedList(Arrays.asList(methods));
-        return fromStringParts(ll);
-
-
-    }
-    private static Typestate fromStringParts(List<String> methods) {
-        if (methods.isEmpty()) {
-            return Typestate.END;
-        } else {
-            HashMap<String, Typestate> rem = new HashMap<>();
-            rem.put(methods.remove(0), fromStringParts(methods));
-            return new Branch(rem);
-        }
+        TypestateLexer lexer = new TypestateLexer(protocol);
+        TypestateParser parser = new TypestateParser();
+        Typestate parsedProtocol = parser.parse(lexer.getTokens());
+        HashMap<String, Typestate> implicitConstructorCall = new HashMap<>();
+        implicitConstructorCall.put("<init>", parsedProtocol);
+        System.out.println("PARSED PROTOCOL: " + parsedProtocol.toString());
+        return new Branch(implicitConstructorCall);
     }
 
     public abstract Typestate deepCopy();
@@ -68,10 +61,10 @@ public abstract class Typestate implements Cloneable {
         }
     }
 
-    private static class Branch extends Typestate {
+    static class Branch extends Typestate {
         private HashMap<String, Typestate> branches;
 
-        private Branch(HashMap<String, Typestate> branches) {
+        Branch(HashMap<String, Typestate> branches) {
             this.branches = branches;
         }
 
@@ -89,7 +82,7 @@ public abstract class Typestate implements Cloneable {
         public String toString() {
             StringBuilder sb = new StringBuilder().append("{");
             for (String operation : branches.keySet()) {
-                sb.append(operation).append(": ").append(branches.get(operation).toString());
+                sb.append(operation).append("; ").append(branches.get(operation).toString());
             }
             sb.append("}");
             return sb.toString();
@@ -98,6 +91,94 @@ public abstract class Typestate implements Cloneable {
         @Override
         public Typestate deepCopy()  {
             return new Branch((HashMap<String, Typestate>) this.branches.clone());
+        }
+
+
+    }
+    static class Choice extends Typestate {
+        private HashMap<String, Typestate> choices;
+
+        Choice(HashMap<String, Typestate> choice) {
+            this.choices = choices;
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            return choices.containsKey(action);
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            return choices.getOrDefault(action, null);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder().append("<");
+            for (String operation : choices.keySet()) {
+                sb.append(operation).append(": ").append(choices.get(operation).toString());
+            }
+            sb.append(">");
+            return sb.toString();
+        }
+
+        @Override
+        public Typestate deepCopy() {
+            return new Typestate.Branch((HashMap<String, Typestate>) this.choices.clone());
+        }
+    }
+
+    static class Recursive extends Typestate {
+        final Typestate next;
+        final String identifier;
+
+        Recursive(String identifier, Typestate next) {
+            this.next = next;
+            this.identifier = identifier;
+        }
+
+        @Override
+        public Typestate deepCopy() {
+            return new Recursive(identifier, next.deepCopy());
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            return this.next.isAllowed(action);
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            throw new IllegalArgumentException("Perform not implemented on recursive typestates");
+        }
+    }
+
+    static class Variable extends Typestate {
+        final String identifier;
+
+        Variable(String identifier) {
+            this.identifier = identifier;
+        }
+
+
+        @Override
+        public Typestate deepCopy() {
+            return new Variable(this.identifier);
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            return false;
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return identifier;
         }
     }
 }

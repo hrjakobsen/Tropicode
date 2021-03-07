@@ -20,7 +20,7 @@ package simplecall;
 
 import Annotations.Protocol;
 
-@Protocol("<init>;question;question;Branch1")
+@Protocol("{question; {question; {Branch1; end}}}")
 public class C1 {
     public Answer question() {
         return Answer.YES;
