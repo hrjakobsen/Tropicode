@@ -22,6 +22,7 @@ import Checker.Extractor.CodeExtractorVisitor;
 import JVM.Instructions.JvmInstruction;
 import JVM.JvmClass;
 import JVM.JvmContex;
+import JVM.JvmInstructionNode;
 import JVM.JvmMethod;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.ClassReader;
@@ -51,6 +52,10 @@ public class Main {
 
             JvmMethod m = klass.getMethods().get(1);
             List<JvmInstruction> instructions = m.getInstructions();
+
+            JvmInstructionNode iGraph = m.getInstructionGraph();
+            log.debug(iGraph.getGraph());
+
             for (int i = 0; i < instructions.size(); i++) {
                 JvmInstruction instruction = instructions.get(i);
                 log.debug(instruction);

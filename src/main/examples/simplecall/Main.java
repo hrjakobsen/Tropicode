@@ -23,8 +23,11 @@ public class Main {
         C1 c1 = new C1();
         int i = 0;
         c1.question();
-        c1.Branch1();
-        c1.Branch2();
+        if (i == 0) {
+            c1.Branch1();
+        } else {
+            c1.Branch2();
+        }
         c1.stop();
     }
 }

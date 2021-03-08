@@ -49,6 +49,10 @@ public class JvmMethod {
         this.access = access;
     }
 
+    public JvmInstructionNode getInstructionGraph() {
+        return JvmInstructionNode.fromList(this.instructions);
+    }
+
     public String getName() {
         return name;
     }

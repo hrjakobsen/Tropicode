@@ -31,6 +31,10 @@ public class JvmLabel extends JvmInstruction {
         return label + ":";
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     @Override
     public void evaluateInstruction(JvmContex ctx) {
         if (ctx.hasSnapshot(this.label)) {

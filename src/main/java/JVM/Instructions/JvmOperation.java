@@ -31,4 +31,8 @@ public abstract class JvmOperation extends JvmInstruction {
     public String toString() {
         return "    " + opcode.toString();
     }
+
+    public JvmOpCode getOpcode() {
+        return opcode;
+    }
 }
