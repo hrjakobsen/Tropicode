@@ -50,10 +50,6 @@ public class JvmJUMP extends JvmOperation {
                 throw new CheckerException("Snapshot not equals to current heap");
             }
         } else {
-            if (opcode.equals(JvmOpCode.GOTO)) {
-                log.error("Unconditional forward jump to " + this.label.toString());
-                throw new UnsupportedOperationException("Unconditional forward jumps are not supported");
-            }
             ctx.takeSnapshot(this.label.toString());
         }
     }

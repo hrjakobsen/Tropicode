@@ -26,7 +26,7 @@ public abstract class JvmValue {
             return "Unknown";
         }
     }
-    public static class ObjectReference extends JvmValue {
+    public static final class ObjectReference extends JvmValue {
         private final String identifer;
 
         public ObjectReference(String identifer) {
@@ -43,5 +43,5 @@ public abstract class JvmValue {
         }
     }
 
-    public static JvmValue UNKNOWN = new UnknownByte();
+    public static final JvmValue UNKNOWN = new UnknownByte();
 }

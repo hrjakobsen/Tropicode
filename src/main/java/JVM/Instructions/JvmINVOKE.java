@@ -52,7 +52,6 @@ public class JvmINVOKE extends JvmOperation {
         JvmObject object = ctx.getObject(objRef.getIdentifer());
         if (object.getProtocol() != null) {
             // perform typestate check
-            log.debug(object.getProtocol());
             if (object.getProtocol().isAllowed(name.trim())) {
                 object.setProtocol(object.getProtocol().perform(name));
             } else {

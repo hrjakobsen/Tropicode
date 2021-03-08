@@ -36,4 +36,12 @@ public class JvmObject {
     public void setProtocol(Typestate protocol) {
         this.protocol = protocol;
     }
+
+    public JvmObject copy() {
+        JvmObject newObj = new JvmObject(this.type, this.identifier);
+        if (protocol != null) {
+            newObj.setProtocol(protocol.deepCopy());
+        }
+        return newObj;
+    }
 }

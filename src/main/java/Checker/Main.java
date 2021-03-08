@@ -29,6 +29,7 @@ import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -51,21 +52,26 @@ public class Main {
             ctx.setProtocolStore(protocols);
 
             JvmMethod m = klass.getMethods().get(1);
-            List<JvmInstruction> instructions = m.getInstructions();
 
             JvmInstructionNode iGraph = m.getInstructionGraph();
             log.debug(iGraph.getGraph());
-
-            for (int i = 0; i < instructions.size(); i++) {
-                JvmInstruction instruction = instructions.get(i);
-                log.debug(instruction);
-                instruction.evaluateInstruction(ctx);
-                log.debug(ctx);
-            }
+            checkGraph(iGraph, ctx, new HashSet<>());
             simplecall.Main.main(new String[] {});
         } catch (CheckerException ex) {
             System.err.println(ex.toString());
         }
+    }
+
+    private static boolean checkGraph(JvmInstructionNode node, JvmContex jvmContex, HashSet<JvmInstructionNode> seen) {
+        if (seen.contains(node)) return true;
+        seen.add(node);
+        node.getInstruction().evaluateInstruction(jvmContex);
+        for (JvmInstructionNode child : node.getChildren()) {
+            if (!checkGraph(child, jvmContex.copy(), seen)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Hack to get typestate before implementing all functionality

@@ -28,7 +28,7 @@ import java.util.UUID;
 public class JvmContex {
     private Stack<JvmValue> stack = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
-    private final JvmValue[] locals = new JvmValue[65536];
+    private JvmValue[] locals = new JvmValue[65536];
     private Map<String, Typestate> protocolStore = new HashMap<>();
     private Map<String, JvmHeapSnapshot> snapshots = new HashMap<>();
 
@@ -98,5 +98,19 @@ public class JvmContex {
 
     public boolean hasSnapshot(String label) {
         return snapshots.containsKey(label);
+    }
+
+    public JvmContex copy() {
+        JvmContex newContext = new JvmContex();
+        newContext.locals = locals.clone();
+        newContext.stack = (Stack<JvmValue>) stack.clone();
+        HashMap<String, JvmObject> newHeap = new HashMap<>();
+        for (String s : heap.keySet()) {
+            newHeap.put(s, heap.get(s).copy());
+        }
+        newContext.heap = newHeap;
+        newContext.protocolStore = protocolStore;
+        newContext.snapshots = snapshots;
+        return newContext;
     }
 }
