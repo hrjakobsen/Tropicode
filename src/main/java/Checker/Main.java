@@ -19,7 +19,6 @@ package Checker;
 
 import Checker.Exceptions.CheckerException;
 import Checker.Extractor.CodeExtractorVisitor;
-import JVM.Instructions.JvmInstruction;
 import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmInstructionNode;
@@ -28,9 +27,10 @@ import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -45,7 +45,6 @@ public class Main {
             Map<String, Typestate> protocols = new HashMap<>();
 
             protocols.put("simplecall/C1", getProtocol("simplecall.C1"));
-            log.debug(protocols.get("simplecall/C1"));
 
             JvmClass klass = cv.getJvmClass();
             JvmContex ctx = new JvmContex();
@@ -54,9 +53,15 @@ public class Main {
             JvmMethod m = klass.getMethods().get(1);
 
             JvmInstructionNode iGraph = m.getInstructionGraph();
-            log.debug(iGraph.getGraph());
+
+            try {
+                Path tempFile = Files.createTempFile(null, null);
+                Files.writeString(tempFile, iGraph.getGraph());
+                Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath().toString());
+            } catch (IOException ex) {
+                log.debug(iGraph.getGraph());
+            }
             checkGraph(iGraph, ctx, new HashSet<>());
-            simplecall.Main.main(new String[] {});
         } catch (CheckerException ex) {
             System.err.println(ex.toString());
         }

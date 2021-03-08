@@ -76,3 +76,14 @@ or Clojure. Be aware though, that the protocol specifications _are_ language spe
 For Java this is pretty straightforward, as classes generated classes matches closely the ones defined in the program 
 text, for other languages this may not be the case. The `@Protocol` annotation is currently provided by the tool for use
 in Java programs. In the future this will expanded to other languages as well.
+
+
+# Todo
+* Add choice typestates
+    * Requires parsing of enum classes along with analysis of the static jump-arrays in other classes
+* Implement rest of bytecode operations
+* Track objects in:
+    * Static members
+    * Instance members
+    * Parameters
+* Check method bodies upon reaching an invocation (to check aliasing)
