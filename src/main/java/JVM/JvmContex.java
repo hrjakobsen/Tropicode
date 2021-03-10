@@ -29,6 +29,7 @@ public class JvmContex {
     private Stack<JvmValue> stack = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
     private JvmValue[] locals = new JvmValue[65536];
+    private Map<String, JvmClass> classes = new HashMap<>();
     private Map<String, Typestate> protocolStore = new HashMap<>();
     private Map<String, JvmHeapSnapshot> snapshots = new HashMap<>();
 
@@ -38,6 +39,10 @@ public class JvmContex {
 
     public void setProtocolStore(Map<String, Typestate> protocolStore) {
         this.protocolStore = protocolStore;
+    }
+
+    public Map<String, JvmClass> getClasses() {
+        return classes;
     }
 
     public void push(JvmValue ... values) {
@@ -68,6 +73,9 @@ public class JvmContex {
         heap.put(identifier, object);
         if (protocolStore.containsKey(type)) {
             object.setProtocol(protocolStore.get(type).deepCopy());
+        }
+        for (String field : classes.get(type).getFields()) {
+            object.getFields().put(field, JvmValue.UNKNOWN);
         }
         return new JvmValue.ObjectReference(identifier);
     }
@@ -111,6 +119,7 @@ public class JvmContex {
         newContext.heap = newHeap;
         newContext.protocolStore = protocolStore;
         newContext.snapshots = snapshots;
+        newContext.classes = classes;
         return newContext;
     }
 }

@@ -20,6 +20,7 @@ package Checker.Extractor;
 import JVM.Instructions.*;
 import JVM.JvmMethod;
 import JVM.JvmOpCode;
+import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -27,6 +28,7 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.Arrays;
 
+@Log4j2
 class CodeExtractorMethodVisitor extends MethodVisitor {
     JvmMethod method;
 
@@ -227,7 +229,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case PUTSTATIC:
             case GETFIELD:
             case PUTFIELD:
-                method.getInstructions().add(new JvmUnsupportedOperation(jvmop));
+                method.getInstructions().add(new JvmOperationFIELDOPERATION(jvmop, owner, name));
         }
         super.visitFieldInsn(opcode, owner, name, descriptor);
     }

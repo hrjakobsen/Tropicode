@@ -19,11 +19,14 @@ package Checker.Extractor;
 
 import JVM.JvmClass;
 import JVM.JvmMethod;
+import JVM.JvmValue;
+import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.*;
 
-public class CodeExtractorVisitor extends ClassVisitor {
+@Log4j2
+public class CodeExtractorClassVisitor extends ClassVisitor {
     JvmClass klass = new JvmClass();
-    public CodeExtractorVisitor() {
+    public CodeExtractorClassVisitor() {
         super(Opcodes.ASM8);
     }
 
@@ -31,7 +34,7 @@ public class CodeExtractorVisitor extends ClassVisitor {
         return klass;
     }
 
-    public CodeExtractorVisitor(ClassVisitor cv) {
+    public CodeExtractorClassVisitor(ClassVisitor cv) {
         super(Opcodes.ASM8, cv);
     }
 
@@ -50,5 +53,15 @@ public class CodeExtractorVisitor extends ClassVisitor {
         return new CodeExtractorAnnotationExtractor(super.visitAnnotation(desc, visible), desc, visible, klass);
     }
 
+    @Override
+    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        boolean isStatic = (access & Opcodes.ACC_STATIC) > 0;
+        if (isStatic) {
+            klass.getStaticFields().put(name, JvmValue.UNKNOWN);
+        } else {
+            klass.getFields().add(name);
+        }
+        return super.visitField(access, name, descriptor, signature, value);
+    }
 }
 

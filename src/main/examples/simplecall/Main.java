@@ -18,18 +18,21 @@
 package simplecall;
 
 public class Main {
+    private C1 member = new C1();
+    private static C1 staticmem;
 
     public static void main(String[] args) {
-        C1 c1 = new C1();
+        Main m = new Main();
+        m.member = new C1();
         int i = 0;
-        c1.question();
+        m.member.question();
         if (i == 0) {
-            c1.Branch2();
-            c1.Branch1();
+            m.member.Branch2();
+            m.member.Branch1();
         } else {
-            c1.Branch1();
-            c1.Branch2();
+            m.member.Branch1();
+            m.member.Branch2();
         }
-        c1.stop();
+        m.member.stop();
     }
 }

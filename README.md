@@ -83,7 +83,7 @@ in Java programs. In the future this will expanded to other languages as well.
     * Requires parsing of enum classes along with analysis of the static jump-arrays in other classes
 * Implement rest of bytecode operations
 * Track objects in:
-    * Static members
-    * Instance members
+    * ~~Static members~~
+    * ~~Instance members~~
     * Parameters
 * Check method bodies upon reaching an invocation (to check aliasing)

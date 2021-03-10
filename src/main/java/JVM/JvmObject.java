@@ -19,14 +19,22 @@ package JVM;
 
 import Checker.Typestate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class JvmObject {
     private final String type;
     private final String identifier;
+    Map<String, JvmValue> fields = new HashMap<>();
     private Typestate protocol;
 
     public JvmObject(String type, String identifier) {
         this.type = type;
         this.identifier = identifier;
+    }
+
+    public Map<String, JvmValue> getFields() {
+        return fields;
     }
 
     public Typestate getProtocol() {
@@ -42,6 +50,12 @@ public class JvmObject {
         if (protocol != null) {
             newObj.setProtocol(protocol.deepCopy());
         }
+        Map<String, JvmValue> newFields = new HashMap<>();
+        for (String s : fields.keySet()) {
+            newFields.put(s, fields.get(s));
+        }
+        newObj.fields = newFields;
+
         return newObj;
     }
 }

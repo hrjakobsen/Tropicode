@@ -18,7 +18,7 @@
 package Checker;
 
 import Checker.Exceptions.CheckerException;
-import Checker.Extractor.CodeExtractorVisitor;
+import Checker.Extractor.CodeExtractorClassVisitor;
 import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmInstructionNode;
@@ -38,17 +38,16 @@ public class Main {
     public static void main(String[] args) throws IOException {
         try {
             final String ENTRYPOINT = "simplecall.Main";
-            ClassReader classReader = new ClassReader(ENTRYPOINT);
-            CodeExtractorVisitor cv = new CodeExtractorVisitor();
-            classReader.accept(cv, ClassReader.SKIP_DEBUG);
+            JvmClass klass = parseClass(ENTRYPOINT);
 
             Map<String, Typestate> protocols = new HashMap<>();
 
             protocols.put("simplecall/C1", getProtocol("simplecall.C1"));
 
-            JvmClass klass = cv.getJvmClass();
             JvmContex ctx = new JvmContex();
             ctx.setProtocolStore(protocols);
+            ctx.getClasses().put("simplecall/Main", klass);
+            ctx.getClasses().put("simplecall/C1", parseClass("simplecall.C1"));
 
             JvmMethod m = klass.getMethods().get(1);
 
@@ -81,10 +80,14 @@ public class Main {
 
     // Hack to get typestate before implementing all functionality
     private static Typestate getProtocol(String classname) throws IOException {
+        return parseClass(classname).getProtocol();
+    }
+
+    private static JvmClass parseClass(String classname) throws IOException {
         ClassReader classReader = new ClassReader(classname);
-        CodeExtractorVisitor cv = new CodeExtractorVisitor();
+        CodeExtractorClassVisitor cv = new CodeExtractorClassVisitor();
         classReader.accept(cv, ClassReader.SKIP_DEBUG);
         JvmClass klass = cv.getJvmClass();
-        return klass.getProtocol();
+        return klass;
     }
 }

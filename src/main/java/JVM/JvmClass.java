@@ -20,10 +20,14 @@ package JVM;
 import Checker.Typestate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JvmClass {
     List<JvmMethod> methods = new ArrayList<>();
+    List<String> fields = new ArrayList<>();
+    Map<String, JvmValue> staticFields = new HashMap<>();
     Typestate protocol = null;
 
     public List<JvmMethod> getMethods() {
@@ -32,6 +36,14 @@ public class JvmClass {
 
     public void setMethods(List<JvmMethod> methods) {
         this.methods = methods;
+    }
+
+    public List<String> getFields() {
+        return fields;
+    }
+
+    public Map<String, JvmValue> getStaticFields() {
+        return staticFields;
     }
 
     @Override
