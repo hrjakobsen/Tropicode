@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TypestateParserTests {
+public class TypestateParserTest {
 
     @Test
     void parsesEnd() {
