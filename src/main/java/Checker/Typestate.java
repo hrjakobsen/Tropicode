@@ -19,19 +19,22 @@
 
 package Checker;
 
-import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class Typestate implements Cloneable {
+
+    public static Typestate getInitialObjectProtocol(String protocol) {
+        Typestate parsedProtocol = fromString(protocol);
+        HashMap<String, Typestate> implicitConstructorCall = new HashMap<>();
+        implicitConstructorCall.put("<init>", parsedProtocol);
+        return new Branch(implicitConstructorCall);
+    }
 
     public static Typestate fromString(String protocol) {
         TypestateLexer lexer = new TypestateLexer(protocol);
         TypestateParser parser = new TypestateParser();
         Typestate parsedProtocol = parser.parse(lexer.getTokens());
-        HashMap<String, Typestate> implicitConstructorCall = new HashMap<>();
-        implicitConstructorCall.put("<init>", parsedProtocol);
-        return new Branch(implicitConstructorCall);
+        return parsedProtocol;
     }
 
     public abstract Typestate deepCopy();
@@ -87,10 +90,10 @@ public abstract class Typestate implements Cloneable {
 
     }
 
-    static class Branch extends Typestate {
+    public static class Branch extends Typestate {
         private HashMap<String, Typestate> branches;
 
-        Branch(HashMap<String, Typestate> branches) {
+        public Branch(HashMap<String, Typestate> branches) {
             this.branches = branches;
         }
 
@@ -186,11 +189,11 @@ public abstract class Typestate implements Cloneable {
         }
     }
 
-    static class Recursive extends Typestate {
+    public static class Recursive extends Typestate {
         final Typestate next;
         final String identifier;
 
-        Recursive(String identifier, Typestate next) {
+        public Recursive(String identifier, Typestate next) {
             this.next = next;
             this.identifier = identifier;
         }
@@ -227,10 +230,10 @@ public abstract class Typestate implements Cloneable {
         }
     }
 
-    static class Variable extends Typestate {
+    public static class Variable extends Typestate {
         final String identifier;
 
-        Variable(String identifier) {
+        public Variable(String identifier) {
             this.identifier = identifier;
         }
 

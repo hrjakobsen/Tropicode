@@ -82,8 +82,11 @@ in Java programs. In the future this will expanded to other languages as well.
 * Add choice typestates
     * Requires parsing of enum classes along with analysis of the static jump-arrays in other classes
 * Implement rest of bytecode operations
+    * 191 / 204 implemented 
 * Track objects in:
-    * ~~Static members~~
-    * ~~Instance members~~
     * Parameters
+* Initialize static members in &lt;clinit&gt;
 * Check method bodies upon reaching an invocation (to check aliasing)
+* Handle arrays
+    * On AASTORE, we should lose track of the object
+    * On AALOAD how do we handle calls on the returned objects?

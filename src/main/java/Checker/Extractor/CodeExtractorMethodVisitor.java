@@ -52,6 +52,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
         switch (jvmop) {
             case NOP:
+                addOperation(new JvmNoEffectOperation(jvmop));
                 break;
             case ACONST_NULL:
             case ICONST_M1:

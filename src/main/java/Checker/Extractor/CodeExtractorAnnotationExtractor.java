@@ -45,7 +45,7 @@ public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
     @Override
     public void visit(String name, Object value) {
         if (isProtocol && name.equals("value")) {
-            klass.setProtocol(Typestate.fromString(value.toString()));
+            klass.setProtocol(Typestate.getInitialObjectProtocol(value.toString()));
         }
         super.visit(name, value);
     }
