@@ -19,33 +19,20 @@
 
 package JVM;
 
-import java.util.UUID;
+public class JvmArray  {
+    private final String type;
+    private final String identifier;
 
-public abstract class JvmValue {
-    private static class UnknownByte extends JvmValue {
-        @Override
-        public String toString() {
-            return "Unknown";
-        }
+    public JvmArray(String type, String identifier) {
+        this.type = type;
+        this.identifier = identifier;
     }
 
-    public static final class Reference extends JvmValue {
-
-        private final String identifer;
-
-        public Reference(String identifer) {
-            this.identifer = identifer;
-        }
-
-        @Override
-        public String toString() {
-            return identifer.substring(0, 5);
-        }
-
-        public String getIdentifer() {
-            return identifer;
-        }
+    public String getType() {
+        return type;
     }
 
-    public static final JvmValue UNKNOWN = new UnknownByte();
+    public String getIdentifier() {
+        return identifier;
+    }
 }

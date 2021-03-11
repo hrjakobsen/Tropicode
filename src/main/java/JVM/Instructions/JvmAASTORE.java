@@ -17,35 +17,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM;
+package JVM.Instructions;
 
-import java.util.UUID;
+import JVM.JvmContex;
+import JVM.JvmOpCode;
+import JVM.JvmValue;
+import lombok.extern.log4j.Log4j2;
 
-public abstract class JvmValue {
-    private static class UnknownByte extends JvmValue {
-        @Override
-        public String toString() {
-            return "Unknown";
-        }
+@Log4j2
+public class JvmAASTORE extends JvmOperation {
+    public JvmAASTORE() {
+        super(JvmOpCode.AASTORE);
     }
 
-    public static final class Reference extends JvmValue {
-
-        private final String identifer;
-
-        public Reference(String identifer) {
-            this.identifer = identifer;
-        }
-
-        @Override
-        public String toString() {
-            return identifer.substring(0, 5);
-        }
-
-        public String getIdentifer() {
-            return identifer;
-        }
+    @Override
+    public void evaluateInstruction(JvmContex ctx) {
+        JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
+        log.warn("Losing track of obj " + obj.getIdentifer());
     }
-
-    public static final JvmValue UNKNOWN = new UnknownByte();
 }

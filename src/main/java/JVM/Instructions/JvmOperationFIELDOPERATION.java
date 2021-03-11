@@ -23,7 +23,6 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class JvmOperationFIELDOPERATION extends JvmOperation {
@@ -41,12 +40,12 @@ public class JvmOperationFIELDOPERATION extends JvmOperation {
         switch (this.opcode) {
             case PUTFIELD:
                 JvmValue value = ctx.pop();
-                JvmValue.ObjectReference obj = (JvmValue.ObjectReference) ctx.pop();
+                JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
                 Map<String, JvmValue> fields = ctx.getObject(obj.getIdentifer()).getFields();
                 fields.put(fieldName, value);
                 break;
             case GETFIELD:
-                obj = (JvmValue.ObjectReference) ctx.pop();
+                obj = (JvmValue.Reference) ctx.pop();
                 fields = ctx.getObject(obj.getIdentifer()).getFields();
                 value = fields.get(fieldName);
                 assert value != null;

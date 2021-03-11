@@ -21,7 +21,6 @@ package JVM;
 
 import Checker.Typestate;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -30,6 +29,7 @@ import java.util.UUID;
 public class JvmContex {
     private Stack<JvmValue> stack = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
+    private Map<String, JvmArray> arrays = new HashMap<>();
     private JvmValue[] locals = new JvmValue[65536];
     private Map<String, JvmClass> classes = new HashMap<>();
     private Map<String, Typestate> protocolStore = new HashMap<>();
@@ -79,7 +79,7 @@ public class JvmContex {
         for (String field : classes.get(type).getFields()) {
             object.getFields().put(field, JvmValue.UNKNOWN);
         }
-        return new JvmValue.ObjectReference(identifier);
+        return new JvmValue.Reference(identifier);
     }
 
     public JvmObject getObject(String identifier) {
@@ -123,5 +123,11 @@ public class JvmContex {
         newContext.snapshots = snapshots;
         newContext.classes = classes;
         return newContext;
+    }
+
+    public JvmValue allocateArray(String type) {
+        String identifier = UUID.randomUUID().toString();
+        arrays.put(identifier, new JvmArray(identifier, type));
+        return new JvmValue.Reference(identifier);
     }
 }

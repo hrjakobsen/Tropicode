@@ -17,35 +17,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM;
+package JVM.Instructions;
 
-import java.util.UUID;
+import JVM.JvmContex;
+import JVM.JvmOpCode;
+import JVM.JvmValue;
 
-public abstract class JvmValue {
-    private static class UnknownByte extends JvmValue {
-        @Override
-        public String toString() {
-            return "Unknown";
-        }
+public class JvmSWAP extends JvmOperation{
+    public JvmSWAP() {
+        super(JvmOpCode.SWAP);
     }
 
-    public static final class Reference extends JvmValue {
-
-        private final String identifer;
-
-        public Reference(String identifer) {
-            this.identifer = identifer;
-        }
-
-        @Override
-        public String toString() {
-            return identifer.substring(0, 5);
-        }
-
-        public String getIdentifer() {
-            return identifer;
-        }
+    @Override
+    public void evaluateInstruction(JvmContex ctx) {
+        JvmValue val1 = ctx.pop();
+        JvmValue val2 = ctx.pop();
+        ctx.push(val1);
+        ctx.push(val2);
     }
-
-    public static final JvmValue UNKNOWN = new UnknownByte();
 }

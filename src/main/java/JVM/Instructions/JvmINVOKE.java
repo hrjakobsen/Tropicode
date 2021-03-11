@@ -50,7 +50,7 @@ public class JvmINVOKE extends JvmOperation {
             ctx.pop();
         }
 
-        JvmValue.ObjectReference objRef = (JvmValue.ObjectReference)ctx.pop();
+        JvmValue.Reference objRef = (JvmValue.Reference)ctx.pop();
         JvmObject object = ctx.getObject(objRef.getIdentifer());
         if (object.getProtocol() != null) {
             // perform typestate check

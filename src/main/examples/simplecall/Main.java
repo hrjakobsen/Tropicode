@@ -22,17 +22,17 @@ public class Main {
     private static C1 staticmem;
 
     public static void main(String[] args) {
-        Main m = new Main();
-        m.member = new C1();
+        C1 c = new C1();
+        C1[] cs = new C1[] {c};
         int i = 0;
-        m.member.question();
+        c.question();
         if (i == 0) {
-            m.member.Branch2();
-            m.member.Branch1();
+            c.Branch2();
+            c.Branch1();
         } else {
-            m.member.Branch1();
-            m.member.Branch2();
+            c.Branch1();
+            c.Branch2();
         }
-        m.member.stop();
+        c.stop();
     }
 }

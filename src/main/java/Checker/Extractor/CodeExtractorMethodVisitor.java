@@ -38,6 +38,10 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         super(Opcodes.ASM8, mv);
         this.method = m;
     }
+    
+    private void addOperation(JvmInstruction op) {
+        method.getInstructions().add(op);
+    }
 
     public JvmMethod getMethod() {
         return method;
@@ -64,7 +68,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case FCONST_2:
             case DCONST_0:
             case DCONST_1:
-                this.method.getInstructions().add(new JvmCONST(jvmop));
+                addOperation(new JvmCONST(jvmop));
                 break;
             case IADD:
             case LADD:
@@ -86,30 +90,53 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case LREM:
             case FREM:
             case DREM:
-                this.method.getInstructions().add(new JvmBinaryOperation(jvmop));
+            case IAND:
+            case LAND:
+            case IOR:
+            case LOR:
+            case IXOR:
+            case LXOR:
+            case LCMP:
+            case FCMPL:
+            case FCMPG:
+            case DCMPL:
+            case DCMPG:
+                addOperation(new JvmBinaryOperation(jvmop));
                 break;
             case IALOAD:
             case LALOAD:
             case FALOAD:
             case DALOAD:
-            case AALOAD:
             case BALOAD:
             case CALOAD:
             case SALOAD:
+                addOperation(new JvmALOADCONST(jvmop));
+                break;
+            case AALOAD:
+                addOperation(new JvmAALOAD());
+                break;
             case IASTORE:
             case LASTORE:
             case FASTORE:
             case DASTORE:
-            case AASTORE:
             case BASTORE:
             case CASTORE:
             case SASTORE:
+                addOperation(new JvmASTORECONST(jvmop));
+                break;
+            case AASTORE:
+                addOperation(new JvmAASTORE());
+                break;
+            case SWAP:
+                addOperation(new JvmSWAP());
+                break;
             case DUP_X1:
             case DUP_X2:
             case DUP2:
             case DUP2_X1:
             case DUP2_X2:
-            case SWAP:
+                addOperation(new JvmUnsupportedOperation(jvmop));
+                break;
             case INEG:
             case LNEG:
             case FNEG:
@@ -120,12 +147,6 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case LSHR:
             case IUSHR:
             case LUSHR:
-            case IAND:
-            case LAND:
-            case IOR:
-            case LOR:
-            case IXOR:
-            case LXOR:
             case I2L:
             case I2F:
             case I2D:
@@ -141,30 +162,28 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case I2B:
             case I2C:
             case I2S:
-            case LCMP:
-            case FCMPL:
-            case FCMPG:
-            case DCMPL:
-            case DCMPG:
+                addOperation(new JvmUnaryOperation(jvmop));
+                break;
             case ARRAYLENGTH:
+                addOperation(new JvmCONST(jvmop));
             case ATHROW:
             case MONITORENTER:
             case MONITOREXIT:
-                this.method.getInstructions().add(new JvmUnsupportedOperation(jvmop));
+                addOperation(new JvmUnsupportedOperation(jvmop));
                 break;
             case DUP:
-                this.method.getInstructions().add(new JvmDUP());
+                addOperation(new JvmDUP());
                 break;
             case POP:
             case POP2:
-                this.method.getInstructions().add(new JvmPOP());
+                addOperation(new JvmPOP());
             case IRETURN:
             case LRETURN:
             case FRETURN:
             case DRETURN:
             case ARETURN:
             case RETURN:
-                this.method.getInstructions().add(new JvmReturnOperation(jvmop));
+                addOperation(new JvmReturnOperation(jvmop));
                 break;
         }
         super.visitInsn(opcode);
@@ -176,10 +195,11 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         switch (jvmop) {
             case BIPUSH:
             case SIPUSH:
-                this.method.getInstructions().add(new JvmCONST(jvmop));
+                addOperation(new JvmCONST(jvmop));
                 break;
             case NEWARRAY:
-                this.method.getInstructions().add(new JvmUnsupportedOperation(jvmop));
+                addOperation(new JvmUnsupportedOperation(jvmop));
+                break;
         }
         super.visitIntInsn(opcode, operand);
     }
@@ -193,17 +213,18 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case FLOAD:
             case DLOAD:
             case ALOAD:
-                method.getInstructions().add(new JvmLOAD(var));
+                addOperation(new JvmLOAD(var));
                 break;
             case ISTORE:
             case LSTORE:
             case FSTORE:
             case DSTORE:
             case ASTORE:
-                method.getInstructions().add(new JvmSTORE(var));
+                addOperation(new JvmSTORE(var));
                 break;
             case RET:
-                method.getInstructions().add(new JvmUnsupportedOperation(jvmop));
+                addOperation(new JvmUnsupportedOperation(jvmop));
+                break;
         }
         super.visitVarInsn(opcode, var);
     }
@@ -213,12 +234,17 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
         switch (jvmop) {
             case ANEWARRAY:
+                addOperation(new JvmANEWARRAY(type));
+                break;
             case CHECKCAST:
+                addOperation(new JvmNoEffectOperation(jvmop));
+                break;
             case INSTANCEOF:
-                method.getInstructions().add(new JvmUnsupportedOperation(jvmop));
+                addOperation(new JvmUnaryOperation(jvmop));
                 break;
             case NEW:
-                method.getInstructions().add(new JvmNEW(type));
+                addOperation(new JvmNEW(type));
+                break;
         }
         super.visitTypeInsn(opcode, type);
     }
@@ -231,7 +257,8 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case PUTSTATIC:
             case GETFIELD:
             case PUTFIELD:
-                method.getInstructions().add(new JvmOperationFIELDOPERATION(jvmop, owner, name));
+                addOperation(new JvmOperationFIELDOPERATION(jvmop, owner, name));
+                break;
         }
         super.visitFieldInsn(opcode, owner, name, descriptor);
     }
@@ -239,7 +266,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
-        method.getInstructions().add(new JvmINVOKE(jvmop, owner, name, descriptor, isInterface));
+        addOperation(new JvmINVOKE(jvmop, owner, name, descriptor, isInterface));
         if (this.mv != null) {
             this.mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
         }
@@ -247,7 +274,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
-        method.getInstructions().add(new JvmUnsupportedOperation(JvmOpCode.INVOKEDYNAMIC));
+        addOperation(new JvmUnsupportedOperation(JvmOpCode.INVOKEDYNAMIC));
         System.out.println("    " + name + " " + descriptor + " " + bootstrapMethodHandle + " " + Arrays.toString(bootstrapMethodArguments));
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     }
@@ -257,10 +284,10 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
         switch (jvmop) {
             case JSR:
-                method.getInstructions().add(new JvmJSR(label));
+                addOperation(new JvmJSR(label));
                 break;
             case GOTO:
-                method.getInstructions().add(new JvmJUMP(jvmop, label, 0));
+                addOperation(new JvmJUMP(jvmop, label, 0));
                 break;
             case IFNULL:
             case IFNONNULL:
@@ -270,7 +297,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case IFGE:
             case IFGT:
             case IFLE:
-                method.getInstructions().add(new JvmJUMP(jvmop, label, 1));
+                addOperation(new JvmJUMP(jvmop, label, 1));
                 break;
             case IF_ICMPEQ:
             case IF_ICMPNE:
@@ -280,7 +307,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case IF_ICMPLE:
             case IF_ACMPEQ:
             case IF_ACMPNE:
-                method.getInstructions().add(new JvmJUMP(jvmop, label, 2));
+                addOperation(new JvmJUMP(jvmop, label, 2));
                 break;
         }
         super.visitJumpInsn(opcode, label);
@@ -288,31 +315,31 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitLabel(Label label) {
-        method.getInstructions().add(new JvmLabel(label.toString()));
+        addOperation(new JvmLabel(label.toString()));
         super.visitLabel(label);
     }
 
     @Override
     public void visitLdcInsn(Object value) {
-        method.getInstructions().add(new JvmLDC());
+        addOperation(new JvmLDC());
         super.visitLdcInsn(value);
     }
 
     @Override
     public void visitIincInsn(int var, int increment) {
-        method.getInstructions().add(new JvmNoEffectOperation(JvmOpCode.IINC));
+        addOperation(new JvmNoEffectOperation(JvmOpCode.IINC));
         super.visitIincInsn(var, increment);
     }
 
     @Override
     public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-        method.getInstructions().add(new JvmUnsupportedOperation(JvmOpCode.TABLESWITCH));
+        addOperation(new JvmUnsupportedOperation(JvmOpCode.TABLESWITCH));
         super.visitTableSwitchInsn(min, max, dflt, labels);
     }
 
     @Override
     public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-        method.getInstructions().add(new JvmUnsupportedOperation(JvmOpCode.LOOKUPSWITCH));
+        addOperation(new JvmUnsupportedOperation(JvmOpCode.LOOKUPSWITCH));
         /* System.out.println("    " + "LOOKUPSWITCH {");
         for (int i = 0; i < keys.length; i++) {
             System.out.println("    " + "    " + keys[i] + " → " + labels[i]);
@@ -324,7 +351,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-        method.getInstructions().add(new JvmUnsupportedOperation(JvmOpCode.MULTIANEWARRAY));
+        addOperation(new JvmUnsupportedOperation(JvmOpCode.MULTIANEWARRAY));
         System.out.println("    " + descriptor + " " + numDimensions);
         super.visitMultiANewArrayInsn(descriptor, numDimensions);
     }
