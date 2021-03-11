@@ -1,5 +1,6 @@
 # Tropicode: bytecode made better
 ![Build status](https://github.com/hrjakobsen/Tropicode/actions/workflows/maven.yml/badge.svg)
+![License](https://img.shields.io/github/license/hrjakobsen/Tropicode)
 
 
 The goal of this project is to provide a tool for analyzing object protocol (typestates) for languages targeting the 
