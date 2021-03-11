@@ -1,4 +1,4 @@
-# Protocol analysis of JVM bytecode
+# Tropicode: bytecode made better
 
 The goal of this project is to provide a tool for analyzing object protocol (typestates) for languages targeting the 
 Java Virtual Machine (JVM). 
