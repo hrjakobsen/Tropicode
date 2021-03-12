@@ -17,20 +17,15 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM.Instructions;
+package Annotations;
 
-import Checker.Exceptions.UnsupportedOperationException;
-import JVM.JvmContex;
-import JVM.JvmOpCode;
-import JVM.JvmValue;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class JvmAALOAD extends JvmOperation {
-    public JvmAALOAD() {
-        super(JvmOpCode.AALOAD);
-    }
-
-    @Override
-    public void evaluateInstruction(JvmContex ctx) {
-        ctx.push(JvmValue.UNKNOWN_REFERENCE);
-    }
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.TYPE_USE)
+public @interface KeySet {
+    String value();
 }

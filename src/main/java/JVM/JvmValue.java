@@ -29,9 +29,9 @@ public abstract class JvmValue {
         }
     }
 
-    public static final class Reference extends JvmValue {
+    public static class Reference extends JvmValue {
 
-        private final String identifer;
+        protected final String identifer;
 
         public Reference(String identifer) {
             this.identifer = identifer;
@@ -47,5 +47,22 @@ public abstract class JvmValue {
         }
     }
 
+    public static class UnknownReference extends Reference {
+        public UnknownReference() {
+            super("UNKNOWN");
+        }
+
+        @Override
+        public String toString() {
+            return this.identifer;
+        }
+
+        @Override
+        public String getIdentifer() {
+            throw new IllegalStateException("Trying to dereference unknown reference");
+        }
+    }
+
     public static final JvmValue UNKNOWN = new UnknownByte();
+    public static final JvmValue UNKNOWN_REFERENCE = new UnknownReference();
 }

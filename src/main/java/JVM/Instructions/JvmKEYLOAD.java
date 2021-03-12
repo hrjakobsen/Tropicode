@@ -19,18 +19,26 @@
 
 package JVM.Instructions;
 
-import Checker.Exceptions.UnsupportedOperationException;
 import JVM.JvmContex;
-import JVM.JvmOpCode;
 import JVM.JvmValue;
 
-public class JvmAALOAD extends JvmOperation {
-    public JvmAALOAD() {
-        super(JvmOpCode.AALOAD);
+public class JvmKEYLOAD extends JvmInstruction {
+    private final String key;
+
+    public JvmKEYLOAD(String key) {
+        super();
+        this.key = key;
     }
 
     @Override
     public void evaluateInstruction(JvmContex ctx) {
-        ctx.push(JvmValue.UNKNOWN_REFERENCE);
+        ctx.pop();
+        String identifier = ctx.getKey(this.key);
+        ctx.push(new JvmValue.Reference(identifier));
+    }
+
+    @Override
+    public String toString() {
+        return "JvmKEYLOAD " + key;
     }
 }

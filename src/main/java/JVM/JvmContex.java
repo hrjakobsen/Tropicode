@@ -30,6 +30,7 @@ public class JvmContex {
     private Stack<JvmValue> stack = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
     private Map<String, JvmArray> arrays = new HashMap<>();
+    private Map<String, String> keys = new HashMap<>();
     private JvmValue[] locals = new JvmValue[65536];
     private Map<String, JvmClass> classes = new HashMap<>();
     private Map<String, Typestate> protocolStore = new HashMap<>();
@@ -67,6 +68,10 @@ public class JvmContex {
 
     public  JvmValue peek() {
         return stack.peek();
+    }
+
+    public void addKey(String key, String identifier) {
+        keys.put(key, identifier);
     }
 
     public JvmValue allocateObject(String type) {
@@ -122,6 +127,11 @@ public class JvmContex {
         newContext.protocolStore = protocolStore;
         newContext.snapshots = snapshots;
         newContext.classes = classes;
+        HashMap<String, String> newKeys = new HashMap<>();
+        for (String s : keys.keySet()) {
+            newKeys.put(s, keys.get(s));
+        }
+        newContext.keys = newKeys;
         return newContext;
     }
 
@@ -129,5 +139,9 @@ public class JvmContex {
         String identifier = UUID.randomUUID().toString();
         arrays.put(identifier, new JvmArray(identifier, type));
         return new JvmValue.Reference(identifier);
+    }
+
+    public String getKey(String key) {
+        return keys.get(key);
     }
 }

@@ -35,6 +35,5 @@ public class JvmAASTORE extends JvmOperation {
     public void evaluateInstruction(JvmContex ctx) {
         JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
         log.warn("Losing track of obj " + obj.getIdentifer());
-        throw new UnsupportedOperationException("AASTORE is not yet handled correctly");
     }
 }

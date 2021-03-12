@@ -19,36 +19,45 @@
 
 package Checker.Extractor;
 
-import Checker.Typestate;
-import JVM.JvmClass;
+import Annotations.ArrayCast;
+import Annotations.KeySet;
+import JVM.Instructions.JvmKEYLOAD;
+import JVM.Instructions.JvmKEYSET;
+import JVM.JvmMethod;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
+
+import static org.objectweb.asm.Opcodes.ASM8;
 
 @Log4j2
-public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
+public class CodeExtractorTypeAnnotationExtractor extends AnnotationVisitor {
+    private final int typeRef;
+    private final TypePath typePath;
     private final String descriptor;
     private final boolean visible;
-    private final JvmClass klass;
-    private boolean isProtocol = false;
+    private final JvmMethod method;
 
-
-    public CodeExtractorAnnotationExtractor(AnnotationVisitor annotationVisitor, String descriptor, boolean visible, JvmClass klass) {
-        super(Opcodes.ASM8, annotationVisitor);
-        this.klass = klass;
+    public CodeExtractorTypeAnnotationExtractor(AnnotationVisitor annotationVisitor, int typeRef, TypePath typePath, String descriptor, boolean visible, JvmMethod method) {
+        super(ASM8, annotationVisitor);
+        this.typeRef = typeRef;
+        this.typePath = typePath;
         this.descriptor = descriptor;
         this.visible = visible;
-        if (descriptor.equals("LAnnotations/Protocol;")) {
-            isProtocol = true;
-        }
+        this.method = method;
     }
-
 
     @Override
     public void visit(String name, Object value) {
-        if (isProtocol && name.equals("value")) {
-            klass.setProtocol(Typestate.getInitialObjectProtocol(value.toString()));
+        if (descriptor.equals(classNameToDescriptor(ArrayCast.class.getCanonicalName())) && name.equals("value")) {
+            method.getInstructions().add(new JvmKEYLOAD((String) value));
+        } else if (descriptor.equals(classNameToDescriptor(KeySet.class.getCanonicalName())) && name.equals("value")) {
+            method.getInstructions().add(new JvmKEYSET((String) value));
         }
         super.visit(name, value);
+    }
+
+    private String classNameToDescriptor(String className) {
+        return "L" + className.replaceAll("\\.", "/") + ";";
     }
 }

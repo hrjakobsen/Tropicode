@@ -23,10 +23,7 @@ import JVM.Instructions.*;
 import JVM.JvmMethod;
 import JVM.JvmOpCode;
 import lombok.extern.log4j.Log4j2;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 
 import java.util.Arrays;
 
@@ -355,5 +352,10 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         addOperation(new JvmUnsupportedOperation(JvmOpCode.MULTIANEWARRAY));
         System.out.println("    " + descriptor + " " + numDimensions);
         super.visitMultiANewArrayInsn(descriptor, numDimensions);
+    }
+
+    @Override
+    public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
+        return new CodeExtractorTypeAnnotationExtractor(super.visitTypeAnnotation(typeRef, typePath, descriptor, visible), typeRef, typePath, descriptor, visible, method);
     }
 }

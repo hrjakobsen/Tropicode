@@ -19,18 +19,26 @@
 
 package JVM.Instructions;
 
-import Checker.Exceptions.UnsupportedOperationException;
 import JVM.JvmContex;
-import JVM.JvmOpCode;
 import JVM.JvmValue;
 
-public class JvmAALOAD extends JvmOperation {
-    public JvmAALOAD() {
-        super(JvmOpCode.AALOAD);
+public class JvmKEYSET extends JvmInstruction {
+    private final String key;
+
+    public JvmKEYSET(String key) {
+        super();
+        this.key = key;
     }
 
     @Override
     public void evaluateInstruction(JvmContex ctx) {
-        ctx.push(JvmValue.UNKNOWN_REFERENCE);
+        JvmValue.Reference ref = (JvmValue.Reference) ctx.pop();
+        ctx.addKey(this.key, ref.getIdentifer());
+        ctx.push(ref);
+    }
+
+    @Override
+    public String toString() {
+        return "JvmKEYSET " + key;
     }
 }
