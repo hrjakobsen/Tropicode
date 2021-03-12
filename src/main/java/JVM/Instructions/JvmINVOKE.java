@@ -51,15 +51,18 @@ public class JvmINVOKE extends JvmOperation {
         }
 
         JvmValue.Reference objRef = (JvmValue.Reference)ctx.pop();
-        JvmObject object = ctx.getObject(objRef.getIdentifer());
-        if (object.getProtocol() != null) {
-            // perform typestate check
-            if (object.getProtocol().isAllowed(name.trim())) {
-                object.setProtocol(object.getProtocol().perform(name));
-            } else {
-                throw new InvalidProtocolOperationException(object.getProtocol(), name.trim());
+        if (objRef == JvmValue.UNKNOWN_REFERENCE) {
+            log.warn("Unchecked call to unknown reference. Beware.");
+        } else {
+            JvmObject object = ctx.getObject(objRef.getIdentifer());
+            if (object.getProtocol() != null) {
+                // perform typestate check
+                if (object.getProtocol().isAllowed(name.trim())) {
+                    object.setProtocol(object.getProtocol().perform(name));
+                } else {
+                    throw new InvalidProtocolOperationException(object.getProtocol(), name.trim());
+                }
             }
-
         }
         if (hasOutput) {
             ctx.push(JvmValue.UNKNOWN);

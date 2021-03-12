@@ -139,10 +139,19 @@ public class JvmInstructionNode {
         if (seen.contains(this)) return new ArrayList<>();
         seen.add(this);
         List<String> nodes = new ArrayList<>();
-        nodes.add(getNodeName() + "[label=\"" + this.instruction.toString().trim() + "\"];");
+        nodes.add(getNodeName() + "[label=\"" + getNodeLabel() + "\"];");
         for (JvmInstructionNode child : this.children) {
             nodes.addAll(child.getNodes(seen));
         }
         return nodes;
+    }
+
+    private String getNodeLabel() {
+        StringBuilder sb = new StringBuilder();
+        if (this.instruction.getLineNumber() != -1) {
+            sb.append("L\"").append(this.instruction.getLineNumber()).append("\": \"");
+        }
+        sb.append(this.instruction.toString().trim());
+        return sb.toString();
     }
 }

@@ -17,19 +17,12 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM.Instructions;
+package Checker.Exceptions;
 
-import JVM.JvmContex;
+import JVM.Instructions.JvmInstruction;
 
-public abstract class JvmInstruction {
-    private int lineNumber = -1;
-    public abstract void evaluateInstruction(JvmContex ctx);
-
-    public void setLineNumber(int lineNumber) {
-        this.lineNumber = lineNumber;
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
+public class UnsupportedInstructionException extends CheckerException {
+    public UnsupportedInstructionException(JvmInstruction inst, String message) {
+        super(message + " while executing " + inst + " at line " + inst.getLineNumber());
     }
 }

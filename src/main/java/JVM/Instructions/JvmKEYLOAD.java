@@ -21,7 +21,9 @@ package JVM.Instructions;
 
 import JVM.JvmContex;
 import JVM.JvmValue;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class JvmKEYLOAD extends JvmInstruction {
     private final String key;
 
@@ -34,6 +36,7 @@ public class JvmKEYLOAD extends JvmInstruction {
     public void evaluateInstruction(JvmContex ctx) {
         ctx.pop();
         String identifier = ctx.getKey(this.key);
+        log.warn("Restoring unsafe access to " + identifier);
         ctx.push(new JvmValue.Reference(identifier));
     }
 

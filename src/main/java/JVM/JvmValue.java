@@ -19,6 +19,8 @@
 
 package JVM;
 
+import Checker.Exceptions.UnsupportedOperationException;
+
 import java.util.UUID;
 
 public abstract class JvmValue {
@@ -59,7 +61,7 @@ public abstract class JvmValue {
 
         @Override
         public String getIdentifer() {
-            throw new IllegalStateException("Trying to dereference unknown reference");
+            throw new UnsupportedOperationException("Trying to dereference unknown reference");
         }
     }
 

@@ -17,7 +17,7 @@
 
 package simplecall;
 
-import Annotations.ArrayCast;
+import Annotations.ArrayKeyLoad;
 import Annotations.KeySet;
 
 public class Main {
@@ -27,7 +27,8 @@ public class Main {
     public static void main(String[] args) {
         C1 c1 = new @KeySet("k") C1();
         C1[] cs = new C1[] {c1};
-        C1 c = (@ArrayCast("k") C1) cs[0];
+        C1 c =  (@ArrayKeyLoad("k") C1) cs[0];
+        c.test = "test";
         int i = 0;
         c.question();
         if (i == 0) {

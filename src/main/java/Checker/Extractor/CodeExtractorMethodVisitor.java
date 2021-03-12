@@ -35,13 +35,20 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         super(Opcodes.ASM8, mv);
         this.method = m;
     }
-    
+    private int lastLineNumber = -1;
     private void addOperation(JvmInstruction op) {
         method.getInstructions().add(op);
+        op.setLineNumber(lastLineNumber);
     }
 
     public JvmMethod getMethod() {
         return method;
+    }
+
+    @Override
+    public void visitLineNumber(int line, Label start) {
+        this.lastLineNumber = line;
+        super.visitLineNumber(line, start);
     }
 
     @Override
