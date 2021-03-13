@@ -26,14 +26,18 @@ import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.*;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Log4j2
 class CodeExtractorMethodVisitor extends MethodVisitor {
     JvmMethod method;
+    private final Set<String> dependencies;
 
-    public CodeExtractorMethodVisitor(MethodVisitor mv, JvmMethod m) {
+    public CodeExtractorMethodVisitor(MethodVisitor mv, JvmMethod m, Set<String> dependencies) {
         super(Opcodes.ASM8, mv);
         this.method = m;
+        this.dependencies = dependencies;
     }
     private int lastLineNumber = -1;
     private void addOperation(JvmInstruction op) {
@@ -256,6 +260,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+        dependencies.add(owner);
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
         switch (jvmop) {
             case GETSTATIC:
@@ -270,6 +275,10 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+        if (!owner.startsWith("[")) {
+            //TODO: Verify that this always work, and that the class in the array will be found elsewhere
+            dependencies.add(owner);
+        }
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
         addOperation(new JvmINVOKE(jvmop, owner, name, descriptor, isInterface));
         if (this.mv != null) {
@@ -280,7 +289,6 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     @Override
     public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
         addOperation(new JvmUnsupportedOperation(JvmOpCode.INVOKEDYNAMIC));
-        System.out.println("    " + name + " " + descriptor + " " + bootstrapMethodHandle + " " + Arrays.toString(bootstrapMethodArguments));
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     }
 
@@ -357,12 +365,15 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     @Override
     public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
         addOperation(new JvmUnsupportedOperation(JvmOpCode.MULTIANEWARRAY));
-        System.out.println("    " + descriptor + " " + numDimensions);
         super.visitMultiANewArrayInsn(descriptor, numDimensions);
     }
 
     @Override
     public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
         return new CodeExtractorTypeAnnotationExtractor(super.visitTypeAnnotation(typeRef, typePath, descriptor, visible), typeRef, typePath, descriptor, visible, method);
+    }
+
+    public Set<String> getDependencies() {
+        return dependencies;
     }
 }

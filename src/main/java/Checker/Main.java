@@ -31,27 +31,31 @@ import org.objectweb.asm.ClassReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 public class Main {
     public static void main(String[] args) throws IOException {
+        String ENTRYPOINT_CLASS = "simplecall/Main",
+               ENTRYPOINT_METHOD = "main([Ljava/lang/String;)V";
         try {
-            final String ENTRYPOINT = "simplecall.Main";
-            JvmClass klass = parseClass(ENTRYPOINT);
-
-            Map<String, Typestate> protocols = new HashMap<>();
-
-            protocols.put("simplecall/C1", getProtocol("simplecall.C1"));
+            Queue<String> classesToLoad = new ArrayDeque<>();
+            classesToLoad.add(ENTRYPOINT_CLASS);
 
             JvmContex ctx = new JvmContex();
-            ctx.setProtocolStore(protocols);
-            ctx.getClasses().put("simplecall/Main", klass);
-            ctx.getClasses().put("simplecall/C1", parseClass("simplecall.C1"));
 
-            JvmMethod m = klass.getMethods().get(1);
+            while (!classesToLoad.isEmpty()) {
+                String nextClass = classesToLoad.poll();
+                String compiledClassName = nextClass.replaceAll("/", ".");
+                if (ctx.getClasses().containsKey(nextClass)) {
+                    continue;
+                }
+                JvmClass klass = parseClass(compiledClassName, classesToLoad);
+                ctx.getClasses().put(nextClass, klass);
+            }
+
+            JvmClass klass = ctx.getClasses().get(ENTRYPOINT_CLASS);
+            JvmMethod m = klass.getMethods().get(ENTRYPOINT_METHOD);
 
             JvmInstructionNode iGraph = m.getInstructionGraph();
 
@@ -80,16 +84,22 @@ public class Main {
         return true;
     }
 
-    // Hack to get typestate before implementing all functionality
-    private static Typestate getProtocol(String classname) throws IOException {
-        return parseClass(classname).getProtocol();
-    }
+    private static final Set<String> ignoreDependencies = new HashSet<>() {{
+        add("java.lang.Object");
+        add("java.lang.System");
+        add("java.io.PrintStream");
+        add("java.lang.Enum");
+    }};
 
-    private static JvmClass parseClass(String classname) throws IOException {
+    private static JvmClass parseClass(String classname, Queue<String> classesToLoad) throws IOException {
+        log.debug("Parsing " + classname);
         ClassReader classReader = new ClassReader(classname);
         CodeExtractorClassVisitor cv = new CodeExtractorClassVisitor();
         classReader.accept(cv, ClassReader.SKIP_DEBUG);
         JvmClass klass = cv.getJvmClass();
+        if (!ignoreDependencies.contains(classname)) {
+            classesToLoad.addAll(cv.getClassDependencies());
+        }
         return klass;
     }
 }

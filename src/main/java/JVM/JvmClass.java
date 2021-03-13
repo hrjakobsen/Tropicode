@@ -27,16 +27,16 @@ import java.util.List;
 import java.util.Map;
 
 public class JvmClass {
-    List<JvmMethod> methods = new ArrayList<>();
+    Map<String, JvmMethod> methods = new HashMap<>();
     List<String> fields = new ArrayList<>();
     Map<String, JvmValue> staticFields = new HashMap<>();
     Typestate protocol = null;
 
-    public List<JvmMethod> getMethods() {
+    public Map<String, JvmMethod> getMethods() {
         return methods;
     }
 
-    public void setMethods(List<JvmMethod> methods) {
+    public void setMethods(Map<String, JvmMethod> methods) {
         this.methods = methods;
     }
 

@@ -20,18 +20,14 @@ package simplecall;
 import Annotations.ArrayKeyLoad;
 import Annotations.KeySet;
 
-public class Main {
-    private C1 member = new C1();
-    private static C1 staticmem;
+import java.io.IOException;
 
+public class Main {
     public static void main(String[] args) {
-        C1 c1 = new @KeySet("k") C1();
-        C1[] cs = new C1[] {c1};
-        C1 c =  (@ArrayKeyLoad("k") C1) cs[0];
-        c.test = "test";
-        int i = 0;
+        C1 c = new C1();
         c.question();
-        if (i == 0) {
+        int in = 48; // System.in.read(); // 0 = ASCII(48)
+        if (in == 48) {
             c.Branch2();
             c.Branch1();
         } else {

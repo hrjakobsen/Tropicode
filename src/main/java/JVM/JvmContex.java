@@ -33,16 +33,7 @@ public class JvmContex {
     private Map<String, String> keys = new HashMap<>();
     private JvmValue[] locals = new JvmValue[65536];
     private Map<String, JvmClass> classes = new HashMap<>();
-    private Map<String, Typestate> protocolStore = new HashMap<>();
     private Map<String, JvmHeapSnapshot> snapshots = new HashMap<>();
-
-    public Map<String, Typestate> getProtocolStore() {
-        return protocolStore;
-    }
-
-    public void setProtocolStore(Map<String, Typestate> protocolStore) {
-        this.protocolStore = protocolStore;
-    }
 
     public Map<String, JvmClass> getClasses() {
         return classes;
@@ -78,8 +69,8 @@ public class JvmContex {
         String identifier = UUID.randomUUID().toString();
         JvmObject object = new JvmObject(type, identifier);
         heap.put(identifier, object);
-        if (protocolStore.containsKey(type)) {
-            object.setProtocol(protocolStore.get(type).deepCopy());
+        if (classes.containsKey(type) && classes.get(type).getProtocol() != null) {
+            object.setProtocol(classes.get(type).getProtocol().deepCopy());
         }
         for (String field : classes.get(type).getFields()) {
             object.getFields().put(field, JvmValue.UNKNOWN);
@@ -124,7 +115,6 @@ public class JvmContex {
             newHeap.put(s, heap.get(s).copy());
         }
         newContext.heap = newHeap;
-        newContext.protocolStore = protocolStore;
         newContext.snapshots = snapshots;
         newContext.classes = classes;
         HashMap<String, String> newKeys = new HashMap<>();

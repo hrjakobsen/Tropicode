@@ -25,9 +25,13 @@ import JVM.JvmValue;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Log4j2
 public class CodeExtractorClassVisitor extends ClassVisitor {
     JvmClass klass = new JvmClass();
+    Set<String> classDependencies = new HashSet<>();
     public CodeExtractorClassVisitor() {
         super(Opcodes.ASM8);
     }
@@ -40,14 +44,25 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
         super(Opcodes.ASM8, cv);
     }
 
+    public Set<String> getClassDependencies() {
+        return classDependencies;
+    }
+
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        if (superName != null) {
+            classDependencies.add(superName);
+        }
+        super.visit(version, access, name, signature, superName, interfaces);
+    }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         JvmMethod m = new JvmMethod(access, name, descriptor, signature);
-        klass.getMethods().add(m);
+        klass.getMethods().put(name + descriptor, m);
         return new CodeExtractorMethodVisitor(
                 super.visitMethod(access, name, descriptor, signature, exceptions),
-                m);
+                m, classDependencies);
     }
 
     @Override
