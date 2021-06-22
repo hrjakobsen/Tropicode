@@ -17,7 +17,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM;
+package CFG;
 
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;

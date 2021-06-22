@@ -19,11 +19,11 @@
 
 package Checker;
 
+import CFG.InstructionGraph;
 import Checker.Exceptions.CheckerException;
 import Checker.Extractor.CodeExtractorClassVisitor;
 import JVM.JvmClass;
 import JVM.JvmContex;
-import JVM.JvmInstructionNode;
 import JVM.JvmMethod;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.ClassReader;
@@ -57,14 +57,15 @@ public class Main {
             JvmClass klass = ctx.getClasses().get(ENTRYPOINT_CLASS);
             JvmMethod m = klass.getMethods().get(ENTRYPOINT_METHOD);
 
-            JvmInstructionNode iGraph = m.getInstructionGraph();
+            InstructionGraph iGraph = m.getInstructionGraph();
+            iGraph.dump();
 
             try {
                 Path tempFile = Files.createTempFile(null, null);
-                Files.writeString(tempFile, iGraph.getGraph());
+                Files.writeString(tempFile, iGraph.getDotGraph());
                 Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath().toString());
             } catch (IOException ex) {
-                log.debug(iGraph.getGraph());
+                iGraph.dump();
             }
             checkGraph(iGraph, ctx, new HashSet<>());
         } catch (CheckerException ex) {
@@ -72,12 +73,12 @@ public class Main {
         }
     }
 
-    private static boolean checkGraph(JvmInstructionNode node, JvmContex jvmContex, HashSet<JvmInstructionNode> seen) {
+    private static boolean checkGraph(InstructionGraph node, JvmContex jvmContex, HashSet<InstructionGraph> seen) {
         if (seen.contains(node)) return true;
         seen.add(node);
-        node.getInstruction().evaluateInstruction(jvmContex);
-        for (JvmInstructionNode child : node.getChildren()) {
-            if (!checkGraph(child, jvmContex.copy(), seen)) {
+        node.getBlock().evaluate(jvmContex);
+        for (InstructionGraph next : node.getConnections()) {
+            if (!checkGraph(next, jvmContex.copy(), seen)) {
                 return false;
             }
         }

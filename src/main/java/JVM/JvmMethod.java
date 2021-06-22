@@ -19,6 +19,9 @@
 
 package JVM;
 
+import CFG.BasicBlock;
+import CFG.InstructionGraph;
+import CFG.JvmInstructionNode;
 import JVM.Instructions.JvmInstruction;
 
 import java.util.ArrayList;
@@ -51,8 +54,8 @@ public class JvmMethod {
         this.access = access;
     }
 
-    public JvmInstructionNode getInstructionGraph() {
-        return JvmInstructionNode.fromList(this.instructions);
+    public InstructionGraph getInstructionGraph() {
+        return InstructionGraph.fromList(this.instructions);
     }
 
     public String getName() {
