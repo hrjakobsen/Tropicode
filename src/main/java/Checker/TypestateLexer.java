@@ -20,6 +20,7 @@
 package Checker;
 
 import Checker.Exceptions.CheckerException;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,12 +30,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+@Log4j2
 public class TypestateLexer {
     private String inputString;
 
     public enum TokenType {
         BRACKET_OPEN("\\{"),
         BRACKET_CLOSE("\\}"),
+        PAREN_OPEN("\\("),
+        PAREN_CLOSE("\\)"),
+        PIPE("\\|"),
         CARET_OPEN("<"),
         CARET_CLOSE(">"),
         SEMICOLON(";"),

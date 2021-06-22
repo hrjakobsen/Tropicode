@@ -19,6 +19,7 @@
 import Checker.Typestate;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,6 +64,35 @@ public class TypestateParserTest {
     void parsesRecursionVariable() {
         Typestate actualTypestate = Typestate.fromString("X");
         Typestate expectedTypestate = new Typestate.Variable("X");
+        assertEquals(actualTypestate, expectedTypestate);
+    }
+
+    @Test
+    void parsesParallelTypestate() {
+        Typestate actualTypestate = Typestate.fromString("(end | X).end");
+        Typestate expectedTypestate = new Typestate.Parallel(
+                new ArrayList<>() {{
+                    add(Typestate.END);
+                    add(new Typestate.Variable("X"));
+                }},
+                Typestate.END);
+        assertEquals(actualTypestate, expectedTypestate);
+    }
+
+    @Test
+    void parsesNestedParallelTypestate() {
+        Typestate actualTypestate = Typestate.fromString("(end | (end | end))).end");
+        Typestate expectedTypestate = new Typestate.Parallel(
+                new ArrayList<>() {{
+                    add(Typestate.END);
+                    add(new Typestate.Parallel(
+                            new ArrayList<>() {{
+                                add(Typestate.END);
+                                add(Typestate.END);
+                            }},
+                            Typestate.END));
+                }},
+                Typestate.END);
         assertEquals(actualTypestate, expectedTypestate);
     }
 }

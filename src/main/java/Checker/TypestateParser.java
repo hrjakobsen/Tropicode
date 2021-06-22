@@ -22,15 +22,13 @@ package Checker;
 import Checker.Exceptions.CheckerException;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Stream;
 
 
 /*
 * Parsed grammar for typestates
-* u ::= { m_i ; w_i } | end | rec X. u | X
+* u ::= (u_0 | ... | u_i).u { m_i ; w_i } | end | rec X. u | X
 * w ::= < l_i : u_i > | u
 * */
 @Log4j2
@@ -48,11 +46,43 @@ public class TypestateParser {
         TypestateLexer.Token next = tokens.peek();
         return switch (next.getType()) {
             case BRACKET_OPEN -> parseBranch(tokens);
+            case PAREN_OPEN -> parseParallel(tokens);
             case END -> parseEnd(tokens);
             case REC -> parseRec(tokens);
             case IDENTIFIER -> parseVariable(tokens);
             default -> throw new CheckerException("Invalid next token " + next.getText());
         };
+    }
+
+    private Typestate parseParallel(Stack<TypestateLexer.Token> tokens) {
+        List<Typestate> locals = new ArrayList<>();
+
+        TypestateLexer.Token parOpen = tokens.pop();
+        ensureToken(TypestateLexer.TokenType.PAREN_OPEN, parOpen);
+
+        locals.add(parseU(tokens));
+        TypestateLexer.TokenType next = tokens.peek().getType();
+        if (next == TypestateLexer.TokenType.PIPE) {
+            do {
+                tokens.pop();
+                locals.add(parseU(tokens));
+                next = tokens.peek().getType();
+            } while (next == TypestateLexer.TokenType.PIPE);
+        }
+
+        TypestateLexer.Token parClose = tokens.pop();
+        ensureToken(TypestateLexer.TokenType.PAREN_CLOSE, parClose);
+
+        TypestateLexer.Token nextToken = tokens.peek();
+        if (nextToken.getType() != TypestateLexer.TokenType.DOT) {
+            return new Typestate.Parallel(locals, Typestate.END);
+        }
+
+        TypestateLexer.Token dot = tokens.pop();
+        ensureToken(TypestateLexer.TokenType.DOT, dot);
+
+        Typestate continuation = parseU(tokens);
+        return new Typestate.Parallel(locals, continuation);
     }
 
     private Typestate parseVariable(Stack<TypestateLexer.Token> tokens) {

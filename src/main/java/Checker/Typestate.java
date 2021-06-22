@@ -20,6 +20,7 @@
 package Checker;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class Typestate implements Cloneable {
 
@@ -270,6 +271,91 @@ public abstract class Typestate implements Cloneable {
         @Override
         public String toString() {
             return identifier;
+        }
+    }
+
+    public static class Parallel extends Typestate {
+        private List<Typestate> locals;
+        private Typestate continuation;
+
+        public Parallel(List<Typestate> locals, Typestate continuation) {
+            this.locals = locals;
+            this.continuation = continuation;
+        }
+
+        @Override
+        public Typestate deepCopy() {
+            List<Typestate> locals_copy = this.locals.stream().map(Typestate::deepCopy).collect(Collectors.toList());
+            Typestate continuation_copy = this.continuation.deepCopy();
+            return new Parallel(locals_copy, continuation_copy);
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            for (Typestate local : this.locals) {
+                if (local.isAllowed(action)) {
+                    return true;
+                }
+            }
+            if (hasFinishedLocalProtocols()) {
+                return continuation.isAllowed(action);
+            }
+            return false;
+        }
+
+        public boolean hasFinishedLocalProtocols() {
+            for (Typestate local : this.locals) {
+                if (!local.equals(Typestate.END)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            if (this.hasFinishedLocalProtocols()) {
+                return continuation.perform(action);
+            }
+            for (int i = 0; i < this.locals.size(); i++) {
+                if (this.locals.get(i).isAllowed(action)) {
+                    this.locals.set(i, this.locals.get(i).perform(action));
+                    if (this.hasFinishedLocalProtocols()) {
+                        return continuation;
+                    }
+                    return this;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            Parallel copy = (Parallel) this.deepCopy();
+            for (int i = 0; i < copy.locals.size(); i++) {
+                copy.locals.set(i, copy.locals.get(i).unfoldRecursive(identifier, ts));
+            }
+            copy.continuation = copy.continuation.unfoldRecursive(identifier, ts);
+            return copy;
+        }
+
+        @Override
+        public List<String> getOperations() {
+            if (hasFinishedLocalProtocols()) {
+                return continuation.getOperations();
+            }
+            List<String> operations = new ArrayList<>();
+            this.locals.forEach(t -> operations.addAll(t.getOperations()));
+            return operations;
+        }
+
+        @Override
+        public String toString() {
+            return "(" +
+                    this.locals.stream().map(Object::toString).collect(Collectors.joining(" | ")) +
+                    ")" +
+                    "." +
+                    this.continuation.toString();
         }
     }
 }
