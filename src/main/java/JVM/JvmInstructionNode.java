@@ -92,6 +92,7 @@ public class JvmInstructionNode {
         } else {
             if (next instanceof JvmLabel) {
                 JvmLabel label = (JvmLabel) next;
+                labels.put(label.getLabel(), ins);
                 if (forwardJumpTable.containsKey(label.getLabel())) {
                     // If any forward jumps to this label, update their references
                     for (JvmInstructionNode jvmInstructionNode : forwardJumpTable.get(label.getLabel())) {
