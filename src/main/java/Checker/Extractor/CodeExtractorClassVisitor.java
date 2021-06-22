@@ -74,7 +74,11 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
         boolean isStatic = (access & Opcodes.ACC_STATIC) > 0;
         if (isStatic) {
-            klass.getStaticFields().put(name, JvmValue.UNKNOWN);
+            if (descriptor.charAt(0) == 'L') {
+                klass.getStaticFields().put(name, JvmValue.UNKNOWN_REFERENCE);
+            } else {
+                klass.getStaticFields().put(name, JvmValue.UNKNOWN);
+            }
         } else {
             klass.getFields().add(name);
         }
