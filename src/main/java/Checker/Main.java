@@ -36,8 +36,8 @@ import java.util.*;
 @Log4j2
 public class Main {
     public static void main(String[] args) throws IOException {
-        String ENTRYPOINT_CLASS = "simplecall/Main",
-               ENTRYPOINT_METHOD = "main([Ljava/lang/String;)V";
+        String ENTRYPOINT_CLASS = args[0],
+               ENTRYPOINT_METHOD = args[1];
         try {
             Queue<String> classesToLoad = new ArrayDeque<>();
             classesToLoad.add(ENTRYPOINT_CLASS);
