@@ -52,7 +52,7 @@ public class JvmINVOKE extends JvmOperation {
 
         JvmValue.Reference objRef = (JvmValue.Reference)ctx.pop();
         if (objRef == JvmValue.UNKNOWN_REFERENCE) {
-            log.warn("Unchecked call to unknown reference. Beware.");
+            log.warn(String.format("Unchecked call to method {%s} on class {%s} on an unknown reference. Beware.", this.name, this.owner));
         } else {
             JvmObject object = ctx.getObject(objRef.getIdentifer());
             if (object.getProtocol() != null) {
