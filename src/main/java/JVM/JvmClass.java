@@ -24,10 +24,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class JvmClass {
 
     int access_flags;
+    String name;
+    String superName;
+    String[] interfaces;
+    String signature;
     Map<String, JvmMethod> methods = new HashMap<>();
     List<String> fields = new ArrayList<>();
     Map<String, JvmValue> staticFields = new HashMap<>();
@@ -43,6 +49,38 @@ public class JvmClass {
 
     public void setAccess_flags(int access_flags) {
         this.access_flags = access_flags;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSuperName() {
+        return superName;
+    }
+
+    public void setSuperName(String superName) {
+        this.superName = superName;
+    }
+
+    public String[] getInterfaces() {
+        return interfaces;
+    }
+
+    public void setInterfaces(String[] interfaces) {
+        this.interfaces = interfaces;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
     public Map<String, JvmMethod> getMethods() {
@@ -63,7 +101,11 @@ public class JvmClass {
 
     @Override
     public String toString() {
-        return "JvmClass{" + "methods=" + methods + '}';
+        return "JvmClass " + this.name;
+    }
+
+    public void dump() {
+        log.info("JvmClass" + this.name + "{" + "methods=" + methods.toString() + '}');
     }
 
     public Typestate getProtocol() {

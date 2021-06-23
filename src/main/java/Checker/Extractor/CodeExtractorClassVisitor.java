@@ -65,6 +65,10 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
             classDependencies.add(superName);
         }
         klass.setAccess_flags(access);
+        klass.setName(name);
+        klass.setInterfaces(interfaces);
+        klass.setSuperName(superName);
+        klass.setSignature(signature);
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
