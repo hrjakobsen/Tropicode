@@ -20,6 +20,7 @@
 package Checker;
 
 import Checker.Exceptions.CheckerException;
+import Checker.TypestateLexer.TokenType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,8 +75,7 @@ public class TypestateParser {
     TypestateLexer.Token parClose = tokens.pop();
     ensureToken(TypestateLexer.TokenType.PAREN_CLOSE, parClose);
 
-    TypestateLexer.Token nextToken = tokens.peek();
-    if (nextToken.getType() != TypestateLexer.TokenType.DOT) {
+    if (tokens.isEmpty() || tokens.peek().getType() != TokenType.DOT) {
       return new Typestate.Parallel(locals, Typestate.END);
     }
 
