@@ -19,12 +19,12 @@
 
 package JVM.Instructions;
 
-import Checker.Exceptions.UnsupportedOperationException;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
 
 public class JvmAALOAD extends JvmOperation {
+
     public JvmAALOAD() {
         super(JvmOpCode.AALOAD);
     }

@@ -23,6 +23,7 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 
 public class JvmPOP extends JvmOperation {
+
     public JvmPOP() {
         super(JvmOpCode.POP);
     }

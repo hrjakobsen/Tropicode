@@ -24,6 +24,7 @@ import JVM.JvmOpCode;
 import JVM.JvmValue;
 
 public class JvmSTORE extends JvmOperation {
+
     private final int index;
 
     public JvmSTORE(int index) {

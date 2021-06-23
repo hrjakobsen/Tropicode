@@ -19,17 +19,16 @@
 
 package JVM;
 
-import Checker.Typestate;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
 
 public class JvmContex {
+
+    private final Map<String, JvmArray> arrays = new HashMap<>();
     private Stack<JvmValue> stack = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
-    private Map<String, JvmArray> arrays = new HashMap<>();
     private Map<String, String> keys = new HashMap<>();
     private JvmValue[] locals = new JvmValue[65536];
     private Map<String, JvmClass> classes = new HashMap<>();
@@ -39,7 +38,7 @@ public class JvmContex {
         return classes;
     }
 
-    public void push(JvmValue ... values) {
+    public void push(JvmValue... values) {
         for (JvmValue val : values) {
             stack.push(val);
         }
@@ -57,7 +56,7 @@ public class JvmContex {
         return stack.pop();
     }
 
-    public  JvmValue peek() {
+    public JvmValue peek() {
         return stack.peek();
     }
 
@@ -84,9 +83,7 @@ public class JvmContex {
 
     @Override
     public String toString() {
-        return "JvmContex{" +
-                    stack.toString()
-                + "}";
+        return "JvmContex{" + stack.toString() + "}";
     }
 
     public void takeSnapshot(String label) {

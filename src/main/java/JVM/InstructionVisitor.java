@@ -19,9 +19,25 @@
 
 package JVM;
 
-import JVM.Instructions.*;
+import JVM.Instructions.JvmBinaryOperation;
+import JVM.Instructions.JvmCONST;
+import JVM.Instructions.JvmDUP;
+import JVM.Instructions.JvmINVOKE;
+import JVM.Instructions.JvmInstruction;
+import JVM.Instructions.JvmJSR;
+import JVM.Instructions.JvmJUMP;
+import JVM.Instructions.JvmLDC;
+import JVM.Instructions.JvmLOAD;
+import JVM.Instructions.JvmLabel;
+import JVM.Instructions.JvmNEW;
+import JVM.Instructions.JvmNoEffectOperation;
+import JVM.Instructions.JvmPOP;
+import JVM.Instructions.JvmReturnOperation;
+import JVM.Instructions.JvmSTORE;
+import JVM.Instructions.JvmUnsupportedOperation;
 
 public abstract class InstructionVisitor<T> {
+
     public T visit(JvmInstruction inst) {
         if (inst instanceof JvmBinaryOperation) {
             return visitJvmBinaryOperation((JvmBinaryOperation) inst);
@@ -59,18 +75,32 @@ public abstract class InstructionVisitor<T> {
     }
 
     public abstract T visitJvmBinaryOperation(JvmBinaryOperation inst);
+
     public abstract T visitJvmCONST(JvmCONST inst);
+
     public abstract T visitJvmDUP(JvmDUP inst);
+
     public abstract T visitJvmINVOKE(JvmINVOKE inst);
+
     public abstract T visitJvmJSR(JvmJSR inst);
+
     public abstract T visitJvmJUMP(JvmJUMP inst);
+
     public abstract T visitJvmLabel(JvmLabel inst);
+
     public abstract T visitJvmLDC(JvmLDC inst);
+
     public abstract T visitJvmLOAD(JvmLOAD inst);
+
     public abstract T visitJvmNEW(JvmNEW inst);
+
     public abstract T visitJvmPOP(JvmPOP inst);
+
     public abstract T visitJvmReturnOperation(JvmReturnOperation inst);
+
     public abstract T visitJvmSTORE(JvmSTORE inst);
+
     public abstract T visitJvmNoEffectOperation(JvmNoEffectOperation inst);
+
     public abstract T visitJvmUnsupportedOperation(JvmUnsupportedOperation inst);
 }

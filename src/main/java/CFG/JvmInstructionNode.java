@@ -22,38 +22,21 @@ package CFG;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLabel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.*;
 
 @Log4j2
 public class JvmInstructionNode {
+
     private JvmInstruction instruction;
     private Set<JvmInstructionNode> children;
 
-    public JvmInstructionNode() {
-
-    }
-
-    public JvmInstruction getInstruction() {
-        return instruction;
-    }
-
-    public void setInstruction(JvmInstruction instruction) {
-        this.instruction = instruction;
-    }
-
-    public Set<JvmInstructionNode> getChildren() {
-        return children;
-    }
-
-    public void setChildren(Set<JvmInstructionNode> children) {
-        this.children = children;
-    }
-
-    public Set<JvmInstructionNode> getNext() {
-        return children;
-    }
+    public JvmInstructionNode() {}
 
     public static JvmInstructionNode fromList(List<JvmInstruction> instructions) {
         Map<String, List<JvmInstructionNode>> forwardJumpTable = new HashMap<>();
@@ -62,8 +45,15 @@ public class JvmInstructionNode {
         return fromListInternal(instructions, 0, forwardJumpTable, labels, seen);
     }
 
-    private static JvmInstructionNode fromListInternal(List<JvmInstruction> instructions, int index, Map<String, List<JvmInstructionNode>> forwardJumpTable, Map<String, JvmInstructionNode> labels, HashSet<JvmInstruction> seen) {
-        if (index >= instructions.size()) { return null; }
+    private static JvmInstructionNode fromListInternal(
+            List<JvmInstruction> instructions,
+            int index,
+            Map<String, List<JvmInstructionNode>> forwardJumpTable,
+            Map<String, JvmInstructionNode> labels,
+            HashSet<JvmInstruction> seen) {
+        if (index >= instructions.size()) {
+            return null;
+        }
         JvmInstruction next = instructions.get(index);
         JvmInstructionNode ins = new JvmInstructionNode();
         Set<JvmInstructionNode> children = new HashSet<>();
@@ -87,7 +77,9 @@ public class JvmInstructionNode {
                     fromListInternal(instructions, index + 1, forwardJumpTable, labels, seen);
                     break;
                 default:
-                    children.add(fromListInternal(instructions, index + 1, forwardJumpTable, labels, seen));
+                    children.add(
+                            fromListInternal(
+                                    instructions, index + 1, forwardJumpTable, labels, seen));
             }
         } else {
             if (next instanceof JvmLabel) {
@@ -95,17 +87,39 @@ public class JvmInstructionNode {
                 labels.put(label.getLabel(), ins);
                 if (forwardJumpTable.containsKey(label.getLabel())) {
                     // If any forward jumps to this label, update their references
-                    for (JvmInstructionNode jvmInstructionNode : forwardJumpTable.get(label.getLabel())) {
+                    for (JvmInstructionNode jvmInstructionNode :
+                            forwardJumpTable.get(label.getLabel())) {
                         jvmInstructionNode.getChildren().add(ins);
                     }
                 }
             }
-            JvmInstructionNode nextIns = fromListInternal(instructions, index + 1, forwardJumpTable, labels, seen);
+            JvmInstructionNode nextIns =
+                    fromListInternal(instructions, index + 1, forwardJumpTable, labels, seen);
             if (nextIns != null) {
                 children.add(nextIns);
             }
         }
         return ins;
+    }
+
+    public JvmInstruction getInstruction() {
+        return instruction;
+    }
+
+    public void setInstruction(JvmInstruction instruction) {
+        this.instruction = instruction;
+    }
+
+    public Set<JvmInstructionNode> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Set<JvmInstructionNode> children) {
+        this.children = children;
+    }
+
+    public Set<JvmInstructionNode> getNext() {
+        return children;
     }
 
     public String getGraph() {
@@ -122,7 +136,9 @@ public class JvmInstructionNode {
     }
 
     private List<String> getConnections(HashSet<JvmInstructionNode> seen) {
-        if (seen.contains(this)) return new ArrayList<>();
+        if (seen.contains(this)) {
+            return new ArrayList<>();
+        }
         seen.add(this);
         List<String> connections = new ArrayList<>();
         for (JvmInstructionNode child : children) {
@@ -137,7 +153,9 @@ public class JvmInstructionNode {
     }
 
     private List<String> getNodes(HashSet<JvmInstructionNode> seen) {
-        if (seen.contains(this)) return new ArrayList<>();
+        if (seen.contains(this)) {
+            return new ArrayList<>();
+        }
         seen.add(this);
         List<String> nodes = new ArrayList<>();
         nodes.add(getNodeName() + "[label=\"" + getNodeLabel() + "\"];");

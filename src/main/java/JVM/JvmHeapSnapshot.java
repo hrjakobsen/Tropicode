@@ -20,13 +20,14 @@
 package JVM;
 
 import Checker.Typestate;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class JvmHeapSnapshot {
+
     Map<String, Typestate> snapshot = new HashMap<>();
+
     public JvmHeapSnapshot(Map<String, JvmObject> heap) {
         for (String objIdentifier : heap.keySet()) {
             if (heap.get(objIdentifier).getProtocol() != null) {
@@ -36,17 +37,24 @@ public class JvmHeapSnapshot {
     }
 
     public boolean compareTo(Map<String, JvmObject> heap) {
-        if (heap.values().stream().map(JvmObject::getProtocol).filter(Objects::nonNull).count() != snapshot.size()) {
+        if (heap.values().stream().map(JvmObject::getProtocol).filter(Objects::nonNull).count()
+                != snapshot.size()) {
             return false;
         }
         for (String objIdentifier : heap.keySet()) {
-            if (heap.get(objIdentifier).getProtocol() == null) continue;
+            if (heap.get(objIdentifier).getProtocol() == null) {
+                continue;
+            }
             if (!snapshot.containsKey(objIdentifier)) {
                 System.out.println("Missing key" + objIdentifier);
                 return false;
             }
             if (!snapshot.get(objIdentifier).equals(heap.get(objIdentifier).getProtocol())) {
-                System.out.println("Different typestates:" + snapshot.get(objIdentifier).toString() + " != " + heap.get(objIdentifier).getProtocol().toString());
+                System.out.println(
+                        "Different typestates:"
+                                + snapshot.get(objIdentifier).toString()
+                                + " != "
+                                + heap.get(objIdentifier).getProtocol().toString());
                 return false;
             }
         }

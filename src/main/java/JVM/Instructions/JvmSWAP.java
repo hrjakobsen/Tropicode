@@ -23,7 +23,8 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
 
-public class JvmSWAP extends JvmOperation{
+public class JvmSWAP extends JvmOperation {
+
     public JvmSWAP() {
         super(JvmOpCode.SWAP);
     }

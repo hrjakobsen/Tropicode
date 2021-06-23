@@ -25,6 +25,7 @@ import JVM.JvmOpCode;
 import org.objectweb.asm.Label;
 
 public class JvmJSR extends JvmOperation {
+
     private final Label label;
 
     public JvmJSR(Label label) {

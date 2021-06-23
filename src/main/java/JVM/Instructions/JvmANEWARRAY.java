@@ -21,9 +21,9 @@ package JVM.Instructions;
 
 import JVM.JvmContex;
 import JVM.JvmOpCode;
-import JVM.JvmValue;
 
 public class JvmANEWARRAY extends JvmOperation {
+
     private final String type;
 
     public JvmANEWARRAY(String type) {

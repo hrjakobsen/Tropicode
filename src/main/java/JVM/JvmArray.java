@@ -19,7 +19,8 @@
 
 package JVM;
 
-public class JvmArray  {
+public class JvmArray {
+
     private final String type;
     private final String identifier;
 

@@ -19,10 +19,10 @@
 
 package JVM.Instructions;
 
-import JVM.JvmContex;
 import JVM.JvmOpCode;
 
 public abstract class JvmOperation extends JvmInstruction {
+
     JvmOpCode opcode;
 
     public JvmOperation(JvmOpCode opcode) {

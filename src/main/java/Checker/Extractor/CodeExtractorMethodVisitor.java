@@ -19,27 +19,54 @@
 
 package Checker.Extractor;
 
-import JVM.Instructions.*;
+import JVM.Instructions.JvmAALOAD;
+import JVM.Instructions.JvmAASTORE;
+import JVM.Instructions.JvmALOADCONST;
+import JVM.Instructions.JvmANEWARRAY;
+import JVM.Instructions.JvmASTORECONST;
+import JVM.Instructions.JvmBinaryOperation;
+import JVM.Instructions.JvmCONST;
+import JVM.Instructions.JvmDUP;
+import JVM.Instructions.JvmINVOKE;
+import JVM.Instructions.JvmInstruction;
+import JVM.Instructions.JvmJSR;
+import JVM.Instructions.JvmJUMP;
+import JVM.Instructions.JvmLDC;
+import JVM.Instructions.JvmLOAD;
+import JVM.Instructions.JvmLabel;
+import JVM.Instructions.JvmNEW;
+import JVM.Instructions.JvmNoEffectOperation;
+import JVM.Instructions.JvmOperationFIELDOPERATION;
+import JVM.Instructions.JvmPOP;
+import JVM.Instructions.JvmReturnOperation;
+import JVM.Instructions.JvmSTORE;
+import JVM.Instructions.JvmSWAP;
+import JVM.Instructions.JvmUnaryOperation;
+import JVM.Instructions.JvmUnsupportedOperation;
 import JVM.JvmMethod;
 import JVM.JvmOpCode;
-import lombok.extern.log4j.Log4j2;
-import org.objectweb.asm.*;
-
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
+import lombok.extern.log4j.Log4j2;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 
 @Log4j2
 class CodeExtractorMethodVisitor extends MethodVisitor {
-    JvmMethod method;
+
     private final Set<String> dependencies;
+    JvmMethod method;
+    private int lastLineNumber = -1;
 
     public CodeExtractorMethodVisitor(MethodVisitor mv, JvmMethod m, Set<String> dependencies) {
         super(Opcodes.ASM8, mv);
         this.method = m;
         this.dependencies = dependencies;
     }
-    private int lastLineNumber = -1;
+
     private void addOperation(JvmInstruction op) {
         method.getInstructions().add(op);
         op.setLineNumber(lastLineNumber);
@@ -274,9 +301,11 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+    public void visitMethodInsn(
+            int opcode, String owner, String name, String descriptor, boolean isInterface) {
         if (!owner.startsWith("[")) {
-            //TODO: Verify that this always work, and that the class in the array will be found elsewhere
+            // TODO: Verify that this always work, and that the class in the array will be found
+            // elsewhere
             dependencies.add(owner);
         }
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
@@ -287,9 +316,14 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+    public void visitInvokeDynamicInsn(
+            String name,
+            String descriptor,
+            Handle bootstrapMethodHandle,
+            Object... bootstrapMethodArguments) {
         addOperation(new JvmUnsupportedOperation(JvmOpCode.INVOKEDYNAMIC));
-        super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
+        super.visitInvokeDynamicInsn(
+                name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     }
 
     @Override
@@ -369,8 +403,15 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-        return new CodeExtractorTypeAnnotationExtractor(super.visitTypeAnnotation(typeRef, typePath, descriptor, visible), typeRef, typePath, descriptor, visible, method);
+    public AnnotationVisitor visitInsnAnnotation(
+            int typeRef, TypePath typePath, String descriptor, boolean visible) {
+        return new CodeExtractorTypeAnnotationExtractor(
+                super.visitTypeAnnotation(typeRef, typePath, descriptor, visible),
+                typeRef,
+                typePath,
+                descriptor,
+                visible,
+                method);
     }
 
     public Set<String> getDependencies() {

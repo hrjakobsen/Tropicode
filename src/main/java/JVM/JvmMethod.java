@@ -19,15 +19,13 @@
 
 package JVM;
 
-import CFG.BasicBlock;
 import CFG.InstructionGraph;
-import CFG.JvmInstructionNode;
 import JVM.Instructions.JvmInstruction;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class JvmMethod {
+
     int access;
     String name;
     String descriptor;
@@ -38,7 +36,12 @@ public class JvmMethod {
         this(access, name, descriptor, signature, new ArrayList<>());
     }
 
-    public JvmMethod(int access, String name, String descriptor, String signature, List<JvmInstruction> instructions) {
+    public JvmMethod(
+            int access,
+            String name,
+            String descriptor,
+            String signature,
+            List<JvmInstruction> instructions) {
         this.access = access;
         this.name = name;
         this.descriptor = descriptor;
@@ -98,13 +101,20 @@ public class JvmMethod {
             str.append(inst.toString()).append("\n");
         }
 
-
-        return "JvmMethod{" +
-                "access=" + access +
-                ", name='" + name + '\'' +
-                ", descriptor='" + descriptor + '\'' +
-                ", signature='" + signature + '\'' +
-                ", instructions=\n" + str.toString() +
-                '}';
+        return "JvmMethod{"
+                + "access="
+                + access
+                + ", name='"
+                + name
+                + '\''
+                + ", descriptor='"
+                + descriptor
+                + '\''
+                + ", signature='"
+                + signature
+                + '\''
+                + ", instructions=\n"
+                + str
+                + '}';
     }
 }

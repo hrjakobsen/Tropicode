@@ -18,5 +18,6 @@
 package simplecall;
 
 public enum Answer {
-    YES, NO
+    YES,
+    NO
 }

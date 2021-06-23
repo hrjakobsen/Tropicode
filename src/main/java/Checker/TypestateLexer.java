@@ -20,19 +20,54 @@
 package Checker;
 
 import Checker.Exceptions.CheckerException;
-import lombok.extern.log4j.Log4j2;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class TypestateLexer {
+
     private String inputString;
+
+    public TypestateLexer(String s) {
+        inputString = s;
+    }
+
+    public Stack<Token> getTokens() {
+        List<Token> tokens = new ArrayList<>();
+        Token next = nextToken();
+        while (next != null) {
+            tokens.add(next);
+            next = nextToken();
+        }
+        if (!inputString.trim().isEmpty()) {
+            throw new CheckerException(
+                    "Typestate could not be parsed. Lexer finished with this remaining: "
+                            + inputString);
+        }
+        Stack<Token> tokenStack = new Stack<>();
+        Collections.reverse(tokens);
+        tokenStack.addAll(tokens);
+        return tokenStack;
+    }
+
+    private Token nextToken() {
+        inputString = inputString.trim();
+        for (TokenType token : TokenType.values()) {
+            int matchLength = token.getMatchLength(inputString);
+            if (matchLength != -1) {
+                // A match has been found
+                String match = inputString.substring(0, matchLength);
+                inputString = inputString.substring(matchLength);
+                return new Token(token, match);
+            }
+        }
+        return null;
+    }
 
     public enum TokenType {
         BRACKET_OPEN("\\{"),
@@ -52,16 +87,16 @@ public class TypestateLexer {
         private final Pattern pattern;
         public String text;
 
+        TokenType(String pattern) {
+            this.pattern = Pattern.compile("^" + pattern);
+        }
+
         public String getText() {
             return text;
         }
 
         public void setText(String text) {
             this.text = text;
-        }
-
-        TokenType(String pattern) {
-            this.pattern = Pattern.compile("^" +pattern);
         }
 
         public int getMatchLength(String s) {
@@ -75,6 +110,7 @@ public class TypestateLexer {
     }
 
     public static class Token {
+
         private final TokenType type;
         private final String text;
 
@@ -96,40 +132,4 @@ public class TypestateLexer {
             return type + " [" + text + "]";
         }
     }
-
-    public TypestateLexer(String s) {
-        inputString = s;
-    }
-
-    public Stack<Token> getTokens() {
-        List<Token> tokens = new ArrayList<>();
-        Token next = nextToken();
-        while (next != null) {
-            tokens.add(next);
-            next = nextToken();
-        }
-        if (!inputString.trim().isEmpty()) {
-            throw new CheckerException("Typestate could not be parsed. Lexer finished with this remaining: " + inputString);
-        }
-        Stack<Token> tokenStack = new Stack<>();
-        Collections.reverse(tokens);
-        tokenStack.addAll(tokens);
-        return tokenStack;
-    }
-
-    private Token nextToken() {
-        inputString = inputString.trim();
-        for (TokenType token : TokenType.values()) {
-            int matchLength = token.getMatchLength(inputString);
-            if (matchLength != -1) {
-                // A match has been found
-                String match = inputString.substring(0, matchLength);
-                inputString = inputString.substring(matchLength);
-                return new Token(token, match);
-
-            }
-        }
-        return null;
-    }
-
 }

@@ -20,6 +20,7 @@
 package Checker.Exceptions;
 
 public class UnsupportedOperationException extends CheckerException {
+
     public UnsupportedOperationException(String message) {
         super(message);
     }

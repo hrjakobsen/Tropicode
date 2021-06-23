@@ -23,6 +23,7 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 
 public class JvmLOAD extends JvmOperation {
+
     private final int index;
 
     public JvmLOAD(int i) {

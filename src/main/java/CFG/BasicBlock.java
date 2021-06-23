@@ -21,12 +21,13 @@ package CFG;
 
 import JVM.Instructions.JvmInstruction;
 import JVM.JvmContex;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.*;
 
 @Log4j2
 public class BasicBlock {
+
     List<JvmInstruction> instructions = new ArrayList<>();
 
     public List<JvmInstruction> getInstructions() {
@@ -47,7 +48,6 @@ public class BasicBlock {
         }
         return this.instructions.get(this.instructions.size() - 1);
     }
-
 
     public void evaluate(JvmContex ctx) {
         for (JvmInstruction instruction : this.getInstructions()) {

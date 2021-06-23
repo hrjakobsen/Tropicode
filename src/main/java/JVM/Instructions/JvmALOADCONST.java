@@ -24,6 +24,7 @@ import JVM.JvmOpCode;
 import JVM.JvmValue;
 
 public class JvmALOADCONST extends JvmOperation {
+
     public JvmALOADCONST(JvmOpCode opcode) {
         super(opcode);
     }

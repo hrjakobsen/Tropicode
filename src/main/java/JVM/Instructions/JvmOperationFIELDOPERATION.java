@@ -22,10 +22,10 @@ package JVM.Instructions;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
-
 import java.util.Map;
 
 public class JvmOperationFIELDOPERATION extends JvmOperation {
+
     private final String owner;
     private final String fieldName;
 

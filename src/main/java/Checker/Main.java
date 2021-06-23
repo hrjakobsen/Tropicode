@@ -25,19 +25,31 @@ import Checker.Extractor.CodeExtractorClassVisitor;
 import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmMethod;
-import lombok.extern.log4j.Log4j2;
-import org.objectweb.asm.ClassReader;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
+import lombok.extern.log4j.Log4j2;
+import org.objectweb.asm.ClassReader;
 
 @Log4j2
 public class Main {
+
+    private static final Set<String> ignoreDependencies =
+            new HashSet<>() {
+                {
+                    add("java.lang.Object");
+                    add("java.lang.System");
+                    add("java.io.PrintStream");
+                    add("java.lang.Enum");
+                }
+            };
+
     public static void main(String[] args) throws IOException {
-        String ENTRYPOINT_CLASS = args[0],
-               ENTRYPOINT_METHOD = args[1];
+        String ENTRYPOINT_CLASS = args[0], ENTRYPOINT_METHOD = args[1];
         try {
             Queue<String> classesToLoad = new ArrayDeque<>();
             classesToLoad.add(ENTRYPOINT_CLASS);
@@ -63,18 +75,21 @@ public class Main {
             try {
                 Path tempFile = Files.createTempFile(null, null);
                 Files.writeString(tempFile, iGraph.getDotGraph());
-                Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath().toString());
+                Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
             } catch (IOException ex) {
                 iGraph.dump();
             }
             checkGraph(iGraph, ctx, new HashSet<>());
         } catch (CheckerException ex) {
-            System.err.println(ex.toString());
+            System.err.println(ex);
         }
     }
 
-    private static boolean checkGraph(InstructionGraph node, JvmContex jvmContex, HashSet<InstructionGraph> seen) {
-        if (seen.contains(node)) return true;
+    private static boolean checkGraph(
+            InstructionGraph node, JvmContex jvmContex, HashSet<InstructionGraph> seen) {
+        if (seen.contains(node)) {
+            return true;
+        }
         seen.add(node);
         node.getBlock().evaluate(jvmContex);
         for (InstructionGraph next : node.getConnections()) {
@@ -85,14 +100,8 @@ public class Main {
         return true;
     }
 
-    private static final Set<String> ignoreDependencies = new HashSet<>() {{
-        add("java.lang.Object");
-        add("java.lang.System");
-        add("java.io.PrintStream");
-        add("java.lang.Enum");
-    }};
-
-    private static JvmClass parseClass(String classname, Queue<String> classesToLoad) throws IOException {
+    private static JvmClass parseClass(String classname, Queue<String> classesToLoad)
+            throws IOException {
         log.debug("Parsing " + classname);
         ClassReader classReader = new ClassReader(classname);
         CodeExtractorClassVisitor cv = new CodeExtractorClassVisitor();

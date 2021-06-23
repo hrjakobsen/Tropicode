@@ -20,11 +20,11 @@
 package JVM;
 
 import Checker.Typestate;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class JvmObject {
+
     private final String type;
     private final String identifier;
     Map<String, JvmValue> fields = new HashMap<>();

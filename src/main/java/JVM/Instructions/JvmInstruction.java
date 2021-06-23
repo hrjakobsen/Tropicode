@@ -22,14 +22,16 @@ package JVM.Instructions;
 import JVM.JvmContex;
 
 public abstract class JvmInstruction {
-    private int lineNumber = -1;
-    public abstract void evaluateInstruction(JvmContex ctx);
 
-    public void setLineNumber(int lineNumber) {
-        this.lineNumber = lineNumber;
-    }
+    private int lineNumber = -1;
+
+    public abstract void evaluateInstruction(JvmContex ctx);
 
     public int getLineNumber() {
         return lineNumber;
+    }
+
+    public void setLineNumber(int lineNumber) {
+        this.lineNumber = lineNumber;
     }
 }

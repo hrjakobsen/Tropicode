@@ -22,6 +22,7 @@ package JVM;
 import Checker.Exceptions.CheckerException;
 
 public class InvalidOpcodeException extends CheckerException {
+
     public InvalidOpcodeException(int opcode) {
         super("Invalid opcode: " + Integer.toHexString(opcode));
     }

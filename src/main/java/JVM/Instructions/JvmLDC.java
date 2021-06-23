@@ -24,6 +24,7 @@ import JVM.JvmOpCode;
 import JVM.JvmValue;
 
 public class JvmLDC extends JvmOperation {
+
     public JvmLDC() {
         super(JvmOpCode.LDC);
     }

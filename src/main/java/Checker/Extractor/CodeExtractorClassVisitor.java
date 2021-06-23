@@ -22,26 +22,31 @@ package Checker.Extractor;
 import JVM.JvmClass;
 import JVM.JvmMethod;
 import JVM.JvmValue;
-import lombok.extern.log4j.Log4j2;
-import org.objectweb.asm.*;
-
 import java.util.HashSet;
 import java.util.Set;
+import lombok.extern.log4j.Log4j2;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 @Log4j2
 public class CodeExtractorClassVisitor extends ClassVisitor {
+
     JvmClass klass = new JvmClass();
     Set<String> classDependencies = new HashSet<>();
+
     public CodeExtractorClassVisitor() {
         super(Opcodes.ASM8);
     }
 
-    public JvmClass getJvmClass() {
-        return klass;
-    }
-
     public CodeExtractorClassVisitor(ClassVisitor cv) {
         super(Opcodes.ASM8, cv);
+    }
+
+    public JvmClass getJvmClass() {
+        return klass;
     }
 
     public Set<String> getClassDependencies() {
@@ -49,7 +54,13 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    public void visit(
+            int version,
+            int access,
+            String name,
+            String signature,
+            String superName,
+            String[] interfaces) {
         if (superName != null) {
             classDependencies.add(superName);
         }
@@ -57,21 +68,25 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+    public MethodVisitor visitMethod(
+            int access, String name, String descriptor, String signature, String[] exceptions) {
         JvmMethod m = new JvmMethod(access, name, descriptor, signature);
         klass.getMethods().put(name + descriptor, m);
         return new CodeExtractorMethodVisitor(
                 super.visitMethod(access, name, descriptor, signature, exceptions),
-                m, classDependencies);
+                m,
+                classDependencies);
     }
 
     @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible){
-        return new CodeExtractorAnnotationExtractor(super.visitAnnotation(desc, visible), desc, visible, klass);
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        return new CodeExtractorAnnotationExtractor(
+                super.visitAnnotation(desc, visible), desc, visible, klass);
     }
 
     @Override
-    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+    public FieldVisitor visitField(
+            int access, String name, String descriptor, String signature, Object value) {
         boolean isStatic = (access & Opcodes.ACC_STATIC) > 0;
         if (isStatic) {
             if (descriptor.charAt(0) == 'L') {
@@ -85,4 +100,3 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
         return super.visitField(access, name, descriptor, signature, value);
     }
 }
-

@@ -20,13 +20,13 @@
 package JVM;
 
 import Checker.Typestate;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class JvmClass {
+
     Map<String, JvmMethod> methods = new HashMap<>();
     List<String> fields = new ArrayList<>();
     Map<String, JvmValue> staticFields = new HashMap<>();
@@ -50,9 +50,7 @@ public class JvmClass {
 
     @Override
     public String toString() {
-        return "JvmClass{" +
-                "methods=" + methods +
-                '}';
+        return "JvmClass{" + "methods=" + methods + '}';
     }
 
     public Typestate getProtocol() {

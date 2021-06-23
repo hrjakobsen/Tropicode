@@ -20,7 +20,6 @@
 package JVM.Instructions;
 
 import Checker.Exceptions.CheckerException;
-import Checker.Exceptions.UnsupportedOperationException;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import lombok.extern.log4j.Log4j2;

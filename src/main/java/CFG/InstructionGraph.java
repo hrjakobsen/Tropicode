@@ -22,33 +22,22 @@ package CFG;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLabel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.*;
 
 @Log4j2
 public class InstructionGraph {
+
     private BasicBlock block;
     private List<InstructionGraph> connections = new ArrayList<>();
 
-    public List<InstructionGraph> getConnections() {
-        return connections;
-    }
-
-    public void setConnections(List<InstructionGraph> connections) {
-        this.connections = connections;
-    }
-
     public InstructionGraph(BasicBlock entry) {
         this.block = entry;
-    }
-
-    public BasicBlock getBlock() {
-        return block;
-    }
-
-    public void setBlock(BasicBlock block) {
-        this.block = block;
     }
 
     public static InstructionGraph fromList(List<JvmInstruction> instructions) {
@@ -69,7 +58,8 @@ public class InstructionGraph {
             if (instruction instanceof JvmJUMP) {
                 JvmJUMP jmpInstruction = (JvmJUMP) instruction;
                 if (jumpTable.containsKey(jmpInstruction.getLabel().toString())) {
-                    lastNode.getConnections().add(jumpTable.get(jmpInstruction.getLabel().toString()));
+                    lastNode.getConnections()
+                            .add(jumpTable.get(jmpInstruction.getLabel().toString()));
                 } else {
                     if (!forwardJumps.containsKey(jmpInstruction.getLabel().toString())) {
                         forwardJumps.put(jmpInstruction.getLabel().toString(), new ArrayList<>());
@@ -104,6 +94,22 @@ public class InstructionGraph {
         return nodes.get(0);
     }
 
+    public List<InstructionGraph> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(List<InstructionGraph> connections) {
+        this.connections = connections;
+    }
+
+    public BasicBlock getBlock() {
+        return block;
+    }
+
+    public void setBlock(BasicBlock block) {
+        this.block = block;
+    }
+
     public String getDotGraph() {
         StringBuilder sb = new StringBuilder();
         sb.append("digraph instructions {\n");
@@ -114,8 +120,9 @@ public class InstructionGraph {
     }
 
     public void appendNodes(Set<InstructionGraph> seen, StringBuilder sb) {
-        if (seen.contains(this))
+        if (seen.contains(this)) {
             return;
+        }
         seen.add(this);
         sb.append(getNodeName()).append("[shape=box,label=\"");
         appendNodeLabel(sb);
@@ -139,7 +146,9 @@ public class InstructionGraph {
     }
 
     private void appendConnections(HashSet<InstructionGraph> seen, StringBuilder sb) {
-        if (seen.contains(this)) return;
+        if (seen.contains(this)) {
+            return;
+        }
         seen.add(this);
 
         for (InstructionGraph connection : this.getConnections()) {
@@ -153,7 +162,9 @@ public class InstructionGraph {
     }
 
     private void dump_internal(HashSet<InstructionGraph> seen) {
-        if (seen.contains(this)) return;
+        if (seen.contains(this)) {
+            return;
+        }
         seen.add(this);
         for (JvmInstruction instruction : this.getBlock().getInstructions()) {
             log.debug(instruction.toString());

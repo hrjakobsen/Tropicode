@@ -16,13 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import Checker.Typestate;
-import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import Checker.Typestate;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class TypestateParserTest {
 
@@ -35,21 +36,47 @@ public class TypestateParserTest {
     @Test
     void parsesSingleBranch() {
         Typestate actualTypestate = Typestate.fromString("{m1; end}");
-        Typestate expectedTypestate = new Typestate.Branch(new HashMap<>() {{ put("m1", Typestate.END); }});
+        Typestate expectedTypestate =
+                new Typestate.Branch(
+                        new HashMap<>() {
+                            {
+                                put("m1", Typestate.END);
+                            }
+                        });
         assertEquals(actualTypestate, expectedTypestate);
     }
 
     @Test
     void parsesMultipleBranches() {
         Typestate actualTypestate = Typestate.fromString("{m1; end m2; end}");
-        Typestate expectedTypestate = new Typestate.Branch(new HashMap<>() {{ put("m1", Typestate.END); put("m2", Typestate.END); }});
+        Typestate expectedTypestate =
+                new Typestate.Branch(
+                        new HashMap<>() {
+                            {
+                                put("m1", Typestate.END);
+                                put("m2", Typestate.END);
+                            }
+                        });
         assertEquals(actualTypestate, expectedTypestate);
     }
 
     @Test
     void parsesNestedBranch() {
         Typestate actualTypestate = Typestate.fromString("{m1; {m2; end}}");
-        Typestate expectedTypestate = new Typestate.Branch(new HashMap<>() {{ put("m1", new Typestate.Branch(new HashMap<>() {{ put("m2", Typestate.END); }})); }});
+        Typestate expectedTypestate =
+                new Typestate.Branch(
+                        new HashMap<>() {
+                            {
+                                put(
+                                        "m1",
+                                        new Typestate.Branch(
+                                                new HashMap<>() {
+                                                    {
+                                                        put("m2", Typestate.END);
+                                                    }
+                                                }));
+                            }
+                        });
         assertEquals(actualTypestate, expectedTypestate);
     }
 
@@ -70,29 +97,38 @@ public class TypestateParserTest {
     @Test
     void parsesParallelTypestate() {
         Typestate actualTypestate = Typestate.fromString("(end | X).end");
-        Typestate expectedTypestate = new Typestate.Parallel(
-                new ArrayList<>() {{
-                    add(Typestate.END);
-                    add(new Typestate.Variable("X"));
-                }},
-                Typestate.END);
+        Typestate expectedTypestate =
+                new Typestate.Parallel(
+                        new ArrayList<>() {
+                            {
+                                add(Typestate.END);
+                                add(new Typestate.Variable("X"));
+                            }
+                        },
+                        Typestate.END);
         assertEquals(actualTypestate, expectedTypestate);
     }
 
     @Test
     void parsesNestedParallelTypestate() {
         Typestate actualTypestate = Typestate.fromString("(end | (end | end))).end");
-        Typestate expectedTypestate = new Typestate.Parallel(
-                new ArrayList<>() {{
-                    add(Typestate.END);
-                    add(new Typestate.Parallel(
-                            new ArrayList<>() {{
+        Typestate expectedTypestate =
+                new Typestate.Parallel(
+                        new ArrayList<>() {
+                            {
                                 add(Typestate.END);
-                                add(Typestate.END);
-                            }},
-                            Typestate.END));
-                }},
-                Typestate.END);
+                                add(
+                                        new Typestate.Parallel(
+                                                new ArrayList<>() {
+                                                    {
+                                                        add(Typestate.END);
+                                                        add(Typestate.END);
+                                                    }
+                                                },
+                                                Typestate.END));
+                            }
+                        },
+                        Typestate.END);
         assertEquals(actualTypestate, expectedTypestate);
     }
 }

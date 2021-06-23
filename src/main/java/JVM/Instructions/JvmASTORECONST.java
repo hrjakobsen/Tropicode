@@ -23,6 +23,7 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 
 public class JvmASTORECONST extends JvmOperation {
+
     public JvmASTORECONST(JvmOpCode opcode) {
         super(opcode);
     }

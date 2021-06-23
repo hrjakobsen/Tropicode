@@ -226,9 +226,11 @@ public enum JvmOpCode {
     TABLESWITCH(0xaa),
     WIDE(0xc4);
 
+    private final int opcode;
 
-    private int opcode;
-    JvmOpCode(int opcode) { this.opcode = opcode; }
+    JvmOpCode(int opcode) {
+        this.opcode = opcode;
+    }
 
     public static JvmOpCode getFromOpcode(int opcode) {
         for (JvmOpCode op : values()) {

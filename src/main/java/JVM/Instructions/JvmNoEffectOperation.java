@@ -23,6 +23,7 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 
 public class JvmNoEffectOperation extends JvmOperation {
+
     public JvmNoEffectOperation(JvmOpCode opcode) {
         super(opcode);
     }

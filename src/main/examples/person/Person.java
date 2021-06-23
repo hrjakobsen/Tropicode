@@ -23,6 +23,7 @@ import Annotations.Protocol;
 
 @Protocol("{setFirstName; {setLastName; {greet; end}}  setLastName; {setFirstName; {greet; end}}}")
 public class Person {
+
     private String firstName;
     private String lastName;
 

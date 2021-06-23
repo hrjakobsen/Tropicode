@@ -29,12 +29,14 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class JvmINVOKE extends JvmOperation {
+
     private final String owner;
     private final String name;
     private final String descriptor;
     private final boolean isInterface;
 
-    public JvmINVOKE(JvmOpCode opcode, String owner, String name, String descriptor, boolean isInterface) {
+    public JvmINVOKE(
+            JvmOpCode opcode, String owner, String name, String descriptor, boolean isInterface) {
         super(opcode);
         this.owner = owner;
         this.name = name;
@@ -50,9 +52,12 @@ public class JvmINVOKE extends JvmOperation {
             ctx.pop();
         }
 
-        JvmValue.Reference objRef = (JvmValue.Reference)ctx.pop();
+        JvmValue.Reference objRef = (JvmValue.Reference) ctx.pop();
         if (objRef == JvmValue.UNKNOWN_REFERENCE) {
-            log.warn(String.format("Unchecked call to method {%s} on class {%s} on an unknown reference. Beware.", this.name, this.owner));
+            log.warn(
+                    String.format(
+                            "Unchecked call to method {%s} on class {%s} on an unknown reference. Beware.",
+                            this.name, this.owner));
         } else {
             JvmObject object = ctx.getObject(objRef.getIdentifer());
             if (object.getProtocol() != null) {
@@ -71,7 +76,14 @@ public class JvmINVOKE extends JvmOperation {
 
     @Override
     public String toString() {
-        return "    " + opcode.toString() + " " + owner + "." + name + descriptor + (isInterface ? "(interface)" : "");
+        return "    "
+                + opcode.toString()
+                + " "
+                + owner
+                + "."
+                + name
+                + descriptor
+                + (isInterface ? "(interface)" : "");
     }
 
     private int countParameters(String descriptor) {

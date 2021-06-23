@@ -24,6 +24,7 @@ import JVM.JvmOpCode;
 import JVM.JvmValue;
 
 public class JvmUnaryOperation extends JvmOperation {
+
     public JvmUnaryOperation(JvmOpCode opcode) {
         super(opcode);
     }

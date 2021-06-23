@@ -17,12 +17,8 @@
 
 package simplecall;
 
-import Annotations.ArrayKeyLoad;
-import Annotations.KeySet;
-
-import java.io.IOException;
-
 public class Main {
+
     public static void main(String[] args) {
         C1 c = new C1();
         c.question();

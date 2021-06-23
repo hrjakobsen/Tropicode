@@ -19,10 +19,14 @@
 
 package Checker;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class Typestate implements Cloneable {
+
+    public static Typestate END = new End();
 
     public static Typestate getInitialObjectProtocol(String protocol) {
         Typestate parsedProtocol = fromString(protocol);
@@ -41,10 +45,10 @@ public abstract class Typestate implements Cloneable {
     public abstract Typestate deepCopy();
 
     public abstract boolean isAllowed(String action);
-    public abstract Typestate perform(String action);
-    protected abstract Typestate unfoldRecursive(String identifier, Typestate ts);
 
-    public static Typestate END = new End();
+    public abstract Typestate perform(String action);
+
+    protected abstract Typestate unfoldRecursive(String identifier, Typestate ts);
 
     @Override
     public boolean equals(Object other) {
@@ -84,15 +88,14 @@ public abstract class Typestate implements Cloneable {
         }
 
         @Override
-        public Typestate deepCopy()  {
+        public Typestate deepCopy() {
             return this;
         }
-
-
     }
 
     public static class Branch extends Typestate {
-        private HashMap<String, Typestate> branches;
+
+        private final HashMap<String, Typestate> branches;
 
         public Branch(HashMap<String, Typestate> branches) {
             this.branches = branches;
@@ -111,7 +114,8 @@ public abstract class Typestate implements Cloneable {
         @Override
         protected Typestate unfoldRecursive(String identifier, Typestate ts) {
             Branch copy = (Branch) this.deepCopy();
-            copy.branches.replaceAll((a, v) -> copy.branches.get(a).unfoldRecursive(identifier, ts));
+            copy.branches.replaceAll(
+                    (a, v) -> copy.branches.get(a).unfoldRecursive(identifier, ts));
             return copy;
         }
 
@@ -131,17 +135,17 @@ public abstract class Typestate implements Cloneable {
         }
 
         @Override
-        public Typestate deepCopy()  {
+        public Typestate deepCopy() {
             HashMap<String, Typestate> newBranches = new HashMap<>();
             for (String key : this.branches.keySet()) {
                 newBranches.put(key, this.branches.get(key).deepCopy());
             }
             return new Branch(newBranches);
         }
-
-
     }
+
     static class Choice extends Typestate {
+
         private HashMap<String, Typestate> choices;
 
         Choice(HashMap<String, Typestate> choice) {
@@ -191,6 +195,7 @@ public abstract class Typestate implements Cloneable {
     }
 
     public static class Recursive extends Typestate {
+
         final Typestate next;
         final String identifier;
 
@@ -224,7 +229,6 @@ public abstract class Typestate implements Cloneable {
             return next.getOperations();
         }
 
-
         @Override
         public String toString() {
             return "rec " + identifier + ". " + next.toString();
@@ -232,12 +236,12 @@ public abstract class Typestate implements Cloneable {
     }
 
     public static class Variable extends Typestate {
+
         final String identifier;
 
         public Variable(String identifier) {
             this.identifier = identifier;
         }
-
 
         @Override
         public Typestate deepCopy() {
@@ -275,7 +279,8 @@ public abstract class Typestate implements Cloneable {
     }
 
     public static class Parallel extends Typestate {
-        private List<Typestate> locals;
+
+        private final List<Typestate> locals;
         private Typestate continuation;
 
         public Parallel(List<Typestate> locals, Typestate continuation) {
@@ -285,7 +290,8 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         public Typestate deepCopy() {
-            List<Typestate> locals_copy = this.locals.stream().map(Typestate::deepCopy).collect(Collectors.toList());
+            List<Typestate> locals_copy =
+                    this.locals.stream().map(Typestate::deepCopy).collect(Collectors.toList());
             Typestate continuation_copy = this.continuation.deepCopy();
             return new Parallel(locals_copy, continuation_copy);
         }
@@ -351,11 +357,11 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         public String toString() {
-            return "(" +
-                    this.locals.stream().map(Object::toString).collect(Collectors.joining(" | ")) +
-                    ")" +
-                    "." +
-                    this.continuation.toString();
+            return "("
+                    + this.locals.stream().map(Object::toString).collect(Collectors.joining(" | "))
+                    + ")"
+                    + "."
+                    + this.continuation.toString();
         }
     }
 }

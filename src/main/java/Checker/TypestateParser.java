@@ -20,164 +20,165 @@
 package Checker;
 
 import Checker.Exceptions.CheckerException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Stack;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.*;
-import java.util.stream.Stream;
 
 
 /*
-* Parsed grammar for typestates
-* u ::= (u_0 | ... | u_i).u { m_i ; w_i } | end | rec X. u | X
-* w ::= < l_i : u_i > | u
-* */
+ * Parsed grammar for typestates
+ * u ::= (u_0 | ... | u_i).u { m_i ; w_i } | end | rec X. u | X
+ * w ::= < l_i : u_i > | u
+ * */
 @Log4j2
 public class TypestateParser {
 
-    public TypestateParser() {
-    }
+  public TypestateParser() {
+  }
 
-    public Typestate parse(Stack<TypestateLexer.Token> tokens) {
-        Typestate parsed = parseU(tokens);
-        return parsed;
-    }
+  public Typestate parse(Stack<TypestateLexer.Token> tokens) {
+    Typestate parsed = parseU(tokens);
+    return parsed;
+  }
 
-    private Typestate parseU(Stack<TypestateLexer.Token> tokens) {
-        TypestateLexer.Token next = tokens.peek();
-        return switch (next.getType()) {
-            case BRACKET_OPEN -> parseBranch(tokens);
-            case PAREN_OPEN -> parseParallel(tokens);
-            case END -> parseEnd(tokens);
-            case REC -> parseRec(tokens);
-            case IDENTIFIER -> parseVariable(tokens);
-            default -> throw new CheckerException("Invalid next token " + next.getText());
-        };
-    }
+  private Typestate parseU(Stack<TypestateLexer.Token> tokens) {
+    TypestateLexer.Token next = tokens.peek();
+    return switch (next.getType()) {
+      case BRACKET_OPEN -> parseBranch(tokens);
+      case PAREN_OPEN -> parseParallel(tokens);
+      case END -> parseEnd(tokens);
+      case REC -> parseRec(tokens);
+      case IDENTIFIER -> parseVariable(tokens);
+      default -> throw new CheckerException("Invalid next token " + next.getText());
+    };
+  }
 
-    private Typestate parseParallel(Stack<TypestateLexer.Token> tokens) {
-        List<Typestate> locals = new ArrayList<>();
+  private Typestate parseParallel(Stack<TypestateLexer.Token> tokens) {
+    List<Typestate> locals = new ArrayList<>();
 
-        TypestateLexer.Token parOpen = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.PAREN_OPEN, parOpen);
+    TypestateLexer.Token parOpen = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.PAREN_OPEN, parOpen);
 
+    locals.add(parseU(tokens));
+    TypestateLexer.TokenType next = tokens.peek().getType();
+    if (next == TypestateLexer.TokenType.PIPE) {
+      do {
+        tokens.pop();
         locals.add(parseU(tokens));
-        TypestateLexer.TokenType next = tokens.peek().getType();
-        if (next == TypestateLexer.TokenType.PIPE) {
-            do {
-                tokens.pop();
-                locals.add(parseU(tokens));
-                next = tokens.peek().getType();
-            } while (next == TypestateLexer.TokenType.PIPE);
-        }
-
-        TypestateLexer.Token parClose = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.PAREN_CLOSE, parClose);
-
-        TypestateLexer.Token nextToken = tokens.peek();
-        if (nextToken.getType() != TypestateLexer.TokenType.DOT) {
-            return new Typestate.Parallel(locals, Typestate.END);
-        }
-
-        TypestateLexer.Token dot = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.DOT, dot);
-
-        Typestate continuation = parseU(tokens);
-        return new Typestate.Parallel(locals, continuation);
+        next = tokens.peek().getType();
+      } while (next == TypestateLexer.TokenType.PIPE);
     }
 
-    private Typestate parseVariable(Stack<TypestateLexer.Token> tokens) {
-        TypestateLexer.Token identifier = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
-        return new Typestate.Variable(identifier.getText());
+    TypestateLexer.Token parClose = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.PAREN_CLOSE, parClose);
+
+    TypestateLexer.Token nextToken = tokens.peek();
+    if (nextToken.getType() != TypestateLexer.TokenType.DOT) {
+      return new Typestate.Parallel(locals, Typestate.END);
     }
 
-    private Typestate parseRec(Stack<TypestateLexer.Token> tokens) {
-        TypestateLexer.Token rec = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.REC, rec);
+    TypestateLexer.Token dot = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.DOT, dot);
 
-        TypestateLexer.Token identifier = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
+    Typestate continuation = parseU(tokens);
+    return new Typestate.Parallel(locals, continuation);
+  }
 
-        TypestateLexer.Token dot = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.DOT, dot);
+  private Typestate parseVariable(Stack<TypestateLexer.Token> tokens) {
+    TypestateLexer.Token identifier = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
+    return new Typestate.Variable(identifier.getText());
+  }
 
-        return new Typestate.Recursive(identifier.getText(), parseU(tokens));
+  private Typestate parseRec(Stack<TypestateLexer.Token> tokens) {
+    TypestateLexer.Token rec = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.REC, rec);
+
+    TypestateLexer.Token identifier = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
+
+    TypestateLexer.Token dot = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.DOT, dot);
+
+    return new Typestate.Recursive(identifier.getText(), parseU(tokens));
+  }
+
+  private Typestate parseEnd(Stack<TypestateLexer.Token> tokens) {
+    TypestateLexer.Token token = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.END, token);
+    return Typestate.END;
+  }
+
+  private Typestate parseBranch(Stack<TypestateLexer.Token> tokens) {
+    TypestateLexer.Token bracketOpen = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.BRACKET_OPEN, bracketOpen);
+
+    HashMap<String, Typestate> branches = new HashMap<>();
+
+    TypestateLexer.Token next = tokens.peek();
+    while (next.getType() == TypestateLexer.TokenType.IDENTIFIER) {
+
+      TypestateLexer.Token identifier = tokens.pop();
+      ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
+
+      TypestateLexer.Token semi = tokens.pop();
+      ensureToken(TypestateLexer.TokenType.SEMICOLON, semi);
+
+      Typestate t = parseW(tokens);
+      branches.put(identifier.getText(), t);
+
+      next = tokens.peek();
     }
 
-    private Typestate parseEnd(Stack<TypestateLexer.Token> tokens) {
-        TypestateLexer.Token token = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.END, token);
-        return Typestate.END;
+    TypestateLexer.Token bracketClose = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.BRACKET_CLOSE, bracketClose);
+
+    return new Typestate.Branch(branches);
+
+  }
+
+  private Typestate parseW(Stack<TypestateLexer.Token> tokens) {
+    TypestateLexer.Token next = tokens.peek();
+    return switch (next.getType()) {
+      case CARET_OPEN -> parseChoice(tokens);
+      default -> parseU(tokens);
+    };
+  }
+
+  private Typestate parseChoice(Stack<TypestateLexer.Token> tokens) {
+    TypestateLexer.Token caretOpen = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.CARET_OPEN, caretOpen);
+
+    HashMap<String, Typestate> choices = new HashMap<>();
+
+    TypestateLexer.Token next = tokens.peek();
+    while (next.getType() == TypestateLexer.TokenType.IDENTIFIER) {
+
+      TypestateLexer.Token identifier = tokens.pop();
+      ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
+
+      TypestateLexer.Token colon = tokens.pop();
+      ensureToken(TypestateLexer.TokenType.COLON, colon);
+
+      Typestate t = parseU(tokens);
+      choices.put(identifier.getText(), t);
+
+      next = tokens.peek();
     }
 
-    private Typestate parseBranch(Stack<TypestateLexer.Token> tokens) {
-        TypestateLexer.Token bracketOpen = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.BRACKET_OPEN, bracketOpen);
+    TypestateLexer.Token caretClose = tokens.pop();
+    ensureToken(TypestateLexer.TokenType.CARET_CLOSE, caretClose);
 
-        HashMap<String, Typestate> branches = new HashMap<>();
+    return new Typestate.Choice(choices);
+  }
 
-        TypestateLexer.Token next = tokens.peek();
-        while (next.getType() == TypestateLexer.TokenType.IDENTIFIER) {
-
-            TypestateLexer.Token identifier = tokens.pop();
-            ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
-
-
-            TypestateLexer.Token semi = tokens.pop();
-            ensureToken(TypestateLexer.TokenType.SEMICOLON, semi);
-
-            Typestate t = parseW(tokens);
-            branches.put(identifier.getText(), t);
-
-            next = tokens.peek();
-        }
-
-        TypestateLexer.Token bracketClose = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.BRACKET_CLOSE, bracketClose);
-
-        return new Typestate.Branch(branches);
-
+  private void ensureToken(TypestateLexer.TokenType expected, TypestateLexer.Token actual) {
+    if (actual.getType() != expected) {
+      throw new CheckerException(
+          "Invalid token encountered while parsing " + expected + " token. Got " + actual.getType()
+              + " with text " + actual.getText());
     }
-
-    private Typestate parseW(Stack<TypestateLexer.Token> tokens) {
-        TypestateLexer.Token next = tokens.peek();
-        return switch (next.getType()) {
-            case CARET_OPEN -> parseChoice(tokens);
-            default -> parseU(tokens);
-        };
-    }
-
-    private Typestate parseChoice(Stack<TypestateLexer.Token> tokens) {
-        TypestateLexer.Token caretOpen = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.CARET_OPEN, caretOpen);
-
-        HashMap<String, Typestate> choices = new HashMap<>();
-
-        TypestateLexer.Token next = tokens.peek();
-        while (next.getType() == TypestateLexer.TokenType.IDENTIFIER) {
-
-            TypestateLexer.Token identifier = tokens.pop();
-            ensureToken(TypestateLexer.TokenType.IDENTIFIER, identifier);
-
-
-            TypestateLexer.Token colon = tokens.pop();
-            ensureToken(TypestateLexer.TokenType.COLON, colon);
-
-            Typestate t = parseU(tokens);
-            choices.put(identifier.getText(), t);
-
-            next = tokens.peek();
-        }
-
-        TypestateLexer.Token caretClose = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.CARET_CLOSE, caretClose);
-
-        return new Typestate.Choice(choices);
-    }
-
-    private void ensureToken(TypestateLexer.TokenType expected, TypestateLexer.Token actual) {
-        if (actual.getType() != expected) {
-            throw new CheckerException("Invalid token encountered while parsing " + expected + " token. Got " + actual.getType() + " with text " + actual.getText() );
-        }
-    }
+  }
 }

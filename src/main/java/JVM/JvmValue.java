@@ -21,10 +21,13 @@ package JVM;
 
 import Checker.Exceptions.UnsupportedOperationException;
 
-import java.util.UUID;
-
 public abstract class JvmValue {
+
+    public static final JvmValue UNKNOWN = new UnknownByte();
+    public static final JvmValue UNKNOWN_REFERENCE = new UnknownReference();
+
     private static class UnknownByte extends JvmValue {
+
         @Override
         public String toString() {
             return "Unknown";
@@ -50,6 +53,7 @@ public abstract class JvmValue {
     }
 
     public static class UnknownReference extends Reference {
+
         public UnknownReference() {
             super("UNKNOWN");
         }
@@ -64,7 +68,4 @@ public abstract class JvmValue {
             throw new UnsupportedOperationException("Trying to dereference unknown reference");
         }
     }
-
-    public static final JvmValue UNKNOWN = new UnknownByte();
-    public static final JvmValue UNKNOWN_REFERENCE = new UnknownReference();
 }

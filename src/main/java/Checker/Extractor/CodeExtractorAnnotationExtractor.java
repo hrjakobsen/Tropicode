@@ -27,13 +27,17 @@ import org.objectweb.asm.Opcodes;
 
 @Log4j2
 public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
+
     private final String descriptor;
     private final boolean visible;
     private final JvmClass klass;
     private boolean isProtocol = false;
 
-
-    public CodeExtractorAnnotationExtractor(AnnotationVisitor annotationVisitor, String descriptor, boolean visible, JvmClass klass) {
+    public CodeExtractorAnnotationExtractor(
+            AnnotationVisitor annotationVisitor,
+            String descriptor,
+            boolean visible,
+            JvmClass klass) {
         super(Opcodes.ASM8, annotationVisitor);
         this.klass = klass;
         this.descriptor = descriptor;
@@ -42,7 +46,6 @@ public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
             isProtocol = true;
         }
     }
-
 
     @Override
     public void visit(String name, Object value) {

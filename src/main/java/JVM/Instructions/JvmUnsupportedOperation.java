@@ -24,6 +24,7 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 
 public class JvmUnsupportedOperation extends JvmOperation {
+
     public JvmUnsupportedOperation(JvmOpCode opcode) {
         super(opcode);
     }

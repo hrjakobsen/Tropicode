@@ -23,6 +23,7 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 
 public class JvmNEW extends JvmOperation {
+
     private final String type;
 
     public JvmNEW(String type) {
