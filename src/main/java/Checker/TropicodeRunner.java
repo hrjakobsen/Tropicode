@@ -34,9 +34,30 @@ import java.util.Queue;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.ClassReader;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
 
 @Log4j2
-public class Main {
+@Command(
+        name = "Tropicode",
+        mixinStandardHelpOptions = true,
+        description = "Checks JVM bytecode for typestate violations")
+public class TropicodeRunner implements Runnable {
+
+    @Parameters(
+            index = "0",
+            description =
+                    "The fully qualified name of the class that contains "
+                            + "the entrypoint method. Specified like \"simpleclass/Main\".")
+    private String entryClass;
+
+    @Parameters(
+            index = "1",
+            description =
+                    "The fully qualified method signature of the entry method. Specified with"
+                            + "JVM types like \"main([Ljava/lang/String;)V\"")
+    private String entryMethod;
 
     private static final Set<String> ignoreDependencies =
             new HashSet<>() {
@@ -48,40 +69,9 @@ public class Main {
                 }
             };
 
-    public static void main(String[] args) throws IOException {
-        String ENTRYPOINT_CLASS = args[0], ENTRYPOINT_METHOD = args[1];
-        try {
-            Queue<String> classesToLoad = new ArrayDeque<>();
-            classesToLoad.add(ENTRYPOINT_CLASS);
-
-            JvmContex ctx = new JvmContex();
-
-            while (!classesToLoad.isEmpty()) {
-                String nextClass = classesToLoad.poll();
-                String compiledClassName = nextClass.replaceAll("/", ".");
-                if (ctx.getClasses().containsKey(nextClass)) {
-                    continue;
-                }
-                JvmClass klass = parseClass(compiledClassName, classesToLoad);
-                ctx.getClasses().put(nextClass, klass);
-            }
-
-            JvmClass klass = ctx.getClasses().get(ENTRYPOINT_CLASS);
-            JvmMethod m = klass.getMethods().get(ENTRYPOINT_METHOD);
-
-            InstructionGraph iGraph = m.getInstructionGraph();
-
-            try {
-                Path tempFile = Files.createTempFile(null, null);
-                Files.writeString(tempFile, iGraph.getDotGraph());
-                Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
-            } catch (IOException ex) {
-                iGraph.dump();
-            }
-            checkGraph(iGraph, ctx, new HashSet<>());
-        } catch (CheckerException ex) {
-            System.err.println(ex);
-        }
+    public static void main(String[] args) {
+        int exitCode = new CommandLine(new TropicodeRunner()).execute(args);
+        System.exit(exitCode);
     }
 
     private static boolean checkGraph(
@@ -110,5 +100,41 @@ public class Main {
             classesToLoad.addAll(cv.getClassDependencies());
         }
         return klass;
+    }
+
+    @Override
+    public void run() {
+        try {
+            Queue<String> classesToLoad = new ArrayDeque<>();
+            classesToLoad.add(this.entryClass);
+
+            JvmContex ctx = new JvmContex();
+
+            while (!classesToLoad.isEmpty()) {
+                String nextClass = classesToLoad.poll();
+                String compiledClassName = nextClass.replaceAll("/", ".");
+                if (ctx.getClasses().containsKey(nextClass)) {
+                    continue;
+                }
+                JvmClass klass = parseClass(compiledClassName, classesToLoad);
+                ctx.getClasses().put(nextClass, klass);
+            }
+
+            JvmClass klass = ctx.getClasses().get(entryClass);
+            JvmMethod m = klass.getMethods().get(entryMethod);
+
+            InstructionGraph iGraph = m.getInstructionGraph();
+
+            try {
+                Path tempFile = Files.createTempFile(null, null);
+                Files.writeString(tempFile, iGraph.getDotGraph());
+                Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
+            } catch (IOException ex) {
+                iGraph.dump();
+            }
+            checkGraph(iGraph, ctx, new HashSet<>());
+        } catch (CheckerException | IOException ex) {
+            System.err.println(ex);
+        }
     }
 }
