@@ -70,7 +70,6 @@ public class Main {
             JvmMethod m = klass.getMethods().get(ENTRYPOINT_METHOD);
 
             InstructionGraph iGraph = m.getInstructionGraph();
-            iGraph.dump();
 
             try {
                 Path tempFile = Files.createTempFile(null, null);
