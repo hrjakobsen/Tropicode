@@ -59,6 +59,7 @@ public class JvmObject {
 
     public JvmObject copy() {
         JvmObject newObj = new JvmObject(this.type, this.identifier);
+        newObj.setTainted(this.isTainted());
         if (protocol != null) {
             newObj.setProtocol(protocol.deepCopy());
         }

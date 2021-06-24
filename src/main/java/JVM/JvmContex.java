@@ -70,6 +70,7 @@ public class JvmContex {
         heap.put(identifier, object);
         if (classes.containsKey(type) && classes.get(type).getProtocol() != null) {
             object.setProtocol(classes.get(type).getProtocol().deepCopy());
+            object.setTainted(true);
         }
         for (String field : classes.get(type).getFields()) {
             object.getFields().put(field, JvmValue.UNKNOWN);
