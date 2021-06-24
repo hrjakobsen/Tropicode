@@ -20,6 +20,7 @@
 package Checker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -362,6 +363,70 @@ public abstract class Typestate implements Cloneable {
                     + ")"
                     + "."
                     + this.continuation.toString();
+        }
+    }
+
+    public static final class BooleanChoice extends Typestate {
+        private Typestate trueBranch;
+        private Typestate falseBranch;
+
+        public BooleanChoice(Typestate trueBranch, Typestate falseBranch) {
+            this.trueBranch = trueBranch;
+            this.falseBranch = falseBranch;
+        }
+
+        public Typestate getTrueBranch() {
+            return trueBranch;
+        }
+
+        public void setTrueBranch(Typestate trueBranch) {
+            this.trueBranch = trueBranch;
+        }
+
+        public Typestate getFalseBranch() {
+            return falseBranch;
+        }
+
+        public void setFalseBranch(Typestate falseBranch) {
+            this.falseBranch = falseBranch;
+        }
+
+        @Override
+        public Typestate deepCopy() {
+            return new BooleanChoice(this.trueBranch.deepCopy(), this.falseBranch.deepCopy());
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            return action.equals("true") || action.equals("false");
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            if (action.equals("true")) {
+                return this.trueBranch;
+            } else if (action.equals("false")) {
+                return this.falseBranch;
+            }
+            throw new IllegalStateException();
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            return new BooleanChoice(
+                    this.trueBranch.unfoldRecursive(identifier, ts),
+                    this.falseBranch.unfoldRecursive(identifier, ts));
+        }
+
+        @Override
+        public List<String> getOperations() {
+            return Arrays.asList("true", "false");
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "[%s, %s]", this.trueBranch.toString(), this.falseBranch.toString());
         }
     }
 }

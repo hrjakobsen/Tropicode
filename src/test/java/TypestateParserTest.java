@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import Checker.Typestate;
+import Checker.Typestate.BooleanChoice;
+import Checker.Typestate.Branch;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.junit.jupiter.api.Test;
@@ -129,6 +131,20 @@ public class TypestateParserTest {
                             }
                         },
                         Typestate.END);
+        assertEquals(actualTypestate, expectedTypestate);
+    }
+
+    @Test
+    void parsesBooleanChoiceTypestate() {
+        Typestate actualTypestate = Typestate.fromString("{m; [end, end]}");
+        Typestate expectedTypestate =
+                new Branch(
+                        new HashMap<>() {
+                            {
+                                put("m", new BooleanChoice(Typestate.END, Typestate.END));
+                            }
+                        });
+
         assertEquals(actualTypestate, expectedTypestate);
     }
 }

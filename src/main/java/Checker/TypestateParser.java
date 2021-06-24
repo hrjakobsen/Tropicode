@@ -20,6 +20,8 @@
 package Checker;
 
 import Checker.Exceptions.CheckerException;
+import Checker.Typestate.BooleanChoice;
+import Checker.TypestateLexer.Token;
 import Checker.TypestateLexer.TokenType;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
 /*
  * Parsed grammar for typestates
  * u ::= (u_0 | ... | u_i).u { m_i ; w_i } | end | rec X. u | X
- * w ::= < l_i : u_i > | u
+ * w ::= < l_i : u_i > | [u_1, u_2] | u
  * */
 @Log4j2
 public class TypestateParser {
@@ -143,6 +145,7 @@ public class TypestateParser {
     TypestateLexer.Token next = tokens.peek();
     return switch (next.getType()) {
       case CARET_OPEN -> parseChoice(tokens);
+      case SQUARE_BRACKET_OPEN -> parseBooleanChoice(tokens);
       default -> parseU(tokens);
     };
   }
@@ -172,6 +175,23 @@ public class TypestateParser {
     ensureToken(TypestateLexer.TokenType.CARET_CLOSE, caretClose);
 
     return new Typestate.Choice(choices);
+  }
+
+  private Typestate parseBooleanChoice(Stack<TypestateLexer.Token> tokens) {
+    Token square_bracket_open = tokens.pop();
+    ensureToken(TokenType.SQUARE_BRACKET_OPEN, square_bracket_open);
+
+    Typestate u1 = parseU(tokens);
+
+    Token comma = tokens.pop();
+    ensureToken(TokenType.COMMA, comma);
+
+    Typestate u2 = parseU(tokens);
+
+    Token square_bracket_close = tokens.pop();
+    ensureToken(TokenType.SQUARE_BRACKET_CLOSE, square_bracket_close);
+
+    return new BooleanChoice(u1, u2);
   }
 
   private void ensureToken(TypestateLexer.TokenType expected, TypestateLexer.Token actual) {

@@ -74,6 +74,8 @@ public class TypestateLexer {
         BRACKET_CLOSE("\\}"),
         PAREN_OPEN("\\("),
         PAREN_CLOSE("\\)"),
+        SQUARE_BRACKET_OPEN("\\["),
+        SQUARE_BRACKET_CLOSE("\\]"),
         PIPE("\\|"),
         CARET_OPEN("<"),
         CARET_CLOSE(">"),
@@ -82,6 +84,7 @@ public class TypestateLexer {
         END("end"),
         REC("rec"),
         DOT("\\."),
+        COMMA(","),
         IDENTIFIER("[a-zA-Z_$][a-zA-Z_$0-9]*");
 
         private final Pattern pattern;
