@@ -76,6 +76,7 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(
             int access, String name, String descriptor, String signature, String[] exceptions) {
         JvmMethod m = new JvmMethod(access, name, descriptor, signature);
+        m.setNumberOfLocalVariables(countMethodArguments(descriptor));
         klass.getMethods().put(name + descriptor, m);
         return new CodeExtractorMethodVisitor(
                 super.visitMethod(access, name, descriptor, signature, exceptions),
@@ -103,5 +104,25 @@ public class CodeExtractorClassVisitor extends ClassVisitor {
             klass.getFields().add(name);
         }
         return super.visitField(access, name, descriptor, signature, value);
+    }
+
+    public static int countMethodArguments(String descriptor) {
+        if (descriptor.charAt(0) != '(') {
+            throw new IllegalArgumentException("Descriptor must start with (");
+        }
+        return parseTypeArguments(descriptor.substring(1));
+    }
+
+    private static int parseTypeArguments(String descriptor) {
+        if (descriptor.charAt(0) == ')') {
+            return 0;
+        }
+        return switch (descriptor.charAt(0)) {
+            case 'B', 'C', 'D', 'F', 'I', 'J', 'S', 'Z' -> 1 + parseTypeArguments(
+                descriptor.substring(1));
+            case '[' -> parseTypeArguments(descriptor.substring(1));
+            case 'L' -> 1 + parseTypeArguments(descriptor.substring(descriptor.indexOf(';') + 1));
+            default -> throw new IllegalStateException(descriptor);
+        };
     }
 }

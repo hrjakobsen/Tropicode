@@ -33,6 +33,7 @@ public class JvmMethod {
     String descriptor;
     String signature;
     List<JvmInstruction> instructions;
+    int numberOfLocalVariables = 0;
 
     public JvmMethod(int access, String name, String descriptor, String signature) {
         this(access, name, descriptor, signature, new ArrayList<>());
@@ -53,6 +54,14 @@ public class JvmMethod {
         this.descriptor = descriptor;
         this.signature = signature;
         this.instructions = instructions;
+    }
+
+    public int getNumberOfLocalVariables() {
+        return numberOfLocalVariables;
+    }
+
+    public void setNumberOfLocalVariables(int numberOfLocalVariables) {
+        this.numberOfLocalVariables = numberOfLocalVariables;
     }
 
     public int getAccess() {
