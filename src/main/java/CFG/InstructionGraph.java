@@ -19,6 +19,7 @@
 
 package CFG;
 
+import JVM.Instructions.JvmINVOKE;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLabel;
@@ -66,6 +67,10 @@ public class InstructionGraph {
                     }
                     forwardJumps.get(jmpInstruction.getLabel().toString()).add(lastNode);
                 }
+                lastNode = new InstructionGraph(new BasicBlock());
+                nodes.add(lastNode);
+            }
+            if (instruction instanceof JvmINVOKE) {
                 lastNode = new InstructionGraph(new BasicBlock());
                 nodes.add(lastNode);
             }
