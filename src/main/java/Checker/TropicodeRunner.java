@@ -37,6 +37,7 @@ import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.ClassReader;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Log4j2
@@ -59,6 +60,9 @@ public class TropicodeRunner implements Runnable {
                     "The fully qualified method signature of the entry method. Specified with"
                             + "JVM types like \"main([Ljava/lang/String;)V\"")
     private String entryMethod;
+
+    @Option(names = "-d", description = "Display the instruction graph of the entry method")
+    boolean displayGraph = false;
 
     private static final Set<String> ignoreDependencies =
             new HashSet<>() {
@@ -133,12 +137,14 @@ public class TropicodeRunner implements Runnable {
 
             InstructionGraph iGraph = m.getInstructionGraph();
 
-            try {
-                Path tempFile = Files.createTempFile(null, null);
-                Files.writeString(tempFile, iGraph.getDotGraph());
-                Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
-            } catch (IOException ex) {
-                iGraph.dump();
+            if (displayGraph) {
+                try {
+                    Path tempFile = Files.createTempFile(null, null);
+                    Files.writeString(tempFile, iGraph.getDotGraph());
+                    Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
+                } catch (IOException ex) {
+                    iGraph.dump();
+                }
             }
             checkGraph(iGraph, ctx, new HashSet<>());
         } catch (CheckerException | IOException ex) {
