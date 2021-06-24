@@ -27,7 +27,7 @@ import java.util.UUID;
 public class JvmContex {
 
     private final Map<String, JvmArray> arrays = new HashMap<>();
-    private Stack<JvmValue> stack = new Stack<>();
+    private Stack<JvmFrame> stack = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
     private Map<String, String> keys = new HashMap<>();
     private JvmValue[] locals = new JvmValue[65536];
@@ -38,9 +38,17 @@ public class JvmContex {
         return classes;
     }
 
+    private JvmFrame getCurrentFrame() {
+        return stack.peek();
+    }
+
+    public void allocateFrame(JvmObject callee, JvmMethod method) {
+        this.stack.push(new JvmFrame(callee, method.getNumberOfLocalVariables()));
+    }
+
     public void push(JvmValue... values) {
         for (JvmValue val : values) {
-            stack.push(val);
+            getCurrentFrame().getStack().push(val);
         }
     }
 
@@ -53,11 +61,11 @@ public class JvmContex {
     }
 
     public JvmValue pop() {
-        return stack.pop();
+        return getCurrentFrame().getStack().pop();
     }
 
     public JvmValue peek() {
-        return stack.peek();
+        return getCurrentFrame().getStack().peek();
     }
 
     public void addKey(String key, String identifier) {
@@ -107,7 +115,7 @@ public class JvmContex {
     public JvmContex copy() {
         JvmContex newContext = new JvmContex();
         newContext.locals = locals.clone();
-        newContext.stack = (Stack<JvmValue>) stack.clone();
+        newContext.stack = (Stack<JvmFrame>) stack.clone();
         HashMap<String, JvmObject> newHeap = new HashMap<>();
         for (String s : heap.keySet()) {
             newHeap.put(s, heap.get(s).copy());

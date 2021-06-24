@@ -25,6 +25,7 @@ import Checker.Extractor.CodeExtractorClassVisitor;
 import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmMethod;
+import JVM.JvmMethod.AccessFlags;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -122,6 +123,13 @@ public class TropicodeRunner implements Runnable {
 
             JvmClass klass = ctx.getClasses().get(entryClass);
             JvmMethod m = klass.getMethods().get(entryMethod);
+
+            if (!m.is(AccessFlags.ACC_STATIC)) {
+                log.error("Entry method must be static");
+                System.exit(1);
+            }
+
+            ctx.allocateFrame(null, m);
 
             InstructionGraph iGraph = m.getInstructionGraph();
 
