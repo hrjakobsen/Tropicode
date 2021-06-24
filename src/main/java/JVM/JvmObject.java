@@ -27,12 +27,22 @@ public class JvmObject {
 
     private final String type;
     private final String identifier;
+    private boolean tainted = false;
+
     Map<String, JvmValue> fields = new HashMap<>();
     private Typestate protocol;
 
     public JvmObject(String type, String identifier) {
         this.type = type;
         this.identifier = identifier;
+    }
+
+    public boolean isTainted() {
+        return tainted;
+    }
+
+    public void setTainted(boolean tainted) {
+        this.tainted = tainted;
     }
 
     public Map<String, JvmValue> getFields() {
