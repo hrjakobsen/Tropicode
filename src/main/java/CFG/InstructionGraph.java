@@ -23,6 +23,10 @@ import JVM.Instructions.JvmINVOKE;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLabel;
+import JVM.Instructions.JvmReturnOperation;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +48,7 @@ public class InstructionGraph {
     public static InstructionGraph fromList(List<JvmInstruction> instructions) {
         List<InstructionGraph> nodes = new ArrayList<>();
         InstructionGraph lastNode = new InstructionGraph(new BasicBlock());
+        InstructionGraph returnNode = null;
         nodes.add(lastNode);
         Map<String, List<InstructionGraph>> forwardJumps = new HashMap<>();
         Map<String, InstructionGraph> jumpTable = new HashMap<>();
@@ -70,7 +75,7 @@ public class InstructionGraph {
                 lastNode = new InstructionGraph(new BasicBlock());
                 nodes.add(lastNode);
             }
-            if (instruction instanceof JvmINVOKE) {
+            if (instruction instanceof JvmINVOKE || instruction instanceof JvmReturnOperation) {
                 lastNode = new InstructionGraph(new BasicBlock());
                 nodes.add(lastNode);
             }
@@ -92,6 +97,17 @@ public class InstructionGraph {
                     default:
                         break;
                 }
+            }
+            if (instruction instanceof JvmReturnOperation) {
+                if (returnNode == null) {
+                    returnNode = new InstructionGraph(new BasicBlock(instruction));
+                }
+                nodes.get(i)
+                        .getBlock()
+                        .getInstructions()
+                        .remove(nodes.get(i).getBlock().getInstructions().size() - 1);
+                nodes.get(i).getConnections().add(returnNode);
+                continue;
             }
             nodes.get(i).getConnections().add(nodes.get(i + 1));
         }
