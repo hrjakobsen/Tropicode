@@ -43,12 +43,12 @@ public class JvmOperationFIELDOPERATION extends JvmOperation {
             case PUTFIELD:
                 JvmValue value = ctx.pop();
                 JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
-                Map<String, JvmValue> fields = ctx.getObject(obj.getIdentifer()).getFields();
+                Map<String, JvmValue> fields = ctx.getObject(obj.getIdentifier()).getFields();
                 fields.put(fieldName, value);
                 break;
             case GETFIELD:
                 obj = (JvmValue.Reference) ctx.pop();
-                fields = ctx.getObject(obj.getIdentifer()).getFields();
+                fields = ctx.getObject(obj.getIdentifier()).getFields();
                 value = fields.get(fieldName);
                 assert value != null;
                 ctx.push(value);

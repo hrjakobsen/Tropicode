@@ -35,6 +35,6 @@ public class JvmAASTORE extends JvmOperation {
     @Override
     public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
-        log.warn("Losing track of obj " + obj.getIdentifer());
+        log.warn("Losing track of obj " + obj.getIdentifier());
     }
 }

@@ -47,7 +47,7 @@ public abstract class JvmValue implements Cloneable {
             return identifer.substring(0, 5);
         }
 
-        public String getIdentifer() {
+        public String getIdentifier() {
             return identifer;
         }
 
@@ -69,7 +69,7 @@ public abstract class JvmValue implements Cloneable {
         }
 
         @Override
-        public String getIdentifer() {
+        public String getIdentifier() {
             throw new UnsupportedOperationException("Trying to dereference unknown reference");
         }
 

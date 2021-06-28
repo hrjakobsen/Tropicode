@@ -28,6 +28,7 @@ import JVM.JvmObject;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
 import JVM.JvmValue.Reference;
+import JVM.JvmValue.UnknownReference;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -58,8 +59,8 @@ public class JvmINVOKE extends JvmOperation {
         for (int i = 0; i < numParams; i++) {
             JvmValue val = ctx.pop();
             args.add(val);
-            if (val instanceof Reference) {
-                if (ctx.getObject(((Reference) val).getIdentifer()).isTainted()) {
+            if (val instanceof Reference && !(val instanceof UnknownReference)) {
+                if (ctx.getObject(((Reference) val).getIdentifier()).isTainted()) {
                     shouldTaint = true;
                 }
             }
@@ -72,7 +73,7 @@ public class JvmINVOKE extends JvmOperation {
                             "Unchecked call to method {%s} on class {%s} on an unknown reference. Beware.",
                             this.name, this.owner));
         } else {
-            JvmObject object = ctx.getObject(objRef.getIdentifer());
+            JvmObject object = ctx.getObject(objRef.getIdentifier());
             if (shouldTaint) {
                 object.setTainted(true);
             }
@@ -80,7 +81,7 @@ public class JvmINVOKE extends JvmOperation {
                 args.forEach(
                         arg -> {
                             if (arg instanceof Reference) {
-                                ctx.getObject(((Reference) arg).getIdentifer()).setTainted(true);
+                                ctx.getObject(((Reference) arg).getIdentifier()).setTainted(true);
                             }
                         });
             }
@@ -93,13 +94,10 @@ public class JvmINVOKE extends JvmOperation {
                     throw new InvalidProtocolOperationException(object.getProtocol(), name.trim());
                 }
             }
-            if (object.isTainted()) {
+            if (object.isTainted() && ctx.getClasses().containsKey(this.owner)) {
                 log.debug("I should analyse " + this.owner + "/" + this.name + this.descriptor);
                 JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
                 ctx.allocateFrame(objRef, m, args);
-                // m.getInstructionGraph().show();
-                // analyser.checkGraph(m.getInstructionGraph(), ctx);
-                // TODO: Expand and analyse method body
             } else {
                 log.debug("I can skip " + this.owner + "/" + this.name + this.descriptor);
             }

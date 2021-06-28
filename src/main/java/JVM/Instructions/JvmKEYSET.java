@@ -35,7 +35,7 @@ public class JvmKEYSET extends JvmInstruction {
     @Override
     public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         JvmValue.Reference ref = (JvmValue.Reference) ctx.pop();
-        ctx.addKey(this.key, ref.getIdentifer());
+        ctx.addKey(this.key, ref.getIdentifier());
         ctx.push(ref);
     }
 
