@@ -62,4 +62,12 @@ public class BasicBlock {
             instruction.evaluateInstruction(ctx, analyser);
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "BasicBlock{%s, (%d total)}",
+                this.instructions.size() > 0 ? this.instructions.get(0).toString().trim() : "",
+                this.instructions.size());
+    }
 }

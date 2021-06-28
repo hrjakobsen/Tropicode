@@ -21,7 +21,9 @@ package CFG;
 
 import Checker.Exceptions.CheckerException;
 import JVM.JvmContex;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class GraphAnalyser {
     private InstructionGraph currentNode;
 
@@ -31,6 +33,7 @@ public class GraphAnalyser {
 
     public JvmContex checkGraph(InstructionGraph node, JvmContex ctx) {
         this.currentNode = node;
+        log.debug("Checking node " + currentNode.getBlock() + " in context " + ctx);
         JvmContex tmp = null;
         node.getBlock().evaluate(ctx, this);
         for (InstructionGraph next : node.getConnections()) {

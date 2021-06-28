@@ -57,4 +57,11 @@ public class JvmFrame implements Cloneable {
         copy.operandStack = (Stack<JvmValue>) operandStack.clone();
         return copy;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "JvmFrame{ %d items on stack, %d locals }",
+                this.operandStack.size(), this.locals.length);
+    }
 }
