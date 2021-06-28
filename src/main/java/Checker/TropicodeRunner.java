@@ -86,21 +86,6 @@ public class TropicodeRunner implements Runnable {
         System.exit(exitCode);
     }
 
-    private static boolean checkGraph(
-            InstructionGraph node, JvmContex jvmContex, HashSet<InstructionGraph> seen) {
-        if (seen.contains(node)) {
-            return true;
-        }
-        seen.add(node);
-        node.getBlock().evaluate(jvmContex, null);
-        for (InstructionGraph next : node.getConnections()) {
-            if (!checkGraph(next, jvmContex.copy(), seen)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private static JvmClass parseClass(String classname, Queue<String> classesToLoad)
             throws IOException {
         log.debug("Parsing " + classname);
