@@ -137,6 +137,10 @@ public class JvmMethod {
                 + '}';
     }
 
+    public boolean hasReturnValue() {
+        return !descriptor.endsWith("V");
+    }
+
     public static final class AccessFlags {
         public static final int ACC_PUBLIC = 0x0001;
         public static final int ACC_PRIVATE = 0x0002;

@@ -50,6 +50,10 @@ public class JvmFrame implements Cloneable {
         return null;
     }
 
+    public boolean hasReturnValue() {
+        return this.method.hasReturnValue();
+    }
+
     @Override
     protected Object clone() throws CloneNotSupportedException {
         JvmFrame copy = (JvmFrame) super.clone();

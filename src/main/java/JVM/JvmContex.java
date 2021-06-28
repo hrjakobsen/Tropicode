@@ -157,6 +157,9 @@ public class JvmContex {
     }
 
     public void deallocateFrame() {
-        this.frames.pop();
+        JvmFrame frame = this.frames.pop();
+        if (frame.hasReturnValue()) {
+            push(JvmValue.UNKNOWN);
+        }
     }
 }

@@ -52,7 +52,6 @@ public class JvmINVOKE extends JvmOperation {
 
     @Override
     public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
-        boolean hasOutput = !descriptor.endsWith("V");
         int numParams = countParameters(this.descriptor);
         boolean shouldTaint = false;
         List<JvmValue> args = new ArrayList<>();
@@ -101,9 +100,6 @@ public class JvmINVOKE extends JvmOperation {
             } else {
                 log.debug("I can skip " + this.owner + "/" + this.name + this.descriptor);
             }
-        }
-        if (hasOutput) {
-            ctx.push(JvmValue.UNKNOWN);
         }
     }
 
