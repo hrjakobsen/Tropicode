@@ -370,7 +370,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitLdcInsn(Object value) {
-        addOperation(new JvmLDC());
+        addOperation(new JvmLDC(value));
         super.visitLdcInsn(value);
     }
 
