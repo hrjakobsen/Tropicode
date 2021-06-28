@@ -20,6 +20,7 @@
 package JVM.Instructions;
 
 import CFG.GraphAnalyser;
+import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
@@ -54,9 +55,15 @@ public class JvmOperationFIELDOPERATION extends JvmOperation {
             case PUTSTATIC:
                 ctx.getClasses().get(owner).getStaticFields().put(fieldName, ctx.pop());
             case GETSTATIC:
-                value = ctx.getClasses().get(owner).getStaticFields().get(fieldName);
-                assert value != null;
-                ctx.push(value);
+                // TODO: Should handle non-indexed classes better than this
+                JvmClass klass = ctx.getClasses().get(owner);
+                if (klass == null) {
+                    ctx.push(JvmValue.UNKNOWN_REFERENCE);
+                } else {
+                    value = klass.getStaticFields().get(fieldName);
+                    assert value != null;
+                    ctx.push(value);
+                }
         }
     }
 }
