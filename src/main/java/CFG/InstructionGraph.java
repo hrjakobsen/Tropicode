@@ -54,12 +54,21 @@ public class InstructionGraph {
     private int depth = 0;
 
     public InstructionGraph(BasicBlock entry) {
+        this(entry, 0);
+    }
+
+    public InstructionGraph(BasicBlock entry, int depth) {
         this.block = entry;
+        this.depth = depth;
     }
 
     public static InstructionGraph fromList(List<JvmInstruction> instructions) {
+        return fromList(instructions, 0);
+    }
+
+    public static InstructionGraph fromList(List<JvmInstruction> instructions, int depth) {
         List<InstructionGraph> nodes = new ArrayList<>();
-        InstructionGraph lastNode = new InstructionGraph(new BasicBlock());
+        InstructionGraph lastNode = new InstructionGraph(new BasicBlock(), depth);
         InstructionGraph returnNode = null;
         nodes.add(lastNode);
         Map<String, List<InstructionGraph>> forwardJumps = new HashMap<>();
@@ -70,7 +79,7 @@ public class InstructionGraph {
         for (JvmInstruction instruction : instructions) {
             if (instruction instanceof JvmLabel) {
                 if (lastNode.getBlock().getInstructions().size() != 0) {
-                    lastNode = new InstructionGraph(new BasicBlock());
+                    lastNode = new InstructionGraph(new BasicBlock(), depth);
                     nodes.add(lastNode);
                 }
                 jumpTable.put(((JvmLabel) instruction).getLabel(), lastNode);
@@ -87,11 +96,11 @@ public class InstructionGraph {
                     }
                     forwardJumps.get(jmpInstruction.getLabel().toString()).add(lastNode);
                 }
-                lastNode = new InstructionGraph(new BasicBlock());
+                lastNode = new InstructionGraph(new BasicBlock(), depth);
                 nodes.add(lastNode);
             }
             if (instruction instanceof JvmINVOKE || instruction instanceof JvmReturnOperation) {
-                lastNode = new InstructionGraph(new BasicBlock());
+                lastNode = new InstructionGraph(new BasicBlock(), depth);
                 nodes.add(lastNode);
             }
             if (instruction instanceof JvmReturnOperation) {
@@ -120,7 +129,7 @@ public class InstructionGraph {
             }
             if (shouldCoalesceReturns && instruction instanceof JvmReturnOperation) {
                 if (returnNode == null) {
-                    returnNode = new InstructionGraph(new BasicBlock(instruction));
+                    returnNode = new InstructionGraph(new BasicBlock(instruction), depth);
                 }
                 nodes.get(i)
                         .getBlock()
@@ -251,9 +260,9 @@ public class InstructionGraph {
                 InstructionGraph callNode =
                         klass.getMethods()
                                 .get(call.getName() + call.getDescriptor())
-                                .getInstructionGraph();
+                                .getInstructionGraph(this.depth + 1);
                 callNode.setDepth(this.getDepth() + 1);
-                callNode.setConnections(this.connections);
+                callNode.insertFinalConnections(this.connections, new HashSet<>());
                 this.connections =
                         new ArrayList<>() {
                             {
@@ -264,6 +273,19 @@ public class InstructionGraph {
         }
         for (InstructionGraph child : getConnections()) {
             child.explodeGraphInternal(ctx, seen);
+        }
+    }
+
+    private void insertFinalConnections(
+            List<InstructionGraph> connections, HashSet<InstructionGraph> seen) {
+        if (seen.contains(this)) {
+            return;
+        }
+        seen.add(this);
+        if (this.connections.size() == 0) {
+            this.connections = connections;
+        } else {
+            this.connections.forEach(n -> n.insertFinalConnections(connections, seen));
         }
     }
 }
