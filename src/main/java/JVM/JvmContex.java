@@ -162,4 +162,13 @@ public class JvmContex {
             push(JvmValue.UNKNOWN);
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof JvmContex)) return false;
+        JvmContex other = (JvmContex) obj;
+        boolean frameEquality = other.frames.equals(frames);
+        boolean heapEquality = other.heap.equals(heap);
+        return frameEquality && heapEquality;
+    }
 }

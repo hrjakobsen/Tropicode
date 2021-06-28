@@ -71,4 +71,11 @@ public class JvmObject {
 
         return newObj;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof JvmObject)) return false;
+        JvmObject other = (JvmObject) obj;
+        return this.protocol.equals(other.protocol) && this.fields.equals(other.fields);
+    }
 }
