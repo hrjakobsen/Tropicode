@@ -26,6 +26,8 @@ import JVM.Instructions.JvmLabel;
 import JVM.Instructions.JvmReturnOperation;
 import JVM.JvmClass;
 import JVM.JvmContex;
+import JVM.JvmMethod;
+import JVM.JvmOpCode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,6 +69,7 @@ public class InstructionGraph {
     }
 
     public static InstructionGraph fromList(List<JvmInstruction> instructions, int depth) {
+        if (instructions.size() == 0) instructions.add(new JvmReturnOperation(JvmOpCode.RETURN));
         List<InstructionGraph> nodes = new ArrayList<>();
         InstructionGraph lastNode = new InstructionGraph(new BasicBlock(), depth);
         InstructionGraph returnNode = null;
@@ -257,18 +260,18 @@ public class InstructionGraph {
             JvmINVOKE call = (JvmINVOKE) block.getLastInstruction();
             JvmClass klass = ctx.getClasses().get(call.getOwner());
             if (klass != null) {
-                InstructionGraph callNode =
-                        klass.getMethods()
-                                .get(call.getName() + call.getDescriptor())
-                                .getInstructionGraph(this.depth + 1);
-                callNode.setDepth(this.getDepth() + 1);
-                callNode.insertFinalConnections(this.connections, new HashSet<>());
-                this.connections =
-                        new ArrayList<>() {
-                            {
-                                add(callNode);
-                            }
-                        };
+                JvmMethod method = klass.getMethods().get(call.getName() + call.getDescriptor());
+                if (method != null) {
+                    InstructionGraph callNode = method.getInstructionGraph(this.depth + 1);
+                    callNode.setDepth(this.getDepth() + 1);
+                    callNode.insertFinalConnections(this.connections, new HashSet<>());
+                    this.connections =
+                            new ArrayList<>() {
+                                {
+                                    add(callNode);
+                                }
+                            };
+                }
             }
         }
         for (InstructionGraph child : getConnections()) {
