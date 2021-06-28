@@ -19,16 +19,20 @@
 
 package JVM;
 
+import JVM.JvmMethod.AccessFlags;
+import JVM.JvmValue.Reference;
 import java.util.Stack;
 
-public class JvmFrame {
+public class JvmFrame implements Cloneable {
     Stack<JvmValue> operandStack = new Stack<>();
     JvmValue[] locals;
-    JvmObject callee;
+    JvmMethod method;
+    boolean hasInstance;
 
-    public JvmFrame(JvmObject callee, int localsSize) {
-        this.callee = callee;
-        this.locals = new JvmValue[localsSize];
+    public JvmFrame(JvmMethod m) {
+        this.method = m;
+        this.locals = new JvmValue[m.getNumberOfLocalVariables() + 1];
+        this.hasInstance = !m.is(AccessFlags.ACC_STATIC);
     }
 
     public Stack<JvmValue> getStack() {
@@ -39,13 +43,16 @@ public class JvmFrame {
         return locals;
     }
 
-    public JvmObject getCallee() {
-        return callee;
+    public JvmValue.Reference getCalleeReference() {
+        if (hasInstance) {
+            return (Reference) this.locals[0];
+        }
+        return null;
     }
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        JvmFrame copy = new JvmFrame(callee.copy(), this.locals.length);
+        JvmFrame copy = (JvmFrame) super.clone();
         copy.locals = locals.clone();
         copy.operandStack = (Stack<JvmValue>) operandStack.clone();
         return copy;

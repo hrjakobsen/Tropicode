@@ -52,6 +52,9 @@ public class InstructionGraph {
         nodes.add(lastNode);
         Map<String, List<InstructionGraph>> forwardJumps = new HashMap<>();
         Map<String, InstructionGraph> jumpTable = new HashMap<>();
+        int returns = 0;
+        boolean shouldCoalesceReturns = false;
+
         for (JvmInstruction instruction : instructions) {
             if (instruction instanceof JvmLabel) {
                 if (lastNode.getBlock().getInstructions().size() != 0) {
@@ -79,6 +82,11 @@ public class InstructionGraph {
                 lastNode = new InstructionGraph(new BasicBlock());
                 nodes.add(lastNode);
             }
+            if (instruction instanceof JvmReturnOperation) {
+                if (++returns > 1) {
+                    shouldCoalesceReturns = true;
+                }
+            }
         }
 
         for (Map.Entry<String, List<InstructionGraph>> entry : forwardJumps.entrySet()) {
@@ -98,7 +106,7 @@ public class InstructionGraph {
                         break;
                 }
             }
-            if (instruction instanceof JvmReturnOperation) {
+            if (shouldCoalesceReturns && instruction instanceof JvmReturnOperation) {
                 if (returnNode == null) {
                     returnNode = new InstructionGraph(new BasicBlock(instruction));
                 }
@@ -109,7 +117,10 @@ public class InstructionGraph {
                 nodes.get(i).getConnections().add(returnNode);
                 continue;
             }
-            nodes.get(i).getConnections().add(nodes.get(i + 1));
+            if (!(i == nodes.size() - 2
+                    && nodes.get(i + 1).getBlock().getInstructions().size() == 0)) {
+                nodes.get(i).getConnections().add(nodes.get(i + 1));
+            }
         }
 
         return nodes.get(0);
@@ -193,6 +204,16 @@ public class InstructionGraph {
 
         for (InstructionGraph connection : this.getConnections()) {
             connection.dump_internal(seen);
+        }
+    }
+
+    public void show() {
+        try {
+            Path tempFile = Files.createTempFile(null, null);
+            Files.writeString(tempFile, this.getDotGraph());
+            Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
+        } catch (IOException ex) {
+            this.dump();
         }
     }
 }

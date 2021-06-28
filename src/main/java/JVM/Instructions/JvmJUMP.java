@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import Checker.Exceptions.CheckerException;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
@@ -42,7 +43,7 @@ public class JvmJUMP extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         for (int i = 0; i < stackValues; i++) {
             ctx.pop();
         }

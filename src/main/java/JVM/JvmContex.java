@@ -19,18 +19,21 @@
 
 package JVM;
 
+import JVM.JvmMethod.AccessFlags;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class JvmContex {
 
     private final Map<String, JvmArray> arrays = new HashMap<>();
-    private Stack<JvmFrame> stack = new Stack<>();
+    private Stack<JvmFrame> frames = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
     private Map<String, String> keys = new HashMap<>();
-    private JvmValue[] locals = new JvmValue[65536];
     private Map<String, JvmClass> classes = new HashMap<>();
     private Map<String, JvmHeapSnapshot> snapshots = new HashMap<>();
 
@@ -38,12 +41,20 @@ public class JvmContex {
         return classes;
     }
 
-    private JvmFrame getCurrentFrame() {
-        return stack.peek();
+    public JvmFrame getCurrentFrame() {
+        return frames.peek();
     }
 
-    public void allocateFrame(JvmObject callee, JvmMethod method) {
-        this.stack.push(new JvmFrame(callee, method.getNumberOfLocalVariables()));
+    public void allocateFrame(JvmValue.Reference objRef, JvmMethod method, List<JvmValue> args) {
+        this.frames.push(new JvmFrame(method));
+        int startIndex = 0;
+        if (!method.is(AccessFlags.ACC_STATIC)) {
+            startIndex = 1;
+            storeLocal(0, objRef);
+        }
+        for (int i = 0; i < args.size(); i++) {
+            storeLocal(i + startIndex, args.get(i));
+        }
     }
 
     public void push(JvmValue... values) {
@@ -53,11 +64,11 @@ public class JvmContex {
     }
 
     public void storeLocal(int i, JvmValue val) {
-        locals[i] = val;
+        getCurrentFrame().getLocals()[i] = val;
     }
 
     public JvmValue getLocal(int i) {
-        return locals[i];
+        return getCurrentFrame().getLocals()[i];
     }
 
     public JvmValue pop() {
@@ -92,7 +103,7 @@ public class JvmContex {
 
     @Override
     public String toString() {
-        return "JvmContex{" + stack.toString() + "}";
+        return "JvmContex{" + frames.toString() + "}";
     }
 
     public void takeSnapshot(String label) {
@@ -114,8 +125,7 @@ public class JvmContex {
 
     public JvmContex copy() {
         JvmContex newContext = new JvmContex();
-        newContext.locals = locals.clone();
-        newContext.stack = (Stack<JvmFrame>) stack.clone();
+        newContext.frames = (Stack<JvmFrame>) frames.clone();
         HashMap<String, JvmObject> newHeap = new HashMap<>();
         for (String s : heap.keySet()) {
             newHeap.put(s, heap.get(s).copy());
@@ -139,5 +149,14 @@ public class JvmContex {
 
     public String getKey(String key) {
         return keys.get(key);
+    }
+
+    public JvmMethod findMethod(String owner, String name, String descriptor) {
+        JvmClass klass = this.classes.get(owner);
+        return klass.getMethods().get(name + descriptor);
+    }
+
+    public void deallocateFrame() {
+        this.frames.pop();
     }
 }

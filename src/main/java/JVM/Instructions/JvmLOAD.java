@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 
@@ -32,7 +33,7 @@ public class JvmLOAD extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         ctx.push(ctx.getLocal(index));
     }
 }

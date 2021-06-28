@@ -17,22 +17,31 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package JVM.Instructions;
+package CFG;
 
-import CFG.GraphAnalyser;
+import Checker.Exceptions.CheckerException;
 import JVM.JvmContex;
 
-public abstract class JvmInstruction {
+public class GraphAnalyser {
+    private InstructionGraph currentNode;
 
-    private int lineNumber = -1;
-
-    public abstract void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser);
-
-    public int getLineNumber() {
-        return lineNumber;
+    public InstructionGraph getCurrentNode() {
+        return currentNode;
     }
 
-    public void setLineNumber(int lineNumber) {
-        this.lineNumber = lineNumber;
+    public JvmContex checkGraph(InstructionGraph node, JvmContex ctx) {
+        this.currentNode = node;
+        JvmContex tmp = null;
+        node.getBlock().evaluate(ctx, this);
+        for (InstructionGraph next : node.getConnections()) {
+            JvmContex nextCtx = checkGraph(next, ctx.copy());
+            if (tmp == null) {
+                tmp = nextCtx;
+            }
+            if (!tmp.equals(nextCtx)) {
+                throw new CheckerException("Invalid context");
+            }
+        }
+        return tmp == null ? ctx : tmp;
     }
 }

@@ -19,9 +19,11 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import Checker.Exceptions.CheckerException;
 import Checker.Exceptions.InvalidProtocolOperationException;
 import JVM.JvmContex;
+import JVM.JvmMethod;
 import JVM.JvmObject;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
@@ -48,17 +50,17 @@ public class JvmINVOKE extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         boolean hasOutput = !descriptor.endsWith("V");
         int numParams = countParameters(this.descriptor);
         boolean shouldTaint = false;
-        List<Reference> object_args = new ArrayList<>();
+        List<JvmValue> args = new ArrayList<>();
         for (int i = 0; i < numParams; i++) {
             JvmValue val = ctx.pop();
+            args.add(val);
             if (val instanceof Reference) {
                 if (ctx.getObject(((Reference) val).getIdentifer()).isTainted()) {
                     shouldTaint = true;
-                    object_args.add((Reference) val);
                 }
             }
         }
@@ -75,9 +77,15 @@ public class JvmINVOKE extends JvmOperation {
                 object.setTainted(true);
             }
             if (object.isTainted()) {
-                object_args.forEach(arg -> ctx.getObject(arg.getIdentifer()).setTainted(true));
+                args.forEach(
+                        arg -> {
+                            if (arg instanceof Reference) {
+                                ctx.getObject(((Reference) arg).getIdentifer()).setTainted(true);
+                            }
+                        });
             }
-            if (object.getProtocol() != null) {
+            if (object.getProtocol() != null
+                    && ctx.getCurrentFrame().getCalleeReference() != objRef) {
                 // perform typestate check
                 if (object.getProtocol().isAllowed(name.trim())) {
                     object.setProtocol(object.getProtocol().perform(name));
@@ -87,6 +95,10 @@ public class JvmINVOKE extends JvmOperation {
             }
             if (object.isTainted()) {
                 log.debug("I should analyse " + this.owner + "/" + this.name + this.descriptor);
+                JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
+                ctx.allocateFrame(objRef, m, args);
+                m.getInstructionGraph().show();
+                analyser.checkGraph(m.getInstructionGraph(), ctx);
                 // TODO: Expand and analyse method body
             } else {
                 log.debug("I can skip " + this.owner + "/" + this.name + this.descriptor);

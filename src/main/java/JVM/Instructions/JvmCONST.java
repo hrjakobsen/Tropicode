@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
@@ -30,7 +31,7 @@ public class JvmCONST extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         ctx.push(JvmValue.UNKNOWN);
     }
 }

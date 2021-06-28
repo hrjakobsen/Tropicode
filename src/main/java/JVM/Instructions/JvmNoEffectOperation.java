@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 
@@ -29,7 +30,7 @@ public class JvmNoEffectOperation extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         // Nothing should happen to the context
     }
 }

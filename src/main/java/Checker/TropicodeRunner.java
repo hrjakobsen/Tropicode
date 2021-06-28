@@ -19,6 +19,7 @@
 
 package Checker;
 
+import CFG.GraphAnalyser;
 import CFG.InstructionGraph;
 import Checker.Exceptions.CheckerException;
 import Checker.Extractor.CodeExtractorClassVisitor;
@@ -27,9 +28,8 @@ import JVM.JvmContex;
 import JVM.JvmMethod;
 import JVM.JvmMethod.AccessFlags;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
@@ -67,10 +67,17 @@ public class TropicodeRunner implements Runnable {
     private static final Set<String> ignoreDependencies =
             new HashSet<>() {
                 {
-                    add("java.lang.Object");
-                    add("java.lang.System");
-                    add("java.io.PrintStream");
-                    add("java.lang.Enum");
+                    add("sun/security/.*");
+                    add("java/lang/invoke/.*");
+                    add("java/nio/.*");
+                    add("sun/nio/.*");
+                    add("java/util/.*");
+                    add("java/util/concurrent/.*");
+                    add("java/security/.*");
+                    add("javax/crypto/.*");
+                    add("jdk/internal/.*");
+                    add("java/lang/[^O].*");
+                    add("java/io/.*");
                 }
             };
 
@@ -85,7 +92,7 @@ public class TropicodeRunner implements Runnable {
             return true;
         }
         seen.add(node);
-        node.getBlock().evaluate(jvmContex);
+        node.getBlock().evaluate(jvmContex, null);
         for (InstructionGraph next : node.getConnections()) {
             if (!checkGraph(next, jvmContex.copy(), seen)) {
                 return false;
@@ -101,8 +108,15 @@ public class TropicodeRunner implements Runnable {
         CodeExtractorClassVisitor cv = new CodeExtractorClassVisitor();
         classReader.accept(cv, ClassReader.SKIP_DEBUG);
         JvmClass klass = cv.getJvmClass();
-        if (!ignoreDependencies.contains(classname)) {
-            classesToLoad.addAll(cv.getClassDependencies());
+        outer:
+        for (String dependency : cv.getClassDependencies()) {
+            for (String pattern : TropicodeRunner.ignoreDependencies) {
+                if (dependency.matches(pattern)) {
+                    continue outer;
+                }
+            }
+            classesToLoad.add(dependency);
+            log.debug("Adding " + dependency);
         }
         return klass;
     }
@@ -114,7 +128,6 @@ public class TropicodeRunner implements Runnable {
             classesToLoad.add(this.entryClass);
 
             JvmContex ctx = new JvmContex();
-
             while (!classesToLoad.isEmpty()) {
                 String nextClass = classesToLoad.poll();
                 String compiledClassName = nextClass.replaceAll("/", ".");
@@ -133,20 +146,14 @@ public class TropicodeRunner implements Runnable {
                 System.exit(1);
             }
 
-            ctx.allocateFrame(null, m);
+            ctx.allocateFrame(null, m, new ArrayList<>());
 
             InstructionGraph iGraph = m.getInstructionGraph();
 
             if (displayGraph) {
-                try {
-                    Path tempFile = Files.createTempFile(null, null);
-                    Files.writeString(tempFile, iGraph.getDotGraph());
-                    Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
-                } catch (IOException ex) {
-                    iGraph.dump();
-                }
+                iGraph.show();
             }
-            checkGraph(iGraph, ctx, new HashSet<>());
+            new GraphAnalyser().checkGraph(iGraph, ctx);
         } catch (CheckerException | IOException ex) {
             System.err.println(ex);
         }

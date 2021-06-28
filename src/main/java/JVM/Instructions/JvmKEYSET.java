@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import JVM.JvmContex;
 import JVM.JvmValue;
 
@@ -32,7 +33,7 @@ public class JvmKEYSET extends JvmInstruction {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         JvmValue.Reference ref = (JvmValue.Reference) ctx.pop();
         ctx.addKey(this.key, ref.getIdentifer());
         ctx.push(ref);

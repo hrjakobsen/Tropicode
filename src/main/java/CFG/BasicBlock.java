@@ -22,6 +22,7 @@ package CFG;
 import JVM.Instructions.JvmInstruction;
 import JVM.JvmContex;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 
@@ -29,6 +30,12 @@ import lombok.extern.log4j.Log4j2;
 public class BasicBlock {
 
     List<JvmInstruction> instructions = new ArrayList<>();
+
+    public BasicBlock() {}
+
+    public BasicBlock(JvmInstruction... instructions) {
+        this.instructions = Arrays.asList(instructions);
+    }
 
     public List<JvmInstruction> getInstructions() {
         return instructions;
@@ -49,9 +56,10 @@ public class BasicBlock {
         return this.instructions.get(this.instructions.size() - 1);
     }
 
-    public void evaluate(JvmContex ctx) {
+    public void evaluate(JvmContex ctx, GraphAnalyser analyser) {
         for (JvmInstruction instruction : this.getInstructions()) {
-            instruction.evaluateInstruction(ctx);
+            log.info("Now checking: " + instruction.toString());
+            instruction.evaluateInstruction(ctx, analyser);
         }
     }
 }

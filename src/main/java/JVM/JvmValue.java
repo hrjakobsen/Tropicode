@@ -21,7 +21,7 @@ package JVM;
 
 import Checker.Exceptions.UnsupportedOperationException;
 
-public abstract class JvmValue {
+public abstract class JvmValue implements Cloneable {
 
     public static final JvmValue UNKNOWN = new UnknownByte();
     public static final JvmValue UNKNOWN_REFERENCE = new UnknownReference();
@@ -34,7 +34,7 @@ public abstract class JvmValue {
         }
     }
 
-    public static class Reference extends JvmValue {
+    public static class Reference extends JvmValue implements Cloneable {
 
         protected final String identifer;
 
@@ -50,9 +50,14 @@ public abstract class JvmValue {
         public String getIdentifer() {
             return identifer;
         }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return super.clone();
+        }
     }
 
-    public static class UnknownReference extends Reference {
+    public static class UnknownReference extends Reference implements Cloneable {
 
         public UnknownReference() {
             super("UNKNOWN");
@@ -66,6 +71,11 @@ public abstract class JvmValue {
         @Override
         public String getIdentifer() {
             throw new UnsupportedOperationException("Trying to dereference unknown reference");
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return super.clone();
         }
     }
 }

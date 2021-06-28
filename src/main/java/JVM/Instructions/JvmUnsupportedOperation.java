@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import Checker.Exceptions.UnsupportedOperationException;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
@@ -30,7 +31,7 @@ public class JvmUnsupportedOperation extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         throw new UnsupportedOperationException(opcode + " has not been implemented");
     }
 }

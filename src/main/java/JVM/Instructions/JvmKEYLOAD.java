@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import JVM.JvmContex;
 import JVM.JvmValue;
 import lombok.extern.log4j.Log4j2;
@@ -34,7 +35,7 @@ public class JvmKEYLOAD extends JvmInstruction {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         ctx.pop();
         String identifier = ctx.getKey(this.key);
         log.warn("Restoring unsafe access to " + identifier);

@@ -19,6 +19,7 @@
 
 package JVM.Instructions;
 
+import CFG.GraphAnalyser;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 
@@ -29,7 +30,7 @@ public class JvmReturnOperation extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx) {
-        // TODO: 07/03/2021 Stack cleanup if needed
+    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
+        ctx.deallocateFrame();
     }
 }
