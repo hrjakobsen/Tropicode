@@ -213,6 +213,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case POP:
             case POP2:
                 addOperation(new JvmPOP());
+                break;
             case IRETURN:
             case LRETURN:
             case FRETURN:
