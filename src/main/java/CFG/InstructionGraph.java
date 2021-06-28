@@ -43,6 +43,16 @@ public class InstructionGraph {
     private BasicBlock block;
     private List<InstructionGraph> connections = new ArrayList<>();
 
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    private int depth = 0;
+
     public InstructionGraph(BasicBlock entry) {
         this.block = entry;
     }
@@ -158,7 +168,15 @@ public class InstructionGraph {
             return;
         }
         seen.add(this);
-        sb.append(getNodeName()).append("[shape=box,label=\"");
+        String hex = Integer.toHexString(Math.max(0, Math.min(255, 255 - this.depth * 20)));
+        if (hex.length() < 2) {
+            hex = "0" + hex;
+        }
+        sb.append(getNodeName())
+                .append(
+                        String.format(
+                                "[fillcolor=\"#%s%s%s\",style=filled,shape=box,label=\"",
+                                hex, hex, hex));
         appendNodeLabel(sb);
         sb.append("\"];\n");
         for (InstructionGraph next : this.getConnections()) {
@@ -234,6 +252,7 @@ public class InstructionGraph {
                         klass.getMethods()
                                 .get(call.getName() + call.getDescriptor())
                                 .getInstructionGraph();
+                callNode.setDepth(this.getDepth() + 1);
                 callNode.setConnections(this.connections);
                 this.connections =
                         new ArrayList<>() {
