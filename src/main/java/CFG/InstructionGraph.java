@@ -24,6 +24,8 @@ import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLabel;
 import JVM.Instructions.JvmReturnOperation;
+import JVM.JvmClass;
+import JVM.JvmContex;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -214,6 +216,35 @@ public class InstructionGraph {
             Runtime.getRuntime().exec("xdot " + tempFile.toAbsolutePath());
         } catch (IOException ex) {
             this.dump();
+        }
+    }
+
+    public void explodeGraph(JvmContex ctx) {
+        explodeGraphInternal(ctx, new HashSet<>());
+    }
+
+    private void explodeGraphInternal(JvmContex ctx, HashSet<InstructionGraph> seen) {
+        if (seen.contains(this)) return;
+        seen.add(this);
+        if (block.getLastInstruction() instanceof JvmINVOKE) {
+            JvmINVOKE call = (JvmINVOKE) block.getLastInstruction();
+            JvmClass klass = ctx.getClasses().get(call.getOwner());
+            if (klass != null) {
+                InstructionGraph callNode =
+                        klass.getMethods()
+                                .get(call.getName() + call.getDescriptor())
+                                .getInstructionGraph();
+                callNode.setConnections(this.connections);
+                this.connections =
+                        new ArrayList<>() {
+                            {
+                                add(callNode);
+                            }
+                        };
+            }
+        }
+        for (InstructionGraph child : getConnections()) {
+            child.explodeGraphInternal(ctx, seen);
         }
     }
 }

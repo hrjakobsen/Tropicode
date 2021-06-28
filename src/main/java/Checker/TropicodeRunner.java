@@ -149,6 +149,7 @@ public class TropicodeRunner implements Runnable {
             ctx.allocateFrame(null, m, new ArrayList<>());
 
             InstructionGraph iGraph = m.getInstructionGraph();
+            iGraph.explodeGraph(ctx);
 
             if (displayGraph) {
                 iGraph.show();

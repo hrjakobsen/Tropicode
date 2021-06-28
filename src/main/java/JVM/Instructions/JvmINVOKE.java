@@ -97,8 +97,8 @@ public class JvmINVOKE extends JvmOperation {
                 log.debug("I should analyse " + this.owner + "/" + this.name + this.descriptor);
                 JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
                 ctx.allocateFrame(objRef, m, args);
-                m.getInstructionGraph().show();
-                analyser.checkGraph(m.getInstructionGraph(), ctx);
+                // m.getInstructionGraph().show();
+                // analyser.checkGraph(m.getInstructionGraph(), ctx);
                 // TODO: Expand and analyse method body
             } else {
                 log.debug("I can skip " + this.owner + "/" + this.name + this.descriptor);
@@ -119,6 +119,22 @@ public class JvmINVOKE extends JvmOperation {
                 + name
                 + descriptor
                 + (isInterface ? "(interface)" : "");
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescriptor() {
+        return descriptor;
+    }
+
+    public boolean isInterface() {
+        return isInterface;
     }
 
     private int countParameters(String descriptor) {
