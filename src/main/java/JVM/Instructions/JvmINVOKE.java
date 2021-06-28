@@ -94,11 +94,8 @@ public class JvmINVOKE extends JvmOperation {
                 }
             }
             if (object.isTainted() && ctx.getClasses().containsKey(this.owner)) {
-                log.debug("I should analyse " + this.owner + "/" + this.name + this.descriptor);
                 JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
                 ctx.allocateFrame(objRef, m, args);
-            } else {
-                log.debug("I can skip " + this.owner + "/" + this.name + this.descriptor);
             }
         }
     }

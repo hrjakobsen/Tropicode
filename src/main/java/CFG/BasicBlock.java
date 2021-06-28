@@ -58,7 +58,6 @@ public class BasicBlock {
 
     public void evaluate(JvmContex ctx, GraphAnalyser analyser) {
         for (JvmInstruction instruction : this.getInstructions()) {
-            log.info("Now checking: " + instruction.toString());
             instruction.evaluateInstruction(ctx, analyser);
         }
     }
