@@ -24,46 +24,31 @@ import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
-import java.util.Map;
 
-public class JvmOperationFIELDOPERATION extends JvmOperation {
-
-    private final String owner;
-    private final String fieldName;
-
-    public JvmOperationFIELDOPERATION(JvmOpCode opcode, String owner, String fieldName) {
-        super(opcode);
-        this.owner = owner;
-        this.fieldName = fieldName;
+public class JvmStaticFieldOperation extends JvmFieldOperation {
+    public JvmStaticFieldOperation(JvmOpCode opcode, String owner, String fieldName) {
+        super(opcode, owner, fieldName);
     }
 
     @Override
     public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         switch (this.opcode) {
-            case PUTFIELD:
-                JvmValue value = ctx.pop();
-                JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
-                Map<String, JvmValue> fields = ctx.getObject(obj.getIdentifier()).getFields();
-                fields.put(fieldName, value);
-                break;
-            case GETFIELD:
-                obj = (JvmValue.Reference) ctx.pop();
-                fields = ctx.getObject(obj.getIdentifier()).getFields();
-                value = fields.get(fieldName);
-                assert value != null;
-                ctx.push(value);
             case PUTSTATIC:
                 ctx.getClasses().get(owner).getStaticFields().put(fieldName, ctx.pop());
+                break;
             case GETSTATIC:
                 // TODO: Should handle non-indexed classes better than this
                 JvmClass klass = ctx.getClasses().get(owner);
                 if (klass == null) {
                     ctx.push(JvmValue.UNKNOWN_REFERENCE);
                 } else {
-                    value = klass.getStaticFields().get(fieldName);
+                    JvmValue value = klass.getStaticFields().get(fieldName);
                     assert value != null;
                     ctx.push(value);
                 }
+                break;
+            default:
+                throw new IllegalStateException();
         }
     }
 }

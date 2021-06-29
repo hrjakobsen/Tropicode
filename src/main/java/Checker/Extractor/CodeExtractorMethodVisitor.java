@@ -28,6 +28,7 @@ import JVM.Instructions.JvmBinaryOperation;
 import JVM.Instructions.JvmCONST;
 import JVM.Instructions.JvmDUP;
 import JVM.Instructions.JvmINVOKE;
+import JVM.Instructions.JvmInstanceFieldOperation;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJSR;
 import JVM.Instructions.JvmJUMP;
@@ -36,11 +37,11 @@ import JVM.Instructions.JvmLOAD;
 import JVM.Instructions.JvmLabel;
 import JVM.Instructions.JvmNEW;
 import JVM.Instructions.JvmNoEffectOperation;
-import JVM.Instructions.JvmOperationFIELDOPERATION;
 import JVM.Instructions.JvmPOP;
 import JVM.Instructions.JvmReturnOperation;
 import JVM.Instructions.JvmSTORE;
 import JVM.Instructions.JvmSWAP;
+import JVM.Instructions.JvmStaticFieldOperation;
 import JVM.Instructions.JvmUnaryOperation;
 import JVM.Instructions.JvmUnsupportedOperation;
 import JVM.JvmMethod;
@@ -294,10 +295,14 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
         switch (jvmop) {
             case GETSTATIC:
             case PUTSTATIC:
+                addOperation(new JvmStaticFieldOperation(jvmop, owner, name));
+                break;
             case GETFIELD:
             case PUTFIELD:
-                addOperation(new JvmOperationFIELDOPERATION(jvmop, owner, name));
+                addOperation(new JvmInstanceFieldOperation(jvmop, owner, name));
                 break;
+            default:
+                throw new IllegalStateException();
         }
         super.visitFieldInsn(opcode, owner, name, descriptor);
     }

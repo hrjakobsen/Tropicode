@@ -23,7 +23,9 @@ import JVM.Instructions.JvmINVOKE;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLabel;
+import JVM.Instructions.JvmNEW;
 import JVM.Instructions.JvmReturnOperation;
+import JVM.Instructions.JvmStaticFieldOperation;
 import JVM.JvmClass;
 import JVM.JvmContex;
 import JVM.JvmMethod;
@@ -102,7 +104,10 @@ public class InstructionGraph {
                 lastNode = new InstructionGraph(new BasicBlock(), depth);
                 nodes.add(lastNode);
             }
-            if (instruction instanceof JvmINVOKE || instruction instanceof JvmReturnOperation) {
+            if (instruction instanceof JvmINVOKE
+                    || instruction instanceof JvmReturnOperation
+                    || instruction instanceof JvmStaticFieldOperation
+                    || instruction instanceof JvmNEW) {
                 lastNode = new InstructionGraph(new BasicBlock(), depth);
                 nodes.add(lastNode);
             }
