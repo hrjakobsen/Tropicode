@@ -116,6 +116,10 @@ public class JvmClass {
         this.protocol = protocol;
     }
 
+    public boolean hasStaticConstructor() {
+        return this.methods.containsKey("<clinit>()V");
+    }
+
     public static final class AccessFlags {
         public static final int ACC_PUBLIC = 0x0001;
         public static final int ACC_FINAL = 0x0010;

@@ -33,4 +33,9 @@ public class JvmReturnOperation extends JvmOperation {
     public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
         ctx.deallocateFrame();
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

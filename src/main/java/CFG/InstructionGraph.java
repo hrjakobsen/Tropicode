@@ -19,11 +19,13 @@
 
 package CFG;
 
+import JVM.Instructions.ClassReference;
 import JVM.Instructions.JvmINVOKE;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLabel;
 import JVM.Instructions.JvmNEW;
+import JVM.Instructions.JvmOperation;
 import JVM.Instructions.JvmReturnOperation;
 import JVM.Instructions.JvmStaticFieldOperation;
 import JVM.JvmClass;
@@ -255,12 +257,14 @@ public class InstructionGraph {
     }
 
     public void explodeGraph(JvmContex ctx) {
-        explodeGraphInternal(ctx, new HashSet<>());
+        explodeGraphInternal(ctx, new HashSet<>(), new HashSet<>());
     }
 
-    private void explodeGraphInternal(JvmContex ctx, HashSet<InstructionGraph> seen) {
+    private void explodeGraphInternal(
+            JvmContex ctx, HashSet<InstructionGraph> seen, HashSet<JvmClass> initialised) {
         if (seen.contains(this)) return;
         seen.add(this);
+
         if (block.getLastInstruction() instanceof JvmINVOKE) {
             JvmINVOKE call = (JvmINVOKE) block.getLastInstruction();
             JvmClass klass = ctx.getClasses().get(call.getOwner());
@@ -279,9 +283,62 @@ public class InstructionGraph {
                 }
             }
         }
-        for (InstructionGraph child : getConnections()) {
-            child.explodeGraphInternal(ctx, seen);
+
+        if (shouldInitialiseStaticMembers(ctx, block.getLastInstruction(), initialised)) {
+            String className = ((ClassReference) block.getLastInstruction()).getClassReference();
+            JvmClass klass = ctx.getClasses().get(className);
+            if (klass != null) {
+                InstructionGraph fakeCallNode =
+                        new InstructionGraph(
+                                new BasicBlock(
+                                        new JvmINVOKE(
+                                                JvmOpCode.INVOKESTATIC,
+                                                className,
+                                                "<clinit>",
+                                                "()V",
+                                                false)));
+                fakeCallNode.setDepth(depth);
+                InstructionGraph staticConstructor =
+                        klass.getMethods().get("<clinit>()V").getInstructionGraph(depth + 1);
+                staticConstructor.setDepth(depth + 1);
+                staticConstructor.insertFinalConnections(this.connections, new HashSet<>());
+                fakeCallNode.setConnections(
+                        new ArrayList<>() {
+                            {
+                                add(staticConstructor);
+                            }
+                        });
+                this.connections =
+                        new ArrayList<>() {
+                            {
+                                add(fakeCallNode);
+                            }
+                        };
+                staticConstructor.explodeGraphInternal(ctx, seen, initialised);
+                return;
+            }
         }
+        for (InstructionGraph child : getConnections()) {
+            child.explodeGraphInternal(ctx, seen, initialised);
+        }
+    }
+
+    private static boolean shouldInitialiseStaticMembers(
+            JvmContex ctx, JvmInstruction instruction, HashSet<JvmClass> initialised) {
+        if (!(instruction instanceof JvmOperation)) return false;
+        JvmOperation operation = (JvmOperation) instruction;
+        if (operation instanceof ClassReference) {
+            JvmClass klass = ctx.getClasses().get(((ClassReference) operation).getClassReference());
+            if (klass == null) {
+                return false;
+            }
+            if (initialised.contains(klass)) {
+                return false;
+            }
+            initialised.add(klass);
+            return klass.hasStaticConstructor();
+        }
+        return false;
     }
 
     private void insertFinalConnections(

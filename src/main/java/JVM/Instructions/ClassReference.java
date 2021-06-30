@@ -19,35 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
-import JVM.JvmContex;
-import JVM.JvmOpCode;
-
-public class JvmNEW extends JvmOperation implements ClassReference {
-
-    private final String type;
-
-    public JvmNEW(String type) {
-        super(JvmOpCode.NEW);
-        this.type = type;
-    }
-
-    @Override
-    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
-        ctx.push(ctx.allocateObject(type));
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    @Override
-    public String toString() {
-        return "    " + opcode.toString() + " " + type;
-    }
-
-    @Override
-    public String getClassReference() {
-        return this.getType();
-    }
+public interface ClassReference {
+    String getClassReference();
 }

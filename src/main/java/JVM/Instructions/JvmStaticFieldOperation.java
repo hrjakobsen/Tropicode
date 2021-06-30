@@ -25,7 +25,7 @@ import JVM.JvmContex;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
 
-public class JvmStaticFieldOperation extends JvmFieldOperation {
+public class JvmStaticFieldOperation extends JvmFieldOperation implements ClassReference {
     public JvmStaticFieldOperation(JvmOpCode opcode, String owner, String fieldName) {
         super(opcode, owner, fieldName);
     }
@@ -50,5 +50,10 @@ public class JvmStaticFieldOperation extends JvmFieldOperation {
             default:
                 throw new IllegalStateException();
         }
+    }
+
+    @Override
+    public String getClassReference() {
+        return this.getOwner();
     }
 }

@@ -31,4 +31,12 @@ public abstract class JvmFieldOperation extends JvmOperation {
         this.owner = owner;
         this.fieldName = fieldName;
     }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
 }

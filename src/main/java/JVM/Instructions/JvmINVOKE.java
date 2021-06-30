@@ -34,7 +34,7 @@ import java.util.List;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class JvmINVOKE extends JvmOperation {
+public class JvmINVOKE extends JvmOperation implements ClassReference {
 
     private final String owner;
     private final String name;
@@ -64,39 +64,46 @@ public class JvmINVOKE extends JvmOperation {
                 }
             }
         }
-
-        JvmValue.Reference objRef = (Reference) ctx.pop();
-        if (objRef == JvmValue.UNKNOWN_REFERENCE) {
-            log.warn(
-                    String.format(
-                            "Unchecked call to method {%s} on class {%s} on an unknown reference. Beware.",
-                            this.name, this.owner));
-        } else {
-            JvmObject object = ctx.getObject(objRef.getIdentifier());
-            if (shouldTaint) {
-                object.setTainted(true);
-            }
-            if (object.isTainted()) {
-                args.forEach(
-                        arg -> {
-                            if (arg instanceof Reference) {
-                                ctx.getObject(((Reference) arg).getIdentifier()).setTainted(true);
-                            }
-                        });
-            }
-            if (object.getProtocol() != null
-                    && ctx.getCurrentFrame().getCalleeReference() != objRef) {
-                // perform typestate check
-                if (object.getProtocol().isAllowed(name.trim())) {
-                    object.setProtocol(object.getProtocol().perform(name));
-                } else {
-                    throw new InvalidProtocolOperationException(object.getProtocol(), name.trim());
+        boolean hasReference = this.opcode != JvmOpCode.INVOKESTATIC;
+        if (hasReference) {
+            JvmValue.Reference objRef = (Reference) ctx.pop();
+            if (objRef == JvmValue.UNKNOWN_REFERENCE) {
+                log.warn(
+                        String.format(
+                                "Unchecked call to method {%s} on class {%s} on an unknown reference. Beware.",
+                                this.name, this.owner));
+            } else {
+                JvmObject object = ctx.getObject(objRef.getIdentifier());
+                if (shouldTaint) {
+                    object.setTainted(true);
+                }
+                if (object.isTainted()) {
+                    args.forEach(
+                            arg -> {
+                                if (arg instanceof Reference) {
+                                    ctx.getObject(((Reference) arg).getIdentifier())
+                                            .setTainted(true);
+                                }
+                            });
+                }
+                if (object.getProtocol() != null
+                        && ctx.getCurrentFrame().getCalleeReference() != objRef) {
+                    // perform typestate check
+                    if (object.getProtocol().isAllowed(name.trim())) {
+                        object.setProtocol(object.getProtocol().perform(name));
+                    } else {
+                        throw new InvalidProtocolOperationException(
+                                object.getProtocol(), name.trim());
+                    }
+                }
+                if (object.isTainted() && ctx.getClasses().containsKey(this.owner)) {
+                    JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
+                    ctx.allocateFrame(objRef, m, args);
                 }
             }
-            if (object.isTainted() && ctx.getClasses().containsKey(this.owner)) {
-                JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
-                ctx.allocateFrame(objRef, m, args);
-            }
+        } else if (ctx.getClasses().containsKey(this.owner)) {
+            JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
+            ctx.allocateFrame(null, m, args);
         }
     }
 
@@ -148,5 +155,10 @@ public class JvmINVOKE extends JvmOperation {
             index++;
         }
         return result;
+    }
+
+    @Override
+    public String getClassReference() {
+        return this.getOwner();
     }
 }
