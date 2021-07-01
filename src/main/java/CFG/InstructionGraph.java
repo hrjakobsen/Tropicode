@@ -287,17 +287,15 @@ public class InstructionGraph {
                             "Recursion encountered in method " + method.getName());
                 }
                 expandedMethods.push(method);
-                if (method != null) {
-                    InstructionGraph callNode = method.getInstructionGraph(this.depth + 1);
-                    callNode.setDepth(this.getDepth() + 1);
-                    callNode.insertFinalConnections(this.connections, new HashSet<>());
-                    this.connections =
-                            new ArrayList<>() {
-                                {
-                                    add(callNode);
-                                }
-                            };
-                }
+                InstructionGraph callNode = method.getInstructionGraph(this.depth + 1);
+                callNode.setDepth(this.getDepth() + 1);
+                callNode.insertFinalConnections(this.connections, new HashSet<>());
+                this.connections =
+                        new ArrayList<>() {
+                            {
+                                add(callNode);
+                            }
+                        };
             }
         }
 
