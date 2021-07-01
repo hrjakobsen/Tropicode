@@ -259,6 +259,7 @@ public class InstructionGraph {
 
     public void explodeGraph(JvmContex ctx) {
         explodeGraphInternal(
+                this,
                 ctx,
                 new HashSet<>(),
                 new HashSet<>(),
@@ -269,78 +270,92 @@ public class InstructionGraph {
                 });
     }
 
-    private void explodeGraphInternal(
+    private static void explodeGraphInternal(
+            InstructionGraph entry,
             JvmContex ctx,
             Set<InstructionGraph> seen,
             Set<JvmClass> initialised,
             Stack<JvmMethod> expandedMethods) {
-        if (seen.contains(this)) return;
-        seen.add(this);
+        Stack<InstructionGraph> next =
+                new Stack<>() {
+                    {
+                        add(entry);
+                    }
+                };
 
-        if (block.getLastInstruction() instanceof JvmINVOKE) {
-            JvmINVOKE call = (JvmINVOKE) block.getLastInstruction();
-            JvmClass klass = ctx.getClasses().get(call.getOwner());
-            if (klass != null) {
-                JvmMethod method = klass.getMethods().get(call.getName() + call.getDescriptor());
-                if (expandedMethods.contains(method)) {
-                    throw new IllegalStateException(
-                            "Recursion encountered in method " + method.getName());
+        while (!next.isEmpty()) {
+            InstructionGraph current = next.pop();
+            if (seen.contains(current)) continue;
+            seen.add(current);
+
+            if (current.block.getLastInstruction() instanceof JvmINVOKE) {
+                JvmINVOKE call = (JvmINVOKE) current.block.getLastInstruction();
+                JvmClass klass = ctx.getClasses().get(call.getOwner());
+                if (klass != null) {
+                    JvmMethod method =
+                            klass.getMethods().get(call.getName() + call.getDescriptor());
+                    if (expandedMethods.contains(method)) {
+                        throw new IllegalStateException(
+                                "Recursion encountered in method " + method.getName());
+                    }
+                    expandedMethods.push(method);
+                    InstructionGraph callNode = method.getInstructionGraph(current.depth + 1);
+                    callNode.setDepth(current.getDepth() + 1);
+                    callNode.insertFinalConnections(current.connections, new HashSet<>());
+                    current.connections =
+                            new ArrayList<>() {
+                                {
+                                    add(callNode);
+                                }
+                            };
                 }
-                expandedMethods.push(method);
-                InstructionGraph callNode = method.getInstructionGraph(this.depth + 1);
-                callNode.setDepth(this.getDepth() + 1);
-                callNode.insertFinalConnections(this.connections, new HashSet<>());
-                this.connections =
-                        new ArrayList<>() {
-                            {
-                                add(callNode);
-                            }
-                        };
             }
-        }
 
-        if (block.getLastInstruction() instanceof JvmReturnOperation) {
-            expandedMethods.pop();
-        }
-
-        if (shouldInitialiseStaticMembers(ctx, block.getLastInstruction(), initialised)) {
-            String className = ((ClassReference) block.getLastInstruction()).getClassReference();
-            JvmClass klass = ctx.getClasses().get(className);
-            if (klass != null) {
-                InstructionGraph fakeCallNode =
-                        new InstructionGraph(
-                                new BasicBlock(
-                                        new JvmINVOKE(
-                                                JvmOpCode.INVOKESTATIC,
-                                                className,
-                                                "<clinit>",
-                                                "()V",
-                                                false)));
-                fakeCallNode.setDepth(depth);
-                JvmMethod staticConstructorMethod = klass.getMethods().get("<clinit>()V");
-                expandedMethods.push(staticConstructorMethod);
-                InstructionGraph staticConstructor =
-                        staticConstructorMethod.getInstructionGraph(depth + 1);
-                staticConstructor.setDepth(depth + 1);
-                staticConstructor.insertFinalConnections(this.connections, new HashSet<>());
-                fakeCallNode.setConnections(
-                        new ArrayList<>() {
-                            {
-                                add(staticConstructor);
-                            }
-                        });
-                this.connections =
-                        new ArrayList<>() {
-                            {
-                                add(fakeCallNode);
-                            }
-                        };
-                staticConstructor.explodeGraphInternal(ctx, seen, initialised, expandedMethods);
-                return;
+            if (current.block.getLastInstruction() instanceof JvmReturnOperation) {
+                expandedMethods.pop();
             }
-        }
-        for (InstructionGraph child : getConnections()) {
-            child.explodeGraphInternal(ctx, seen, initialised, expandedMethods);
+
+            if (shouldInitialiseStaticMembers(
+                    ctx, current.block.getLastInstruction(), initialised)) {
+                String className =
+                        ((ClassReference) current.block.getLastInstruction()).getClassReference();
+                JvmClass klass = ctx.getClasses().get(className);
+                if (klass != null) {
+                    InstructionGraph fakeCallNode =
+                            new InstructionGraph(
+                                    new BasicBlock(
+                                            new JvmINVOKE(
+                                                    JvmOpCode.INVOKESTATIC,
+                                                    className,
+                                                    "<clinit>",
+                                                    "()V",
+                                                    false)));
+                    fakeCallNode.setDepth(current.depth);
+                    JvmMethod staticConstructorMethod = klass.getMethods().get("<clinit>()V");
+                    expandedMethods.push(staticConstructorMethod);
+                    InstructionGraph staticConstructor =
+                            staticConstructorMethod.getInstructionGraph(current.depth + 1);
+                    staticConstructor.setDepth(current.depth + 1);
+                    staticConstructor.insertFinalConnections(current.connections, new HashSet<>());
+                    fakeCallNode.setConnections(
+                            new ArrayList<>() {
+                                {
+                                    add(staticConstructor);
+                                }
+                            });
+                    current.connections =
+                            new ArrayList<>() {
+                                {
+                                    add(fakeCallNode);
+                                }
+                            };
+                    next.push(staticConstructor);
+                    return;
+                }
+            }
+            for (InstructionGraph child : current.getConnections()) {
+                next.push(child);
+            }
         }
     }
 
