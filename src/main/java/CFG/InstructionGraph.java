@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -257,11 +258,22 @@ public class InstructionGraph {
     }
 
     public void explodeGraph(JvmContex ctx) {
-        explodeGraphInternal(ctx, new HashSet<>(), new HashSet<>());
+        explodeGraphInternal(
+                ctx,
+                new HashSet<>(),
+                new HashSet<>(),
+                new Stack<>() {
+                    {
+                        push(null);
+                    }
+                });
     }
 
     private void explodeGraphInternal(
-            JvmContex ctx, HashSet<InstructionGraph> seen, HashSet<JvmClass> initialised) {
+            JvmContex ctx,
+            Set<InstructionGraph> seen,
+            Set<JvmClass> initialised,
+            Stack<JvmMethod> expandedMethods) {
         if (seen.contains(this)) return;
         seen.add(this);
 
@@ -270,6 +282,11 @@ public class InstructionGraph {
             JvmClass klass = ctx.getClasses().get(call.getOwner());
             if (klass != null) {
                 JvmMethod method = klass.getMethods().get(call.getName() + call.getDescriptor());
+                if (expandedMethods.contains(method)) {
+                    throw new IllegalStateException(
+                            "Recursion encountered in method " + method.getName());
+                }
+                expandedMethods.push(method);
                 if (method != null) {
                     InstructionGraph callNode = method.getInstructionGraph(this.depth + 1);
                     callNode.setDepth(this.getDepth() + 1);
@@ -282,6 +299,10 @@ public class InstructionGraph {
                             };
                 }
             }
+        }
+
+        if (block.getLastInstruction() instanceof JvmReturnOperation) {
+            expandedMethods.pop();
         }
 
         if (shouldInitialiseStaticMembers(ctx, block.getLastInstruction(), initialised)) {
@@ -298,8 +319,10 @@ public class InstructionGraph {
                                                 "()V",
                                                 false)));
                 fakeCallNode.setDepth(depth);
+                JvmMethod staticConstructorMethod = klass.getMethods().get("<clinit>()V");
+                expandedMethods.push(staticConstructorMethod);
                 InstructionGraph staticConstructor =
-                        klass.getMethods().get("<clinit>()V").getInstructionGraph(depth + 1);
+                        staticConstructorMethod.getInstructionGraph(depth + 1);
                 staticConstructor.setDepth(depth + 1);
                 staticConstructor.insertFinalConnections(this.connections, new HashSet<>());
                 fakeCallNode.setConnections(
@@ -314,17 +337,17 @@ public class InstructionGraph {
                                 add(fakeCallNode);
                             }
                         };
-                staticConstructor.explodeGraphInternal(ctx, seen, initialised);
+                staticConstructor.explodeGraphInternal(ctx, seen, initialised, expandedMethods);
                 return;
             }
         }
         for (InstructionGraph child : getConnections()) {
-            child.explodeGraphInternal(ctx, seen, initialised);
+            child.explodeGraphInternal(ctx, seen, initialised, expandedMethods);
         }
     }
 
     private static boolean shouldInitialiseStaticMembers(
-            JvmContex ctx, JvmInstruction instruction, HashSet<JvmClass> initialised) {
+            JvmContex ctx, JvmInstruction instruction, Set<JvmClass> initialised) {
         if (!(instruction instanceof JvmOperation)) return false;
         JvmOperation operation = (JvmOperation) instruction;
         if (operation instanceof ClassReference) {
