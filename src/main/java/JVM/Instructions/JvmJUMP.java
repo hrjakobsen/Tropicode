@@ -21,7 +21,7 @@ package JVM.Instructions;
 
 import CFG.GraphAnalyser;
 import Checker.Exceptions.CheckerException;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import JVM.JvmOpCode;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.Label;
@@ -43,7 +43,7 @@ public class JvmJUMP extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
         for (int i = 0; i < stackValues; i++) {
             ctx.pop();
         }

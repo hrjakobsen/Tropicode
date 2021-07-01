@@ -29,7 +29,7 @@ import JVM.Instructions.JvmOperation;
 import JVM.Instructions.JvmReturnOperation;
 import JVM.Instructions.JvmStaticFieldOperation;
 import JVM.JvmClass;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import JVM.JvmMethod;
 import JVM.JvmOpCode;
 import java.io.IOException;
@@ -257,7 +257,7 @@ public class InstructionGraph {
         }
     }
 
-    public void explodeGraph(JvmContex ctx) {
+    public void explodeGraph(JvmContext ctx) {
         explodeGraphInternal(
                 this,
                 ctx,
@@ -272,7 +272,7 @@ public class InstructionGraph {
 
     private static void explodeGraphInternal(
             InstructionGraph entry,
-            JvmContex ctx,
+            JvmContext ctx,
             Set<InstructionGraph> seen,
             Set<JvmClass> initialised,
             Stack<JvmMethod> expandedMethods) {
@@ -360,7 +360,7 @@ public class InstructionGraph {
     }
 
     private static boolean shouldInitialiseStaticMembers(
-            JvmContex ctx, JvmInstruction instruction, Set<JvmClass> initialised) {
+            JvmContext ctx, JvmInstruction instruction, Set<JvmClass> initialised) {
         if (!(instruction instanceof JvmOperation)) return false;
         JvmOperation operation = (JvmOperation) instruction;
         if (operation instanceof ClassReference) {

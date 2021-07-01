@@ -20,13 +20,13 @@
 package JVM.Instructions;
 
 import CFG.GraphAnalyser;
-import JVM.JvmContex;
+import JVM.JvmContext;
 
 public abstract class JvmInstruction {
 
     private int lineNumber = -1;
 
-    public abstract void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser);
+    public abstract void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser);
 
     public int getLineNumber() {
         return lineNumber;

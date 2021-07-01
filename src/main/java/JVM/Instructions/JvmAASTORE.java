@@ -20,7 +20,7 @@
 package JVM.Instructions;
 
 import CFG.GraphAnalyser;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
 import lombok.extern.log4j.Log4j2;
@@ -33,7 +33,7 @@ public class JvmAASTORE extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
         JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
         log.warn("Losing track of obj " + obj.getIdentifier());
     }

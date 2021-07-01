@@ -21,7 +21,7 @@ package JVM.Instructions;
 
 import CFG.GraphAnalyser;
 import Checker.Exceptions.CheckerException;
-import JVM.JvmContex;
+import JVM.JvmContext;
 
 public class JvmLabel extends JvmInstruction {
 
@@ -41,7 +41,7 @@ public class JvmLabel extends JvmInstruction {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
         if (ctx.hasSnapshot(this.label)) {
             // We have previously seen a forward jump to this label, now ensure that the context is
             // consistent

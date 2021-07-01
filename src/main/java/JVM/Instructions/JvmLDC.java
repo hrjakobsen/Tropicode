@@ -20,7 +20,7 @@
 package JVM.Instructions;
 
 import CFG.GraphAnalyser;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
 
@@ -38,7 +38,7 @@ public class JvmLDC extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
         ctx.push(JvmValue.UNKNOWN);
     }
 }

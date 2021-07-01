@@ -20,7 +20,7 @@
 package CFG;
 
 import JVM.Instructions.JvmInstruction;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +56,7 @@ public class BasicBlock {
         return this.instructions.get(this.instructions.size() - 1);
     }
 
-    public void evaluate(JvmContex ctx, GraphAnalyser analyser) {
+    public void evaluate(JvmContext ctx, GraphAnalyser analyser) {
         for (JvmInstruction instruction : this.getInstructions()) {
             instruction.evaluateInstruction(ctx, analyser);
         }

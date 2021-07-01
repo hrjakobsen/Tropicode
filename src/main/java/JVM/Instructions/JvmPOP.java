@@ -20,7 +20,7 @@
 package JVM.Instructions;
 
 import CFG.GraphAnalyser;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import JVM.JvmOpCode;
 
 public class JvmPOP extends JvmOperation {
@@ -30,7 +30,7 @@ public class JvmPOP extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContex ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
         ctx.pop();
     }
 }

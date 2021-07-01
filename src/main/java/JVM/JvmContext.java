@@ -28,7 +28,7 @@ import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class JvmContex {
+public class JvmContext {
 
     private final Map<String, JvmArray> arrays = new HashMap<>();
     private Stack<JvmFrame> frames = new Stack<>();
@@ -103,7 +103,7 @@ public class JvmContex {
 
     @Override
     public String toString() {
-        return "JvmContex{" + frames.toString() + "}";
+        return "JvmContext{" + frames.toString() + "}";
     }
 
     public void takeSnapshot(String label) {
@@ -123,8 +123,8 @@ public class JvmContex {
         return snapshots.containsKey(label);
     }
 
-    public JvmContex copy() {
-        JvmContex newContext = new JvmContex();
+    public JvmContext copy() {
+        JvmContext newContext = new JvmContext();
         newContext.frames = (Stack<JvmFrame>) frames.clone();
         HashMap<String, JvmObject> newHeap = new HashMap<>();
         for (String s : heap.keySet()) {
@@ -165,8 +165,8 @@ public class JvmContex {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof JvmContex)) return false;
-        JvmContex other = (JvmContex) obj;
+        if (!(obj instanceof JvmContext)) return false;
+        JvmContext other = (JvmContext) obj;
         boolean frameEquality = other.frames.equals(frames);
         boolean heapEquality = other.heap.equals(heap);
         return frameEquality && heapEquality;

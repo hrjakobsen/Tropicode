@@ -20,7 +20,7 @@
 package CFG;
 
 import Checker.Exceptions.CheckerException;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -31,12 +31,12 @@ public class GraphAnalyser {
         return currentNode;
     }
 
-    public JvmContex checkGraph(InstructionGraph node, JvmContex ctx) {
+    public JvmContext checkGraph(InstructionGraph node, JvmContext ctx) {
         this.currentNode = node;
-        JvmContex tmp = null;
+        JvmContext tmp = null;
         node.getBlock().evaluate(ctx, this);
         for (InstructionGraph next : node.getConnections()) {
-            JvmContex nextCtx = checkGraph(next, ctx.copy());
+            JvmContext nextCtx = checkGraph(next, ctx.copy());
             if (tmp == null) {
                 tmp = nextCtx;
             }

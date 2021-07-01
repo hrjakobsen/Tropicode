@@ -24,7 +24,7 @@ import CFG.InstructionGraph;
 import Checker.Exceptions.CheckerException;
 import Checker.Extractor.CodeExtractorClassVisitor;
 import JVM.JvmClass;
-import JVM.JvmContex;
+import JVM.JvmContext;
 import JVM.JvmMethod;
 import JVM.JvmMethod.AccessFlags;
 import java.io.IOException;
@@ -112,7 +112,7 @@ public class TropicodeRunner implements Runnable {
             Queue<String> classesToLoad = new ArrayDeque<>();
             classesToLoad.add(this.entryClass);
 
-            JvmContex ctx = new JvmContex();
+            JvmContext ctx = new JvmContext();
             while (!classesToLoad.isEmpty()) {
                 String nextClass = classesToLoad.poll();
                 String compiledClassName = nextClass.replaceAll("/", ".");
