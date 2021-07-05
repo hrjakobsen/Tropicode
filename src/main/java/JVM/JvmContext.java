@@ -159,7 +159,7 @@ public class JvmContext {
     public void deallocateFrame() {
         JvmFrame frame = this.frames.pop();
         if (frame.hasReturnValue()) {
-            push(JvmValue.UNKNOWN);
+            push(frame.getStack().pop());
         }
     }
 
