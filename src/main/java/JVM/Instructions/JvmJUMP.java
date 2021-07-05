@@ -48,7 +48,7 @@ public class JvmJUMP extends JvmOperation {
             ctx.pop();
         }
         if (ctx.hasSnapshot(this.label.toString())) {
-            if (!ctx.compareToSnapshot(this.label.toString())) {
+            if (!ctx.isEqualToSnapshot(this.label.toString())) {
                 throw new CheckerException("Snapshot not equals to current heap");
             }
         } else {

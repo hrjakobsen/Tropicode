@@ -45,7 +45,7 @@ public class JvmLabel extends JvmInstruction {
         if (ctx.hasSnapshot(this.label)) {
             // We have previously seen a forward jump to this label, now ensure that the context is
             // consistent
-            if (!ctx.compareToSnapshot(this.label)) {
+            if (!ctx.isEqualToSnapshot(this.label)) {
                 throw new CheckerException("Invalid snapshot upon reached label");
             }
         } else {

@@ -111,7 +111,7 @@ public class JvmContext {
         this.snapshots.put(label, snapshot);
     }
 
-    public boolean compareToSnapshot(String label) {
+    public boolean isEqualToSnapshot(String label) {
         if (!snapshots.containsKey(label)) {
             return false;
         }
