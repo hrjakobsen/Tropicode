@@ -331,26 +331,14 @@ public class InstructionGraph {
                                                     "()V",
                                                     false)));
                     fakeCallNode.setDepth(current.depth);
-                    JvmMethod staticConstructorMethod = klass.getMethods().get("<clinit>()V");
-                    expandedMethods.push(staticConstructorMethod);
-                    InstructionGraph staticConstructor =
-                            staticConstructorMethod.getInstructionGraph(current.depth + 1);
-                    staticConstructor.setDepth(current.depth + 1);
-                    staticConstructor.insertFinalConnections(current.connections, new HashSet<>());
-                    fakeCallNode.setConnections(
-                            new ArrayList<>() {
-                                {
-                                    add(staticConstructor);
-                                }
-                            });
+                    fakeCallNode.setConnections(current.connections);
                     current.connections =
                             new ArrayList<>() {
                                 {
                                     add(fakeCallNode);
                                 }
                             };
-                    next.push(staticConstructor);
-                    return;
+                    next.push(fakeCallNode);
                 }
             }
             for (InstructionGraph child : current.getConnections()) {
