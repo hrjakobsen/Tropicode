@@ -245,7 +245,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     @Override
     public void visitVarInsn(int opcode, int var) {
         JvmOpCode jvmop = JvmOpCode.getFromOpcode(opcode);
-        method.setNumberOfLocalVariables(Math.max(var, method.getNumberOfLocalVariables()));
+        method.setNumberOfLocalVariables(Math.max(var + 1, method.getNumberOfLocalVariables()));
         switch (jvmop) {
             case ILOAD:
             case LLOAD:
