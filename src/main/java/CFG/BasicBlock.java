@@ -56,9 +56,9 @@ public class BasicBlock {
         return this.instructions.get(this.instructions.size() - 1);
     }
 
-    public void evaluate(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluate(JvmContext ctx) {
         for (JvmInstruction instruction : this.getInstructions()) {
-            instruction.evaluateInstruction(ctx, analyser);
+            instruction.evaluateInstruction(ctx);
         }
     }
 

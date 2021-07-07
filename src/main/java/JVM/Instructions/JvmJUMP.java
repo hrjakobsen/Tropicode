@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
 import lombok.extern.log4j.Log4j2;
@@ -42,7 +41,7 @@ public class JvmJUMP extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         // Remove values used for jump check
         for (int i = 0; i < stackValues; i++) {
             ctx.pop();

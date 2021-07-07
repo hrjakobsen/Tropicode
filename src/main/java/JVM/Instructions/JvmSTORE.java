@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
@@ -35,7 +34,7 @@ public class JvmSTORE extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         JvmValue val = ctx.pop();
         ctx.storeLocal(index, val);
     }

@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
 
@@ -33,7 +32,7 @@ public class JvmNEW extends JvmOperation implements ClassReference {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         ctx.push(ctx.allocateObject(type));
     }
 

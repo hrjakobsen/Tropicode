@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
@@ -31,7 +30,7 @@ public class JvmInstanceFieldOperation extends JvmFieldOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         switch (this.opcode) {
             case PUTFIELD:
                 JvmValue value = ctx.pop();

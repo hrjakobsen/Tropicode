@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
@@ -33,7 +32,7 @@ public class JvmAASTORE extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         JvmValue.Reference obj = (JvmValue.Reference) ctx.pop();
         log.warn("Losing track of obj " + obj.getIdentifier());
     }

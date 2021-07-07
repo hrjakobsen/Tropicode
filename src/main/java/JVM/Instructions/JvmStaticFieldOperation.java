@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import JVM.JvmClass;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
@@ -31,7 +30,7 @@ public class JvmStaticFieldOperation extends JvmFieldOperation implements ClassR
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         switch (this.opcode) {
             case PUTSTATIC:
                 ctx.getClasses().get(owner).getStaticFields().put(fieldName, ctx.pop());

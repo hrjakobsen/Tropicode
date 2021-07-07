@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
 import JVM.JvmValue;
@@ -31,7 +30,7 @@ public class JvmAALOAD extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         ctx.push(JvmValue.UNKNOWN_REFERENCE);
     }
 }

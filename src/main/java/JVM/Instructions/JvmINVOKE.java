@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import Checker.Exceptions.CheckerException;
 import Checker.Exceptions.InvalidProtocolOperationException;
 import JVM.JvmContext;
@@ -60,7 +59,7 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         int numParams = countParameters(this.descriptor);
         boolean shouldTaint = false;
         List<JvmValue> args = new ArrayList<>();

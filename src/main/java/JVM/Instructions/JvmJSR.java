@@ -19,7 +19,6 @@
 
 package JVM.Instructions;
 
-import CFG.GraphAnalyser;
 import Checker.Exceptions.UnsupportedOperationException;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
@@ -35,7 +34,7 @@ public class JvmJSR extends JvmOperation {
     }
 
     @Override
-    public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+    public void evaluateInstruction(JvmContext ctx) {
         throw new UnsupportedOperationException("JSR instruction not supported");
     }
 }

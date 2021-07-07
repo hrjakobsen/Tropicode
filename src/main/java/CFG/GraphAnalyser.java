@@ -21,6 +21,10 @@ package CFG;
 
 import Checker.Exceptions.CheckerException;
 import JVM.JvmContext;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -31,19 +35,29 @@ public class GraphAnalyser {
         return currentNode;
     }
 
-    public JvmContext checkGraph(InstructionGraph node, JvmContext ctx) {
-        this.currentNode = node;
-        JvmContext tmp = null;
-        node.getBlock().evaluate(ctx, this);
-        for (InstructionGraph next : node.getConnections()) {
-            JvmContext nextCtx = checkGraph(next, ctx.copy());
-            if (tmp == null) {
-                tmp = nextCtx;
+    public void checkGraph(InstructionGraph entry, JvmContext initial) {
+        Queue<Pair<InstructionGraph, JvmContext>> next = new ArrayDeque<>();
+        next.add(new Pair<>(entry, initial));
+        Map<InstructionGraph, JvmContext> snapshotMap = new HashMap<>();
+        while (!next.isEmpty()) {
+            Pair<InstructionGraph, JvmContext> toCheck = next.poll();
+            InstructionGraph node = toCheck.getLeft();
+            JvmContext ctx = toCheck.getRight();
+            if (snapshotMap.containsKey(node)) {
+                if (!snapshotMap.get(node).equals(ctx)) {
+                    throw new CheckerException("Invalid context");
+                } else {
+                    // skip connections we've seen before
+                    continue;
+                }
+            } else {
+                snapshotMap.put(node, ctx);
             }
-            if (!tmp.equals(nextCtx)) {
-                throw new CheckerException("Invalid context");
+            JvmContext childCtx = ctx.copy();
+            node.getBlock().evaluate(childCtx);
+            for (InstructionGraph connection : node.getConnections()) {
+                next.add(new Pair<>(connection, childCtx));
             }
         }
-        return tmp == null ? ctx : tmp;
     }
 }
