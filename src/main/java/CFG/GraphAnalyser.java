@@ -18,12 +18,6 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class GraphAnalyser {
-    private InstructionGraph currentNode;
-
-    public InstructionGraph getCurrentNode() {
-        return currentNode;
-    }
-
     public void checkGraph(InstructionGraph entry, JvmContext initial) {
         Queue<Pair<InstructionGraph, JvmContext>> next = new ArrayDeque<>();
         next.add(new Pair<>(entry, initial));
