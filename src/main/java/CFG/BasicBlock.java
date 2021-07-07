@@ -37,6 +37,25 @@ public class BasicBlock {
         this.instructions = Arrays.asList(instructions);
     }
 
+    public String getSourceLocation() {
+        int maxLineNumber = -1;
+        int minLineNumber = Integer.MAX_VALUE;
+        for (JvmInstruction instruction : instructions) {
+            if (instruction.getLineNumber() != -1) {
+                maxLineNumber = Math.max(instruction.getLineNumber(), maxLineNumber);
+                minLineNumber = Math.min(instruction.getLineNumber(), minLineNumber);
+            }
+        }
+        if (maxLineNumber != -1) {
+            if (maxLineNumber == minLineNumber) {
+                return String.format("Line %d", maxLineNumber);
+            } else {
+                return String.format("Lines %d-%d", minLineNumber, maxLineNumber);
+            }
+        }
+        return "Unknown location";
+    }
+
     public List<JvmInstruction> getInstructions() {
         return instructions;
     }

@@ -49,7 +49,11 @@ public class GraphAnalyser {
                 if (!snapshotMap.get(node).equals(ctx)) {
                     List<String> differences = snapshotMap.get(node).findDifferences(ctx);
                     throw new CheckerException(
-                            "Invalid context. Upon reaching an instruction that was visited earlier, there were the following differences in the expected contexts:\n"
+                            "Invalid context at "
+                                    + node.getBlock().getSourceLocation()
+                                    + ". Upon reaching an instruction that was visited "
+                                    + "earlier, there were the following differences in the "
+                                    + "expected contexts:\n"
                                     + differences.stream()
                                             .map(s -> "  * " + s)
                                             .collect(Collectors.joining("\n")));
