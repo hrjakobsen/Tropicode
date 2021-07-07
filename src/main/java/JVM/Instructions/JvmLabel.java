@@ -52,7 +52,7 @@ public class JvmLabel extends JvmInstruction {
                 throw new CheckerException(
                         "Invalid state when performing jump. Errors:\n"
                                 + errors.stream()
-                                        .map((String s) -> "* " + s)
+                                        .map((String s) -> "  * " + s)
                                         .collect(Collectors.joining("\n")));
             }
         } else {

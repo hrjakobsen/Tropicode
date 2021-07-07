@@ -51,7 +51,7 @@ public class GraphAnalyser {
                     throw new CheckerException(
                             "Invalid context. Upon reaching an instruction that was visited earlier, there were the following differences in the expected contexts:\n"
                                     + differences.stream()
-                                            .map(s -> "* " + s)
+                                            .map(s -> "  * " + s)
                                             .collect(Collectors.joining("\n")));
                 } else {
                     // skip connections we've seen before
