@@ -40,6 +40,15 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
     private final String name;
     private final String descriptor;
     private final boolean isInterface;
+    private boolean expanded = false;
+
+    public boolean isExpanded() {
+        return expanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
 
     public JvmINVOKE(
             JvmOpCode opcode, String owner, String name, String descriptor, boolean isInterface) {
@@ -96,7 +105,8 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
                                 object.getProtocol(), name.trim());
                     }
                 }
-                if (object.isTainted() && ctx.getClasses().containsKey(this.owner)) {
+                if (object.isTainted() && ctx.getClasses().containsKey(this.owner)
+                        || isExpanded()) {
                     JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
                     ctx.allocateFrame(objRef, m, args);
                 }

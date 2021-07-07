@@ -292,6 +292,7 @@ public class InstructionGraph {
                 JvmINVOKE call = (JvmINVOKE) current.block.getLastInstruction();
                 JvmClass klass = ctx.getClasses().get(call.getOwner());
                 if (klass != null) {
+                    call.setExpanded(true);
                     JvmMethod method =
                             klass.getMethods().get(call.getName() + call.getDescriptor());
                     if (expandedMethods.contains(method)) {
