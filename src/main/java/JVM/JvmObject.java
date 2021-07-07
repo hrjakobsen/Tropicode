@@ -76,6 +76,12 @@ public class JvmObject {
     public boolean equals(Object obj) {
         if (!(obj instanceof JvmObject)) return false;
         JvmObject other = (JvmObject) obj;
-        return this.protocol.equals(other.protocol) && this.fields.equals(other.fields);
+        // catches null == null
+        boolean protocolEquality = this.protocol == other.protocol;
+        if (this.protocol != null) {
+            protocolEquality = this.protocol.equals(other.protocol);
+        }
+        boolean fieldEquality = this.fields.equals(other.fields);
+        return protocolEquality && fieldEquality;
     }
 }
