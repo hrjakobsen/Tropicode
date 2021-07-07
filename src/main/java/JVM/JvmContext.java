@@ -111,12 +111,12 @@ public class JvmContext {
         this.snapshots.put(label, snapshot);
     }
 
-    public boolean isEqualToSnapshot(String label) {
+    public boolean isEqualToSnapshot(String label, List<String> errors) {
         if (!snapshots.containsKey(label)) {
             return false;
         }
         JvmHeapSnapshot snapshot = snapshots.get(label);
-        return snapshot.compareTo(heap);
+        return snapshot.compareTo(heap, errors);
     }
 
     public boolean hasSnapshot(String label) {

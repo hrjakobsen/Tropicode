@@ -22,6 +22,9 @@ package JVM.Instructions;
 import CFG.GraphAnalyser;
 import Checker.Exceptions.CheckerException;
 import JVM.JvmContext;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class JvmLabel extends JvmInstruction {
 
@@ -45,8 +48,13 @@ public class JvmLabel extends JvmInstruction {
         if (ctx.hasSnapshot(this.label)) {
             // We have previously seen a forward jump to this label, now ensure that the context is
             // consistent
-            if (!ctx.isEqualToSnapshot(this.label)) {
-                throw new CheckerException("Invalid snapshot upon reached label");
+            List<String> errors = new ArrayList<>();
+            if (!ctx.isEqualToSnapshot(this.label, errors)) {
+                throw new CheckerException(
+                        "Invalid state when performing jump. Errors:\n"
+                                + errors.stream()
+                                        .map((String s) -> "* " + s)
+                                        .collect(Collectors.joining("\n")));
             }
         } else {
             // First time we see this label, save a snapshot for later jumps back to the label
