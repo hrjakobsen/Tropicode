@@ -20,9 +20,11 @@
 package JVM;
 
 import JVM.JvmMethod.AccessFlags;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
@@ -170,5 +172,40 @@ public class JvmContext {
         boolean frameEquality = other.frames.equals(frames);
         boolean heapEquality = other.heap.equals(heap);
         return frameEquality && heapEquality;
+    }
+
+    public List<String> findDifferences(JvmContext ctx) {
+        List<String> differences = new ArrayList<>();
+        for (Entry<String, JvmObject> entry : heap.entrySet()) {
+            if (!ctx.heap.containsKey(entry.getKey())) {
+                differences.add("Missing object " + entry.getValue());
+            }
+            if (!entry.getValue().getFields().equals(ctx.heap.get(entry.getKey()).fields)) {
+                differences.add("Fields of " + entry.getKey() + " are different");
+            }
+            if (entry.getValue().getProtocol() != ctx.heap.get(entry.getKey()).getProtocol()) {
+                if (entry.getValue().getProtocol() != null
+                        && !entry.getValue()
+                                .getProtocol()
+                                .equals(ctx.heap.get(entry.getKey()).getProtocol())) {
+                    differences.add(
+                            "Protocol of object "
+                                    + entry.getKey()
+                                    + " should be "
+                                    + entry.getValue().getProtocol().toString()
+                                    + " but it is "
+                                    + ctx.heap.get(entry.getKey()).getProtocol().toString());
+                }
+            }
+        }
+        for (Entry<String, JvmObject> entry : ctx.heap.entrySet()) {
+            if (!heap.containsKey(entry.getKey())) {
+                differences.add("A new object " + entry.getKey() + " is present");
+            }
+        }
+        if (!frames.equals(ctx.frames)) {
+            differences.add("Different stacks");
+        }
+        return differences;
     }
 }

@@ -23,8 +23,10 @@ import Checker.Exceptions.CheckerException;
 import JVM.JvmContext;
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -45,7 +47,12 @@ public class GraphAnalyser {
             JvmContext ctx = toCheck.getRight();
             if (snapshotMap.containsKey(node)) {
                 if (!snapshotMap.get(node).equals(ctx)) {
-                    throw new CheckerException("Invalid context");
+                    List<String> differences = snapshotMap.get(node).findDifferences(ctx);
+                    throw new CheckerException(
+                            "Invalid context. Upon reaching an instruction that was visited earlier, there were the following differences in the expected contexts:\n"
+                                    + differences.stream()
+                                            .map(s -> "* " + s)
+                                            .collect(Collectors.joining("\n")));
                 } else {
                     // skip connections we've seen before
                     continue;
