@@ -36,4 +36,9 @@ public class JvmLOAD extends JvmOperation {
     public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
         ctx.push(ctx.getLocal(index));
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + index;
+    }
 }

@@ -39,4 +39,9 @@ public class JvmSTORE extends JvmOperation {
         JvmValue val = ctx.pop();
         ctx.storeLocal(index, val);
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + index;
+    }
 }
