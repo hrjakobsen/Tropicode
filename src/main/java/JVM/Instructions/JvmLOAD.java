@@ -27,8 +27,8 @@ public class JvmLOAD extends JvmOperation {
 
     private final int index;
 
-    public JvmLOAD(int i) {
-        super(JvmOpCode.ALOAD);
+    public JvmLOAD(int opcode, int i) {
+        super(JvmOpCode.getFromOpcode(opcode));
         index = i;
     }
 

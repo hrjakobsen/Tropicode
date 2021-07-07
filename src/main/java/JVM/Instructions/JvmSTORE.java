@@ -28,8 +28,8 @@ public class JvmSTORE extends JvmOperation {
 
     private final int index;
 
-    public JvmSTORE(int index) {
-        super(JvmOpCode.ASTORE);
+    public JvmSTORE(int opcode, int index) {
+        super(JvmOpCode.getFromOpcode(opcode));
 
         this.index = index;
     }

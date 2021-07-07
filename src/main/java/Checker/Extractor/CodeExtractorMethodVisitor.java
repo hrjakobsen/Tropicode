@@ -252,14 +252,14 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case FLOAD:
             case DLOAD:
             case ALOAD:
-                addOperation(new JvmLOAD(var));
+                addOperation(new JvmLOAD(opcode, var));
                 break;
             case ISTORE:
             case LSTORE:
             case FSTORE:
             case DSTORE:
             case ASTORE:
-                addOperation(new JvmSTORE(var));
+                addOperation(new JvmSTORE(opcode, var));
                 break;
             case RET:
                 addOperation(new JvmUnsupportedOperation(jvmop));
