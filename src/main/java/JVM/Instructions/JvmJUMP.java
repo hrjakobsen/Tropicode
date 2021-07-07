@@ -20,7 +20,6 @@
 package JVM.Instructions;
 
 import CFG.GraphAnalyser;
-import Checker.Exceptions.CheckerException;
 import JVM.JvmContext;
 import JVM.JvmOpCode;
 import lombok.extern.log4j.Log4j2;
@@ -44,15 +43,9 @@ public class JvmJUMP extends JvmOperation {
 
     @Override
     public void evaluateInstruction(JvmContext ctx, GraphAnalyser analyser) {
+        // Remove values used for jump check
         for (int i = 0; i < stackValues; i++) {
             ctx.pop();
-        }
-        if (ctx.hasSnapshot(this.label.toString())) {
-            if (!ctx.isEqualToSnapshot(this.label.toString())) {
-                throw new CheckerException("Snapshot not equals to current heap");
-            }
-        } else {
-            ctx.takeSnapshot(this.label.toString());
         }
     }
 
