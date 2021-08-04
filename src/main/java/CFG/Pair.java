@@ -42,4 +42,9 @@ public class Pair<L, R> {
         }
         return right.equals(pair.right);
     }
+
+    @Override
+    public String toString() {
+        return "<" + left + ", " + right + ">";
+    }
 }
