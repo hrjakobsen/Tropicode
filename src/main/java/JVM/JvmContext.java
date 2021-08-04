@@ -195,4 +195,8 @@ public class JvmContext {
         }
         return differences;
     }
+
+    public int heapSize() {
+        return heap.size();
+    }
 }
