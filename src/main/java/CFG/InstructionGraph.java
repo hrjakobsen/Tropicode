@@ -365,4 +365,9 @@ public class InstructionGraph {
             this.connections.forEach(n -> n.insertFinalConnections(connections, seen));
         }
     }
+
+    @Override
+    public String toString() {
+        return block.toString();
+    }
 }
