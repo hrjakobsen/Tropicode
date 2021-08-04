@@ -6,7 +6,6 @@
 
 package Checker;
 
-import CFG.GraphAnalyser;
 import CFG.InstructionGraph;
 import Checker.Exceptions.CheckerException;
 import Checker.Extractor.CodeExtractorClassVisitor;
@@ -50,6 +49,9 @@ public class TropicodeRunner implements Runnable {
 
     @Option(names = "-d", description = "Display the instruction graph of the entry method")
     boolean displayGraph = false;
+
+    @Option(names = "-f", description = "Use flow analysis ")
+    boolean useFlowAnalysis = false;
 
     private static final Set<String> ignoreDependencies =
             new HashSet<>() {
@@ -124,9 +126,17 @@ public class TropicodeRunner implements Runnable {
             iGraph.explodeGraph(ctx);
 
             if (displayGraph) {
+                Runtime.getRuntime().exec("killall xdot || true");
                 iGraph.show();
             }
-            new GraphAnalyser().checkGraph(iGraph, ctx);
+
+            GraphAnalyzer analyzer = new GraphEvaluationAnalyzer();
+
+            if (useFlowAnalysis) {
+                analyzer = new FlowAnalyzer();
+            }
+
+            analyzer.checkGraph(iGraph, ctx);
         } catch (CheckerException | IOException ex) {
             System.err.println(ex);
         }

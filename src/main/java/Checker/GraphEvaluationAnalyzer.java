@@ -4,8 +4,10 @@
  *     SPDX-License-Identifier: BSD-3-Clause
  */
 
-package CFG;
+package Checker;
 
+import CFG.InstructionGraph;
+import CFG.Pair;
 import Checker.Exceptions.CheckerException;
 import JVM.JvmContext;
 import java.util.ArrayDeque;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class GraphAnalyser {
+public class GraphEvaluationAnalyzer implements GraphAnalyzer {
     public void checkGraph(InstructionGraph entry, JvmContext initial) {
         Queue<Pair<InstructionGraph, JvmContext>> next = new ArrayDeque<>();
         next.add(new Pair<>(entry, initial));
