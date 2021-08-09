@@ -6,6 +6,7 @@
 
 package JVM;
 
+import Checker.Exceptions.CheckerException;
 import JVM.JvmMethod.AccessFlags;
 import JVM.JvmValue.Reference;
 import java.util.Arrays;
@@ -43,11 +44,20 @@ public class JvmFrame implements Cloneable {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-        JvmFrame copy = (JvmFrame) super.clone();
-        copy.locals = locals.clone();
-        copy.operandStack = (Stack<JvmValue>) operandStack.clone();
-        return copy;
+    protected Object clone() {
+        JvmFrame copy = null;
+        try {
+            copy = (JvmFrame) super.clone();
+            copy.locals = locals.clone();
+            copy.operandStack = (Stack<JvmValue>) operandStack.clone();
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new CheckerException("Invalid clone");
+        }
+    }
+
+    public JvmFrame copy() {
+        return (JvmFrame) clone();
     }
 
     @Override
