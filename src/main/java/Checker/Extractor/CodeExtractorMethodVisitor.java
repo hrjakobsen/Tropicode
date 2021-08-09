@@ -161,7 +161,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             case DUP2:
             case DUP2_X1:
             case DUP2_X2:
-                addOperation(new JvmUnsupportedOperation(jvmop));
+                addOperation(new JvmDUP(jvmop));
                 break;
             case INEG:
             case LNEG:
@@ -198,7 +198,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
                 addOperation(new JvmUnsupportedOperation(jvmop));
                 break;
             case DUP:
-                addOperation(new JvmDUP());
+                addOperation(new JvmDUP(JvmOpCode.DUP));
                 break;
             case POP:
             case POP2:
