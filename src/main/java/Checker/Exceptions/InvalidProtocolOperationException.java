@@ -12,9 +12,9 @@ public class InvalidProtocolOperationException extends CheckerException {
 
     public InvalidProtocolOperationException(Typestate typestate, String operation) {
         super(
-                "Invalid operation '"
+                "Protocol Violation: '"
                         + operation
-                        + "' for protocol "
+                        + "' invoked with protocol "
                         + typestate
                         + ". The available operations are: {"
                         + String.join(",", typestate.getOperations())
