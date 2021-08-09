@@ -6,6 +6,7 @@
 
 package JVM;
 
+import Checker.Exceptions.CheckerException;
 import JVM.JvmMethod.AccessFlags;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -87,6 +89,9 @@ public class JvmContext {
     }
 
     public JvmObject getObject(String identifier) {
+        if (!heap.containsKey(identifier)) {
+            throw new CheckerException("Attempting to look up object that is not in the heap");
+        }
         return heap.get(identifier);
     }
 
@@ -114,7 +119,9 @@ public class JvmContext {
 
     public JvmContext copy() {
         JvmContext newContext = new JvmContext();
-        newContext.frames = (Stack<JvmFrame>) frames.clone();
+        Stack<JvmFrame> newFrames = new Stack<>();
+        newFrames.addAll(frames.stream().map(JvmFrame::copy).collect(Collectors.toList()));
+        newContext.frames = newFrames;
         HashMap<String, JvmObject> newHeap = new HashMap<>();
         for (String s : heap.keySet()) {
             newHeap.put(s, heap.get(s).copy());
@@ -167,21 +174,21 @@ public class JvmContext {
             if (!ctx.heap.containsKey(entry.getKey())) {
                 differences.add("Missing object " + entry.getValue());
             }
-            if (!entry.getValue().getFields().equals(ctx.heap.get(entry.getKey()).fields)) {
+            if (!entry.getValue().getFields().equals(getObject(entry.getKey()).fields)) {
                 differences.add("Fields of " + entry.getKey() + " are different");
             }
-            if (entry.getValue().getProtocol() != ctx.heap.get(entry.getKey()).getProtocol()) {
+            if (entry.getValue().getProtocol() != getObject(entry.getKey()).getProtocol()) {
                 if (entry.getValue().getProtocol() != null
                         && !entry.getValue()
                                 .getProtocol()
-                                .equals(ctx.heap.get(entry.getKey()).getProtocol())) {
+                                .equals(getObject(entry.getKey()).getProtocol())) {
                     differences.add(
                             "Protocol of object "
                                     + entry.getKey()
                                     + " should be "
                                     + entry.getValue().getProtocol().toString()
                                     + " but it is "
-                                    + ctx.heap.get(entry.getKey()).getProtocol().toString());
+                                    + getObject(entry.getKey()).getProtocol().toString());
                 }
             }
         }
