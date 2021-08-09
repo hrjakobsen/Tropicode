@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import lombok.extern.log4j.Log4j2;
+import org.objectweb.asm.Label;
 
 @Log4j2
 public class InstructionGraph {
@@ -82,15 +83,8 @@ public class InstructionGraph {
             lastNode.getBlock().insertInstruction(instruction);
             if (instruction instanceof JvmJUMP) {
                 JvmJUMP jmpInstruction = (JvmJUMP) instruction;
-                if (jumpTable.containsKey(jmpInstruction.getLabel().toString())) {
-                    lastNode.getConnections()
-                            .add(jumpTable.get(jmpInstruction.getLabel().toString()));
-                } else {
-                    if (!forwardJumps.containsKey(jmpInstruction.getLabel().toString())) {
-                        forwardJumps.put(jmpInstruction.getLabel().toString(), new ArrayList<>());
-                    }
-                    forwardJumps.get(jmpInstruction.getLabel().toString()).add(lastNode);
-                }
+                addJumpsToLabels(
+                        lastNode, forwardJumps, jumpTable, jmpInstruction.getLabel(), null);
                 lastNode = new InstructionGraph(new BasicBlock(), depth);
                 nodes.add(lastNode);
             }
@@ -116,14 +110,8 @@ public class InstructionGraph {
 
         for (int i = 0; i < nodes.size() - 1; i++) {
             JvmInstruction instruction = nodes.get(i).getBlock().getLastInstruction();
-            if (instruction instanceof JvmJUMP) {
-                switch (((JvmJUMP) instruction).getOpcode()) {
-                    case GOTO:
-                    case GOTO_W:
-                        continue;
-                    default:
-                        break;
-                }
+            if (!instruction.shouldFallThrough()) {
+                continue;
             }
             if (shouldCoalesceReturns && instruction instanceof JvmReturnOperation) {
                 if (returnNode == null) {
@@ -143,6 +131,36 @@ public class InstructionGraph {
         }
 
         return nodes.get(0);
+    }
+
+    private static void addJumpsToLabels(
+            InstructionGraph node,
+            Map<String, List<InstructionGraph>> forwardJumps,
+            Map<String, InstructionGraph> jumpTable,
+            Label defaultLabel,
+            Label[] moreLabels) {
+        ArrayList<Label> labels = new ArrayList<>();
+        if (defaultLabel != null) {
+            labels.add(defaultLabel);
+        }
+        if (moreLabels != null) {
+            labels.addAll(List.of(moreLabels));
+        }
+
+        for (Label label : labels) {
+            if (jumpTable.containsKey(label.toString())) {
+                if (!node.getConnections().contains(jumpTable.get(label.toString()))) {
+                    node.getConnections().add(jumpTable.get(label.toString()));
+                }
+            } else {
+                if (!forwardJumps.containsKey(label.toString())) {
+                    forwardJumps.put(label.toString(), new ArrayList<>());
+                }
+                if (!forwardJumps.get(label.toString()).contains(node)) {
+                    forwardJumps.get(label.toString()).add(node);
+                }
+            }
+        }
     }
 
     public List<InstructionGraph> getConnections() {

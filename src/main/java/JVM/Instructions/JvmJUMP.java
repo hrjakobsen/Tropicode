@@ -39,4 +39,9 @@ public class JvmJUMP extends JvmOperation {
     public String toString() {
         return "    " + this.opcode.toString() + " " + this.label;
     }
+
+    @Override
+    public boolean shouldFallThrough() {
+        return !(opcode == JvmOpCode.GOTO || opcode == JvmOpCode.GOTO_W);
+    }
 }

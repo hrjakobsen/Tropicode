@@ -21,4 +21,8 @@ public abstract class JvmInstruction {
     public void setLineNumber(int lineNumber) {
         this.lineNumber = lineNumber;
     }
+
+    public boolean shouldFallThrough() {
+        return true;
+    }
 }
