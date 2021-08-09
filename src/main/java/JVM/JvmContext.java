@@ -172,7 +172,7 @@ public class JvmContext {
         List<String> differences = new ArrayList<>();
         for (Entry<String, JvmObject> entry : heap.entrySet()) {
             if (!ctx.heap.containsKey(entry.getKey())) {
-                differences.add("Missing object " + entry.getValue());
+                differences.add("Missing object " + entry.getKey());
             }
             if (!entry.getValue().getFields().equals(getObject(entry.getKey()).fields)) {
                 differences.add("Fields of " + entry.getKey() + " are different");
