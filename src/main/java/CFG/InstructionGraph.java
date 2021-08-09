@@ -10,11 +10,13 @@ import JVM.Instructions.ClassReference;
 import JVM.Instructions.JvmINVOKE;
 import JVM.Instructions.JvmInstruction;
 import JVM.Instructions.JvmJUMP;
+import JVM.Instructions.JvmLOOKUPSWITCH;
 import JVM.Instructions.JvmLabel;
 import JVM.Instructions.JvmNEW;
 import JVM.Instructions.JvmOperation;
 import JVM.Instructions.JvmReturnOperation;
 import JVM.Instructions.JvmStaticFieldOperation;
+import JVM.Instructions.JvmTABLESWITCH;
 import JVM.JvmClass;
 import JVM.JvmContext;
 import JVM.JvmMethod;
@@ -88,6 +90,30 @@ public class InstructionGraph {
                 lastNode = new InstructionGraph(new BasicBlock(), depth);
                 nodes.add(lastNode);
             }
+            if (instruction instanceof JvmLOOKUPSWITCH) {
+                JvmLOOKUPSWITCH lookupSwitch = (JvmLOOKUPSWITCH) instruction;
+                addJumpsToLabels(
+                        lastNode,
+                        forwardJumps,
+                        jumpTable,
+                        lookupSwitch.getDefaultLabel(),
+                        lookupSwitch.getLabels());
+                lastNode = new InstructionGraph(new BasicBlock(), depth);
+                nodes.add(lastNode);
+            }
+
+            if (instruction instanceof JvmTABLESWITCH) {
+                JvmTABLESWITCH tableSwitch = (JvmTABLESWITCH) instruction;
+                addJumpsToLabels(
+                        lastNode,
+                        forwardJumps,
+                        jumpTable,
+                        tableSwitch.getDefaultLabel(),
+                        tableSwitch.getLabels());
+                lastNode = new InstructionGraph(new BasicBlock(), depth);
+                nodes.add(lastNode);
+            }
+
             if (instruction instanceof JvmINVOKE
                     || instruction instanceof JvmReturnOperation
                     || instruction instanceof JvmStaticFieldOperation

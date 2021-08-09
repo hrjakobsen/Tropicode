@@ -21,6 +21,7 @@ import JVM.Instructions.JvmJSR;
 import JVM.Instructions.JvmJUMP;
 import JVM.Instructions.JvmLDC;
 import JVM.Instructions.JvmLOAD;
+import JVM.Instructions.JvmLOOKUPSWITCH;
 import JVM.Instructions.JvmLabel;
 import JVM.Instructions.JvmNEW;
 import JVM.Instructions.JvmNoEffectOperation;
@@ -29,6 +30,7 @@ import JVM.Instructions.JvmReturnOperation;
 import JVM.Instructions.JvmSTORE;
 import JVM.Instructions.JvmSWAP;
 import JVM.Instructions.JvmStaticFieldOperation;
+import JVM.Instructions.JvmTABLESWITCH;
 import JVM.Instructions.JvmUnaryOperation;
 import JVM.Instructions.JvmUnsupportedOperation;
 import JVM.JvmMethod;
@@ -374,19 +376,13 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-        addOperation(new JvmUnsupportedOperation(JvmOpCode.TABLESWITCH));
+        addOperation(new JvmTABLESWITCH(dflt, labels));
         super.visitTableSwitchInsn(min, max, dflt, labels);
     }
 
     @Override
     public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-        addOperation(new JvmUnsupportedOperation(JvmOpCode.LOOKUPSWITCH));
-        /* System.out.println("    " + "LOOKUPSWITCH {");
-        for (int i = 0; i < keys.length; i++) {
-            System.out.println("    " + "    " + keys[i] + " → " + labels[i]);
-        }
-        System.out.println("    " + "    default → " + dflt);
-        System.out.println("    " + "}"); */
+        addOperation(new JvmLOOKUPSWITCH(dflt, keys, labels));
         super.visitLookupSwitchInsn(dflt, keys, labels);
     }
 
