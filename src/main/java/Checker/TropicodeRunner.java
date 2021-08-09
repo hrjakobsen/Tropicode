@@ -13,7 +13,10 @@ import JVM.JvmClass;
 import JVM.JvmContext;
 import JVM.JvmMethod;
 import JVM.JvmMethod.AccessFlags;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,6 +56,9 @@ public class TropicodeRunner implements Runnable {
     @Option(names = "-f", description = "Use flow analysis ")
     boolean useFlowAnalysis = false;
 
+    @Option(names = "-i", description = "Classpath ignore file location")
+    String ignoreFileLocation = null;
+
     private static final Set<String> ignoreDependencies =
             new HashSet<>() {
                 {
@@ -70,24 +76,22 @@ public class TropicodeRunner implements Runnable {
                 }
             };
 
+    private ClassFilter classFilter;
+
     public static void main(String[] args) {
         int exitCode = new CommandLine(new TropicodeRunner()).execute(args);
         System.exit(exitCode);
     }
 
-    private static JvmClass parseClass(String classname, Queue<String> classesToLoad)
-            throws IOException {
+    private JvmClass parseClass(String classname, Queue<String> classesToLoad) throws IOException {
         log.debug("Parsing " + classname);
         ClassReader classReader = new ClassReader(classname);
         CodeExtractorClassVisitor cv = new CodeExtractorClassVisitor();
         classReader.accept(cv, ClassReader.SKIP_DEBUG);
         JvmClass klass = cv.getJvmClass();
-        outer:
         for (String dependency : cv.getClassDependencies()) {
-            for (String pattern : TropicodeRunner.ignoreDependencies) {
-                if (dependency.matches(pattern)) {
-                    continue outer;
-                }
+            if (classFilter.rejects(dependency)) {
+                continue;
             }
             classesToLoad.add(dependency);
             log.debug("Adding " + dependency);
@@ -97,7 +101,22 @@ public class TropicodeRunner implements Runnable {
 
     @Override
     public void run() {
+        classFilter = new ClassFilter();
+        classFilter.addPatterns(TropicodeRunner.ignoreDependencies);
         try {
+            if (ignoreFileLocation == null) {
+                String ignoreFile =
+                        System.getProperty("user.home") + File.separator + ".tropicodeignore";
+                if (Files.exists(Path.of(ignoreFile))) {
+                    classFilter.addFile(Path.of(ignoreFile));
+                }
+            } else {
+                if (Files.exists(Path.of(ignoreFileLocation))) {
+                    classFilter.addFile(Path.of(ignoreFileLocation));
+                } else {
+                    throw new CheckerException("Invalid ignore path");
+                }
+            }
             Queue<String> classesToLoad = new ArrayDeque<>();
             classesToLoad.add(this.entryClass);
 
