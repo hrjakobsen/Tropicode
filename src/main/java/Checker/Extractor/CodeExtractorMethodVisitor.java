@@ -33,6 +33,7 @@ import JVM.Instructions.JvmStaticFieldOperation;
 import JVM.Instructions.JvmTABLESWITCH;
 import JVM.Instructions.JvmUnaryOperation;
 import JVM.Instructions.JvmUnsupportedOperation;
+import JVM.JvmExceptionHandler;
 import JVM.JvmMethod;
 import JVM.JvmOpCode;
 import java.util.Set;
@@ -402,6 +403,12 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
                 descriptor,
                 visible,
                 method);
+    }
+
+    @Override
+    public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
+        method.getExceptionHandlers().add(new JvmExceptionHandler(start, end, handler, type));
+        super.visitTryCatchBlock(start, end, handler, type);
     }
 
     public Set<String> getDependencies() {

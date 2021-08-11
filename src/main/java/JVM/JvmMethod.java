@@ -20,10 +20,11 @@ public class JvmMethod {
     String descriptor;
     String signature;
     List<JvmInstruction> instructions;
+    List<JvmExceptionHandler> exceptionHandlers;
     int numberOfLocalVariables = 0;
 
     public JvmMethod(int access, String name, String descriptor, String signature) {
-        this(access, name, descriptor, signature, new ArrayList<>());
+        this(access, name, descriptor, signature, new ArrayList<>(), new ArrayList<>());
     }
 
     public boolean is(int perm) {
@@ -35,12 +36,14 @@ public class JvmMethod {
             String name,
             String descriptor,
             String signature,
-            List<JvmInstruction> instructions) {
+            List<JvmInstruction> instructions,
+            List<JvmExceptionHandler> exceptionHandlers) {
         this.access = access;
         this.name = name;
         this.descriptor = descriptor;
         this.signature = signature;
         this.instructions = instructions;
+        this.exceptionHandlers = exceptionHandlers;
     }
 
     public int getNumberOfLocalVariables() {
@@ -49,6 +52,10 @@ public class JvmMethod {
 
     public void setNumberOfLocalVariables(int numberOfLocalVariables) {
         this.numberOfLocalVariables = numberOfLocalVariables;
+    }
+
+    public List<JvmExceptionHandler> getExceptionHandlers() {
+        return exceptionHandlers;
     }
 
     public int getAccess() {
