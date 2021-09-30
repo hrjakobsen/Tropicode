@@ -71,7 +71,7 @@ public class JvmMethod {
     }
 
     public InstructionGraph getInstructionGraph(int depth) {
-        return InstructionGraph.fromList(this.instructions, depth);
+        return InstructionGraph.fromList(this.instructions, this.exceptionHandlers, depth);
     }
 
     public String getName() {

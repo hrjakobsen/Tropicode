@@ -16,13 +16,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.Label;
 import org.tropicode.checker.JVM.JvmClass;
 import org.tropicode.checker.JVM.JvmContext;
+import org.tropicode.checker.JVM.JvmExceptionHandler;
 import org.tropicode.checker.JVM.JvmMethod;
 import org.tropicode.checker.JVM.JvmOpCode;
 import org.tropicode.checker.JVM.instructions.ClassReference;
+import org.tropicode.checker.JVM.instructions.JvmEnterTryBlock;
+import org.tropicode.checker.JVM.instructions.JvmExitTryBlock;
+import org.tropicode.checker.JVM.instructions.JvmHandleException;
 import org.tropicode.checker.JVM.instructions.JvmINVOKE;
 import org.tropicode.checker.JVM.instructions.JvmInstruction;
 import org.tropicode.checker.JVM.instructions.JvmJUMP;
@@ -59,11 +64,12 @@ public class InstructionGraph {
         this.depth = depth;
     }
 
-    public static InstructionGraph fromList(List<JvmInstruction> instructions) {
-        return fromList(instructions, 0);
-    }
-
-    public static InstructionGraph fromList(List<JvmInstruction> instructions, int depth) {
+    public static InstructionGraph fromList(
+            List<JvmInstruction> plainInstructions,
+            List<JvmExceptionHandler> exceptionHandlers,
+            int depth) {
+        List<JvmInstruction> instructions =
+                insertExceptionHandlers(plainInstructions, exceptionHandlers);
         if (instructions.size() == 0) instructions.add(new JvmReturnOperation(JvmOpCode.RETURN));
         List<InstructionGraph> nodes = new ArrayList<>();
         InstructionGraph lastNode = new InstructionGraph(new BasicBlock(), depth);
@@ -73,6 +79,7 @@ public class InstructionGraph {
         Map<String, InstructionGraph> jumpTable = new HashMap<>();
         int returns = 0;
         boolean shouldCoalesceReturns = false;
+        Stack<String> exceptionHandlerStack = new Stack<>();
 
         for (JvmInstruction instruction : instructions) {
             if (instruction instanceof JvmLabel) {
@@ -82,7 +89,36 @@ public class InstructionGraph {
                 }
                 jumpTable.put(((JvmLabel) instruction).getLabel(), lastNode);
             }
+
+            if (instruction instanceof JvmEnterTryBlock) {
+                exceptionHandlerStack.push(
+                        ((JvmEnterTryBlock) instruction).getHandler().getTarget().toString());
+            }
+
+            if (instruction instanceof JvmExitTryBlock) {
+                exceptionHandlerStack.pop();
+            }
+
+            if (instruction instanceof JvmEnterTryBlock
+                    || instruction instanceof JvmExitTryBlock
+                    || instruction instanceof JvmHandleException) {
+                if (lastNode.getBlock().getInstructions().size() != 0) {
+                    lastNode = new InstructionGraph(new BasicBlock(), depth);
+                    nodes.add(lastNode);
+                }
+            }
             lastNode.getBlock().insertInstruction(instruction);
+
+            if (!exceptionHandlerStack.empty()) {
+                String label = exceptionHandlerStack.peek();
+                if (!forwardJumps.containsKey(label)) {
+                    forwardJumps.put(label, new ArrayList<>());
+                }
+                if (!forwardJumps.get(label).contains(lastNode)) {
+                    forwardJumps.get(label).add(lastNode);
+                }
+            }
+
             if (instruction instanceof JvmJUMP) {
                 JvmJUMP jmpInstruction = (JvmJUMP) instruction;
                 addJumpsToLabels(
@@ -157,6 +193,63 @@ public class InstructionGraph {
         }
 
         return nodes.get(0);
+    }
+
+    private static List<JvmInstruction> insertExceptionHandlers(
+            List<JvmInstruction> instructions, List<JvmExceptionHandler> exceptionHandlers) {
+        List<JvmInstruction> instructionsWithHandlers = new ArrayList<>();
+        for (JvmInstruction instruction : instructions) {
+            if (instruction instanceof JvmLabel) {
+                // Check if label is exit point of an exception
+                List<JvmExceptionHandler> exitHandlers =
+                        exceptionHandlers.stream()
+                                .filter(
+                                        ex ->
+                                                ex.getTo()
+                                                        .toString()
+                                                        .equals(
+                                                                ((JvmLabel) instruction)
+                                                                        .getLabel()))
+                                .collect(Collectors.toList());
+                for (JvmExceptionHandler exitHandler : exitHandlers) {
+                    instructionsWithHandlers.add(new JvmExitTryBlock(exitHandler));
+                }
+
+                instructionsWithHandlers.add(instruction);
+
+                // Check if label is exception handler
+                boolean exceptionHandler =
+                        exceptionHandlers.stream()
+                                .anyMatch(
+                                        ex ->
+                                                ex.getTarget()
+                                                        .toString()
+                                                        .equals(
+                                                                ((JvmLabel) instruction)
+                                                                        .getLabel()));
+                if (exceptionHandler) {
+                    instructionsWithHandlers.add(new JvmHandleException());
+                }
+
+                // Check if label is entry point of an exception
+                List<JvmExceptionHandler> entryHandlers =
+                        exceptionHandlers.stream()
+                                .filter(
+                                        ex ->
+                                                ex.getFrom()
+                                                        .toString()
+                                                        .equals(
+                                                                ((JvmLabel) instruction)
+                                                                        .getLabel()))
+                                .collect(Collectors.toList());
+                for (JvmExceptionHandler entryHandler : entryHandlers) {
+                    instructionsWithHandlers.add(new JvmEnterTryBlock(entryHandler));
+                }
+            } else {
+                instructionsWithHandlers.add(instruction);
+            }
+        }
+        return instructionsWithHandlers;
     }
 
     private static void addJumpsToLabels(
