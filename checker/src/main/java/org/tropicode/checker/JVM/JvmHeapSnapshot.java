@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.tropicode.checker.Checker.Typestate;
+import org.tropicode.checker.checker.Typestate;
 
 public class JvmHeapSnapshot {
 

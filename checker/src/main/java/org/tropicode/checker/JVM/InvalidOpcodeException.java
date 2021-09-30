@@ -6,7 +6,7 @@
 
 package org.tropicode.checker.JVM;
 
-import org.tropicode.checker.Checker.Exceptions.CheckerException;
+import org.tropicode.checker.checker.exceptions.CheckerException;
 
 public class InvalidOpcodeException extends CheckerException {
 

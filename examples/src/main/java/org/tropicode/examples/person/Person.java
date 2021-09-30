@@ -6,7 +6,7 @@
 
 package org.tropicode.examples.person;
 
-import org.tropicode.checker.Annotations.Protocol;
+import org.tropicode.checker.annotations.Protocol;
 
 @Protocol("{setFirstName; {setLastName; {greet; end}}  setLastName; {setFirstName; {greet; end}}}")
 public class Person {

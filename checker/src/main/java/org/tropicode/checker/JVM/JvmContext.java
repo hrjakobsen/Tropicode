@@ -15,8 +15,8 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
-import org.tropicode.checker.Checker.Exceptions.CheckerException;
 import org.tropicode.checker.JVM.JvmMethod.AccessFlags;
+import org.tropicode.checker.checker.exceptions.CheckerException;
 
 @Log4j2
 public class JvmContext {

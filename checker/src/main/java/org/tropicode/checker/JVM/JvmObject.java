@@ -8,7 +8,7 @@ package org.tropicode.checker.JVM;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.tropicode.checker.Checker.Typestate;
+import org.tropicode.checker.checker.Typestate;
 
 public class JvmObject {
 

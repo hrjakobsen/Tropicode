@@ -8,9 +8,9 @@ package org.tropicode.checker.JVM;
 
 import java.util.Arrays;
 import java.util.Stack;
-import org.tropicode.checker.Checker.Exceptions.CheckerException;
 import org.tropicode.checker.JVM.JvmMethod.AccessFlags;
 import org.tropicode.checker.JVM.JvmValue.Reference;
+import org.tropicode.checker.checker.exceptions.CheckerException;
 
 public class JvmFrame implements Cloneable {
     Stack<JvmValue> operandStack = new Stack<>();

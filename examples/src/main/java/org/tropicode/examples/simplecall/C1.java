@@ -6,7 +6,7 @@
 
 package org.tropicode.examples.simplecall;
 
-import org.tropicode.checker.Annotations.Protocol;
+import org.tropicode.checker.annotations.Protocol;
 
 @Protocol("{question; {Branch1; {Branch2; {stop; end}} " + "Branch2; {Branch1; {stop; end}}}}")
 public class C1 {

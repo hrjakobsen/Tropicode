@@ -10,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.junit.jupiter.api.Test;
-import org.tropicode.checker.Checker.Typestate;
-import org.tropicode.checker.Checker.Typestate.BooleanChoice;
-import org.tropicode.checker.Checker.Typestate.Branch;
+import org.tropicode.checker.checker.Typestate;
+import org.tropicode.checker.checker.Typestate.BooleanChoice;
+import org.tropicode.checker.checker.Typestate.Branch;
 
 public class TypestateParserTest {
 

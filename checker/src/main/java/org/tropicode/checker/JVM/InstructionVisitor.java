@@ -6,22 +6,22 @@
 
 package org.tropicode.checker.JVM;
 
-import org.tropicode.checker.JVM.Instructions.JvmBinaryOperation;
-import org.tropicode.checker.JVM.Instructions.JvmCONST;
-import org.tropicode.checker.JVM.Instructions.JvmDUP;
-import org.tropicode.checker.JVM.Instructions.JvmINVOKE;
-import org.tropicode.checker.JVM.Instructions.JvmInstruction;
-import org.tropicode.checker.JVM.Instructions.JvmJSR;
-import org.tropicode.checker.JVM.Instructions.JvmJUMP;
-import org.tropicode.checker.JVM.Instructions.JvmLDC;
-import org.tropicode.checker.JVM.Instructions.JvmLOAD;
-import org.tropicode.checker.JVM.Instructions.JvmLabel;
-import org.tropicode.checker.JVM.Instructions.JvmNEW;
-import org.tropicode.checker.JVM.Instructions.JvmNoEffectOperation;
-import org.tropicode.checker.JVM.Instructions.JvmPOP;
-import org.tropicode.checker.JVM.Instructions.JvmReturnOperation;
-import org.tropicode.checker.JVM.Instructions.JvmSTORE;
-import org.tropicode.checker.JVM.Instructions.JvmUnsupportedOperation;
+import org.tropicode.checker.JVM.instructions.JvmBinaryOperation;
+import org.tropicode.checker.JVM.instructions.JvmCONST;
+import org.tropicode.checker.JVM.instructions.JvmDUP;
+import org.tropicode.checker.JVM.instructions.JvmINVOKE;
+import org.tropicode.checker.JVM.instructions.JvmInstruction;
+import org.tropicode.checker.JVM.instructions.JvmJSR;
+import org.tropicode.checker.JVM.instructions.JvmJUMP;
+import org.tropicode.checker.JVM.instructions.JvmLDC;
+import org.tropicode.checker.JVM.instructions.JvmLOAD;
+import org.tropicode.checker.JVM.instructions.JvmLabel;
+import org.tropicode.checker.JVM.instructions.JvmNEW;
+import org.tropicode.checker.JVM.instructions.JvmNoEffectOperation;
+import org.tropicode.checker.JVM.instructions.JvmPOP;
+import org.tropicode.checker.JVM.instructions.JvmReturnOperation;
+import org.tropicode.checker.JVM.instructions.JvmSTORE;
+import org.tropicode.checker.JVM.instructions.JvmUnsupportedOperation;
 
 public abstract class InstructionVisitor<T> {
 

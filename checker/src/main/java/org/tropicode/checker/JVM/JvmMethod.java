@@ -9,8 +9,8 @@ package org.tropicode.checker.JVM;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
-import org.tropicode.checker.CFG.InstructionGraph;
-import org.tropicode.checker.JVM.Instructions.JvmInstruction;
+import org.tropicode.checker.JVM.instructions.JvmInstruction;
+import org.tropicode.checker.cfg.InstructionGraph;
 
 @Log4j2
 public class JvmMethod {

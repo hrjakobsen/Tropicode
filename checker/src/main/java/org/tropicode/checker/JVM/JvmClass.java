@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.log4j.Log4j2;
-import org.tropicode.checker.Checker.Typestate;
+import org.tropicode.checker.checker.Typestate;
 
 @Log4j2
 public class JvmClass {

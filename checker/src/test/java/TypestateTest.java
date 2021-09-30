@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.tropicode.checker.Checker.Typestate;
+import org.tropicode.checker.checker.Typestate;
 
 public class TypestateTest {
 

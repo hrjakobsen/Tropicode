@@ -6,7 +6,7 @@
 
 package org.tropicode.examples.gettersetter;
 
-import org.tropicode.checker.Annotations.Protocol;
+import org.tropicode.checker.annotations.Protocol;
 
 @Protocol("({setA; {getA; end}} | {setB; {getB; end}} | {setC; {getC; end}})")
 public class DataWrapper {
