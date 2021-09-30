@@ -20,7 +20,7 @@ public class JvmLDC extends JvmOperation {
 
     @Override
     public String toString() {
-        return String.format("%s %s", super.toString(), value.getClass().getName());
+        return String.format("%s %s (%s)", super.toString(), value.getClass().getName(), value);
     }
 
     @Override
