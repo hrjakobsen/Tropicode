@@ -9,10 +9,10 @@ package org.tropicode.checker.JVM;
 import org.objectweb.asm.Label;
 
 public class JvmExceptionHandler {
-    private Label from;
-    private Label to;
-    private Label target;
-    private String type;
+    private final Label from;
+    private final Label to;
+    private final Label target;
+    private final String type;
 
     public JvmExceptionHandler(Label from, Label to, Label target, String type) {
         this.from = from;

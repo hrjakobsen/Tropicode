@@ -79,7 +79,7 @@ public class InstructionGraph {
         Map<String, InstructionGraph> jumpTable = new HashMap<>();
         int returns = 0;
         boolean shouldCoalesceReturns = false;
-        Stack<String> exceptionHandlerStack = new Stack<>();
+        Stack<List<String>> exceptionHandlerStack = new Stack<>();
 
         for (JvmInstruction instruction : instructions) {
             if (instruction instanceof JvmLabel) {
@@ -92,7 +92,11 @@ public class InstructionGraph {
 
             if (instruction instanceof JvmEnterTryBlock) {
                 exceptionHandlerStack.push(
-                        ((JvmEnterTryBlock) instruction).getHandler().getTarget().toString());
+                        ((JvmEnterTryBlock) instruction)
+                                .getHandlers().stream()
+                                        .map(JvmExceptionHandler::getTarget)
+                                        .map(Object::toString)
+                                        .collect(Collectors.toList()));
             }
 
             if (instruction instanceof JvmExitTryBlock) {
@@ -110,12 +114,13 @@ public class InstructionGraph {
             lastNode.getBlock().insertInstruction(instruction);
 
             if (!exceptionHandlerStack.empty()) {
-                String label = exceptionHandlerStack.peek();
-                if (!forwardJumps.containsKey(label)) {
-                    forwardJumps.put(label, new ArrayList<>());
-                }
-                if (!forwardJumps.get(label).contains(lastNode)) {
-                    forwardJumps.get(label).add(lastNode);
+                for (String label : exceptionHandlerStack.peek()) {
+                    if (!forwardJumps.containsKey(label)) {
+                        forwardJumps.put(label, new ArrayList<>());
+                    }
+                    if (!forwardJumps.get(label).contains(lastNode)) {
+                        forwardJumps.get(label).add(lastNode);
+                    }
                 }
             }
 
@@ -201,7 +206,7 @@ public class InstructionGraph {
         for (JvmInstruction instruction : instructions) {
             if (instruction instanceof JvmLabel) {
                 // Check if label is exit point of an exception
-                List<JvmExceptionHandler> exitHandlers =
+                Stack<JvmExceptionHandler> added =
                         exceptionHandlers.stream()
                                 .filter(
                                         ex ->
@@ -210,9 +215,18 @@ public class InstructionGraph {
                                                         .equals(
                                                                 ((JvmLabel) instruction)
                                                                         .getLabel()))
-                                .collect(Collectors.toList());
-                for (JvmExceptionHandler exitHandler : exitHandlers) {
-                    instructionsWithHandlers.add(new JvmExitTryBlock(exitHandler));
+                                .collect(Collectors.toCollection(Stack::new));
+                while (!added.isEmpty()) {
+                    JvmExceptionHandler next = added.peek();
+                    List<JvmExceptionHandler> matches =
+                            added.stream()
+                                    .filter(
+                                            ex ->
+                                                    ex.getFrom().equals(next.getFrom())
+                                                            && ex.getTo().equals(next.getTo()))
+                                    .collect(Collectors.toList());
+                    instructionsWithHandlers.add(new JvmExitTryBlock(matches));
+                    added.removeAll(matches);
                 }
 
                 instructionsWithHandlers.add(instruction);
@@ -232,7 +246,8 @@ public class InstructionGraph {
                 }
 
                 // Check if label is entry point of an exception
-                List<JvmExceptionHandler> entryHandlers =
+
+                added =
                         exceptionHandlers.stream()
                                 .filter(
                                         ex ->
@@ -241,9 +256,18 @@ public class InstructionGraph {
                                                         .equals(
                                                                 ((JvmLabel) instruction)
                                                                         .getLabel()))
-                                .collect(Collectors.toList());
-                for (JvmExceptionHandler entryHandler : entryHandlers) {
-                    instructionsWithHandlers.add(new JvmEnterTryBlock(entryHandler));
+                                .collect(Collectors.toCollection(Stack::new));
+                while (!added.isEmpty()) {
+                    JvmExceptionHandler next = added.peek();
+                    List<JvmExceptionHandler> matches =
+                            added.stream()
+                                    .filter(
+                                            ex ->
+                                                    ex.getFrom().equals(next.getFrom())
+                                                            && ex.getTo().equals(next.getTo()))
+                                    .collect(Collectors.toList());
+                    instructionsWithHandlers.add(new JvmEnterTryBlock(matches));
+                    added.removeAll(matches);
                 }
             } else {
                 instructionsWithHandlers.add(instruction);

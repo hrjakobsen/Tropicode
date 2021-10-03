@@ -13,6 +13,7 @@ public class JvmHandleException extends JvmInstruction {
     @Override
     public void evaluateInstruction(JvmContext ctx) {
         // TODO: Clear required stack levels etc.
+        ctx.exitExceptionHandler();
     }
 
     @Override

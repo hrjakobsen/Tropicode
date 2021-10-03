@@ -6,27 +6,24 @@
 
 package org.tropicode.checker.JVM.instructions;
 
+import java.util.List;
 import org.tropicode.checker.JVM.JvmContext;
 import org.tropicode.checker.JVM.JvmExceptionHandler;
 
 public class JvmExitTryBlock extends JvmInstruction {
-    private JvmExceptionHandler handler;
+    private final List<JvmExceptionHandler> handlers;
 
-    public JvmExceptionHandler getHandler() {
-        return handler;
+    public List<JvmExceptionHandler> getHandlers() {
+        return handlers;
     }
 
-    public void setHandler(JvmExceptionHandler handler) {
-        this.handler = handler;
-    }
-
-    public JvmExitTryBlock(JvmExceptionHandler handler) {
-        this.handler = handler;
+    public JvmExitTryBlock(List<JvmExceptionHandler> handlers) {
+        this.handlers = handlers;
     }
 
     @Override
     public void evaluateInstruction(JvmContext ctx) {
-        // do nothing
+        ctx.exitExceptionHandler();
     }
 
     @Override

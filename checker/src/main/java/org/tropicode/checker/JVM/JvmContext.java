@@ -27,6 +27,7 @@ public class JvmContext {
     private Map<String, String> keys = new HashMap<>();
     private Map<String, JvmClass> classes = new HashMap<>();
     private Map<String, JvmHeapSnapshot> snapshots = new HashMap<>();
+    private Stack<JvmExceptionFrame> exceptionHandlerStack = new Stack<>();
 
     public Map<String, JvmClass> getClasses() {
         return classes;
@@ -134,6 +135,11 @@ public class JvmContext {
             newKeys.put(s, keys.get(s));
         }
         newContext.keys = newKeys;
+        newContext.exceptionHandlerStack = new Stack<>();
+        newContext.exceptionHandlerStack.addAll(
+                exceptionHandlerStack.stream()
+                        .map(JvmExceptionFrame::clone)
+                        .collect(Collectors.toList()));
         return newContext;
     }
 
@@ -200,7 +206,35 @@ public class JvmContext {
         if (!frames.equals(ctx.frames)) {
             differences.add("Different stacks");
         }
+
+        if (!exceptionHandlerStack.equals(ctx.exceptionHandlerStack)) {
+            differences.add("Different exception handler stacks");
+        }
         return differences;
+    }
+
+    public boolean isInsideExceptionHandler() {
+        return !exceptionHandlerStack.empty();
+    }
+
+    public void enterExceptionHandler(List<JvmExceptionHandler> handlers) {
+        exceptionHandlerStack.push(new JvmExceptionFrame(handlers));
+    }
+
+    public void registerMethodCallForObject(JvmObject object) {}
+
+    public void exitExceptionHandler() {
+        exceptionHandlerStack.pop();
+    }
+
+    public void exitExceptionHandler(JvmExceptionHandler handler) {
+        if (exceptionHandlerStack.empty()) {
+            throw new CheckerException(
+                    "Empty exception handler stack when attempting to exit a try statement");
+        }
+        if (!exceptionHandlerStack.pop().getHandlers().contains(handler)) {
+            throw new CheckerException("Invalid exception handler exited");
+        }
     }
 
     public int heapSize() {
