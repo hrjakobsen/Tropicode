@@ -7,9 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="checker" />
         <module name="examples" />
         <module name="tropicode" />
+        <module name="checker" />
       </profile>
     </annotationProcessing>
   </component>
