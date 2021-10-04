@@ -11,6 +11,10 @@ public abstract class JvmValue implements Cloneable {
     public static final JvmValue UNKNOWN = new UnknownByte();
     public static final JvmValue UNKNOWN_REFERENCE = new UnknownReference();
 
+    public boolean isUnknownReference() {
+        return false;
+    }
+
     private static class UnknownByte extends JvmValue {
 
         @Override
@@ -42,7 +46,7 @@ public abstract class JvmValue implements Cloneable {
         }
     }
 
-    public static class UnknownReference extends Reference implements Cloneable {
+    private static class UnknownReference extends Reference implements Cloneable {
 
         public UnknownReference() {
             super("UNKNOWN");
@@ -61,6 +65,11 @@ public abstract class JvmValue implements Cloneable {
         @Override
         protected Object clone() throws CloneNotSupportedException {
             return super.clone();
+        }
+
+        @Override
+        public boolean isUnknownReference() {
+            return true;
         }
     }
 }

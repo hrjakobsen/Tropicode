@@ -15,8 +15,6 @@ import org.tropicode.checker.JVM.JvmObject;
 import org.tropicode.checker.JVM.JvmOpCode;
 import org.tropicode.checker.JVM.JvmValue;
 import org.tropicode.checker.JVM.JvmValue.Reference;
-import org.tropicode.checker.JVM.JvmValue.UnknownReference;
-import org.tropicode.checker.checker.exceptions.CheckerException;
 import org.tropicode.checker.checker.exceptions.InvalidProtocolOperationException;
 
 @Log4j2
@@ -53,7 +51,7 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
         for (int i = 0; i < numParams; i++) {
             JvmValue val = ctx.pop();
             args.add(val);
-            if (val instanceof Reference && !(val instanceof UnknownReference)) {
+            if (val instanceof Reference && !(val.isUnknownReference())) {
                 if (ctx.getObject(((Reference) val).getIdentifier()).isTainted()) {
                     shouldTaint = true;
                 }
