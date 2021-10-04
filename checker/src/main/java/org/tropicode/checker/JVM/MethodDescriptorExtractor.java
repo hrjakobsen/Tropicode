@@ -85,6 +85,12 @@ public class MethodDescriptorExtractor {
     private String parseUntil(char delimiter) {
         StringBuilder str = new StringBuilder();
         do {
+            if (index >= chars.length) {
+                throw new CheckerException(
+                        "Invalid method descriptor. Could not find the character '"
+                                + delimiter
+                                + "'.");
+            }
             str.append(chars[index]);
         } while (chars[index++] != delimiter);
         return str.toString();
