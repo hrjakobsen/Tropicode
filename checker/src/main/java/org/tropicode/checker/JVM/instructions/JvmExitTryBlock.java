@@ -23,7 +23,7 @@ public class JvmExitTryBlock extends JvmInstruction {
 
     @Override
     public void evaluateInstruction(JvmContext ctx) {
-        ctx.exitExceptionHandler();
+        ctx.exitTryBlock();
     }
 
     @Override

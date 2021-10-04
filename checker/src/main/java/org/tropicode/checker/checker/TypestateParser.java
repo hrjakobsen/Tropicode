@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Stack;
 import lombok.extern.log4j.Log4j2;
 import org.tropicode.checker.checker.Typestate.BooleanChoice;
+import org.tropicode.checker.checker.Typestate.ExceptionPath;
 import org.tropicode.checker.checker.TypestateLexer.Token;
 import org.tropicode.checker.checker.TypestateLexer.TokenType;
 import org.tropicode.checker.checker.exceptions.CheckerException;
@@ -37,12 +38,27 @@ public class TypestateParser {
         TypestateLexer.Token next = tokens.peek();
         return switch (next.getType()) {
             case BRACKET_OPEN -> parseBranch(tokens);
+            case TRY -> parseTry(tokens);
             case PAREN_OPEN -> parseParallel(tokens);
             case END -> parseEnd(tokens);
             case REC -> parseRec(tokens);
             case IDENTIFIER -> parseVariable(tokens);
             default -> throw new CheckerException("Invalid next token " + next.getText());
         };
+    }
+
+    private Typestate parseTry(Stack<Token> tokens) {
+        TypestateLexer.Token tryToken = tokens.pop();
+        ensureToken(TypestateLexer.TokenType.TRY, tryToken);
+
+        Typestate intended = parseU(tokens);
+
+        TypestateLexer.Token except = tokens.pop();
+        ensureToken(TokenType.EXCEPT, except);
+
+        Typestate continuation = parseU(tokens);
+
+        return new ExceptionPath(intended, continuation);
     }
 
     private Typestate parseParallel(Stack<TypestateLexer.Token> tokens) {

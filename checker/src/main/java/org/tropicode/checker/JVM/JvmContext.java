@@ -16,6 +16,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.tropicode.checker.JVM.JvmMethod.AccessFlags;
+import org.tropicode.checker.JVM.JvmValue.Reference;
+import org.tropicode.checker.checker.Typestate;
 import org.tropicode.checker.checker.exceptions.CheckerException;
 
 @Log4j2
@@ -217,17 +219,39 @@ public class JvmContext {
         return !exceptionHandlerStack.empty();
     }
 
-    public void enterExceptionHandler(List<JvmExceptionHandler> handlers) {
+    public void enterTryBlock(List<JvmExceptionHandler> handlers) {
         exceptionHandlerStack.push(new JvmExceptionFrame(handlers));
     }
 
-    public void registerMethodCallForObject(JvmObject object) {}
+    public void registerMethodCallForObject(Reference objectReference) {
+        if (exceptionHandlerStack.empty() || objectReference.isUnknownReference()) {
+            return;
+        }
+        JvmObject obj = this.getObject(objectReference.getIdentifier());
+        exceptionHandlerStack.peek().getTaintedObjects().add(obj);
+    }
 
-    public void exitExceptionHandler() {
+    public void exitTryBlock() {
         exceptionHandlerStack.pop();
     }
 
-    public void exitExceptionHandler(JvmExceptionHandler handler) {
+    public void enterExceptionHandler() {
+        // FIXME: Not *all* objects should be moved to exception state. Only those affected by the
+        //  handler. However I am unsure of the best way to find the affected objects.
+        for (JvmObject obj : heap.values()) {
+            if (obj.getProtocol() != null) {
+                if (obj.getProtocol().isAllowed("$EXCEPTION")) {
+                    obj.setProtocol(obj.getProtocol().perform("$EXCEPTION"));
+                } else {
+                    obj.setProtocol(Typestate.INVALID);
+                    log.warn("Object " + obj + " has no exception protocol defined");
+                }
+            }
+        }
+        exitTryBlock();
+    }
+
+    public void exitTryBlock(JvmExceptionHandler handler) {
         if (exceptionHandlerStack.empty()) {
             throw new CheckerException(
                     "Empty exception handler stack when attempting to exit a try statement");

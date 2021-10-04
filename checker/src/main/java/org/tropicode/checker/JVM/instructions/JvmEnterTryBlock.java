@@ -24,7 +24,7 @@ public class JvmEnterTryBlock extends JvmInstruction {
 
     @Override
     public void evaluateInstruction(JvmContext ctx) {
-        ctx.enterExceptionHandler(handlers);
+        ctx.enterTryBlock(handlers);
     }
 
     @Override

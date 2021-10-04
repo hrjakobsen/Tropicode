@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public abstract class Typestate implements Cloneable {
 
     public static Typestate END = new End();
+    public static Typestate INVALID = new Invalid();
 
     public static Typestate getInitialObjectProtocol(String protocol) {
         Typestate parsedProtocol = fromString(protocol);
@@ -414,6 +415,96 @@ public abstract class Typestate implements Cloneable {
         public String toString() {
             return String.format(
                     "[%s, %s]", this.trueBranch.toString(), this.falseBranch.toString());
+        }
+    }
+
+    public static final class ExceptionPath extends Typestate {
+        private Typestate intended;
+        private Typestate continuation;
+
+        public ExceptionPath(Typestate intended, Typestate continuation) {
+            this.intended = intended;
+            this.continuation = continuation;
+        }
+
+        @Override
+        public Typestate deepCopy() {
+            return new ExceptionPath(this.intended.deepCopy(), this.continuation.deepCopy());
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            if (action.equals("$EXCEPTION")) {
+                return true;
+            }
+            return this.intended.isAllowed(action);
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            if (action.equals("$EXCEPTION")) {
+                return this.continuation;
+            } else {
+                return new ExceptionPath(this.intended.perform(action), this.continuation);
+            }
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            return new ExceptionPath(
+                    this.intended.unfoldRecursive(identifier, ts),
+                    this.continuation.unfoldRecursive(identifier, ts));
+        }
+
+        @Override
+        public List<String> getOperations() {
+            List<String> ops = this.intended.getOperations();
+            ops.add("$EXCEPTION");
+            return ops;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "try %s except %s", this.intended.toString(), this.continuation.toString());
+        }
+    }
+
+    public static final class Invalid extends Typestate {
+
+        @Override
+        public String toString() {
+            return "Invalid";
+        }
+
+        @Override
+        public Typestate deepCopy() {
+            return this;
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            return false;
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            return this;
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            return this;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other;
+        }
+
+        @Override
+        public List<String> getOperations() {
+            return new ArrayList<>();
         }
     }
 }

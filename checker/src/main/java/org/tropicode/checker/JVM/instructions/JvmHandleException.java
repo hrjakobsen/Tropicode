@@ -14,7 +14,7 @@ public class JvmHandleException extends JvmInstruction {
     @Override
     public void evaluateInstruction(JvmContext ctx) {
         // TODO: Clear required stack levels etc.
-        ctx.exitExceptionHandler();
+        ctx.enterExceptionHandler();
         // FIXME: For now add the exception reference to the stack as an unknown reference
         ctx.push(JvmValue.UNKNOWN_REFERENCE);
     }

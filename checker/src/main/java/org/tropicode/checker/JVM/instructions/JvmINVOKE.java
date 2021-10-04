@@ -63,6 +63,7 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
         boolean hasReference = this.opcode != JvmOpCode.INVOKESTATIC;
         if (hasReference) {
             JvmValue.Reference objRef = (Reference) ctx.pop();
+            ctx.registerMethodCallForObject(objRef);
             if (objRef == JvmValue.UNKNOWN_REFERENCE) {
                 log.warn(
                         String.format(

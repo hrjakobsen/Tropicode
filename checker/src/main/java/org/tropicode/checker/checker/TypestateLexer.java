@@ -70,6 +70,8 @@ public class TypestateLexer {
         COLON(":"),
         END("end"),
         REC("rec"),
+        TRY("try"),
+        EXCEPT("except"),
         DOT("\\."),
         COMMA(","),
         IDENTIFIER("[a-zA-Z_$][a-zA-Z_$0-9]*");
