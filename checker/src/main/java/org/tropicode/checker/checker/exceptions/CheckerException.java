@@ -24,7 +24,7 @@ public class CheckerException extends RuntimeException {
     public String toString() {
         final String line =
                 "================================================================================\n";
-        final String title = centerText(80, this.getClass().getName()) + "\n";
+        final String title = centerText(80, this.getClass().getSimpleName()) + "\n";
         StringBuilder sb = new StringBuilder(line).append(title);
         String str = this.getMessage();
         sb.append(str.replaceAll("(.{80})", "$1\n"));
