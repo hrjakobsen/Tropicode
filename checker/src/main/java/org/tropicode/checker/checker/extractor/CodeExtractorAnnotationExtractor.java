@@ -29,7 +29,7 @@ public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
         this.klass = klass;
         this.descriptor = descriptor;
         this.visible = visible;
-        if (descriptor.equals("LAnnotations/Protocol;")) {
+        if (descriptor.equals("Lorg/tropicode/checker/annotations/Protocol;")) {
             isProtocol = true;
         }
     }
