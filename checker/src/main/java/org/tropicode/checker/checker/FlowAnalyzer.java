@@ -14,7 +14,6 @@ import java.util.Queue;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.tropicode.checker.JVM.JvmContext;
-import org.tropicode.checker.JVM.instructions.JvmHandleException;
 import org.tropicode.checker.JVM.instructions.JvmInstruction;
 import org.tropicode.checker.JVM.instructions.JvmLabel;
 import org.tropicode.checker.cfg.InstructionGraph;
@@ -39,11 +38,6 @@ public class FlowAnalyzer implements GraphAnalyzer {
             cache.add(next);
             JvmContext ctx = next.getRight().copy();
             JvmInstruction inst = next.getLeft().getBlock().getInstructions().get(0);
-
-            if (inst instanceof JvmHandleException) {
-                // TODO: Implement proper exception checking instead of ignoring the paths
-                continue;
-            }
 
             // Hack to handle infinite checking when new objects are instantiated inside a loop body
             if (inst instanceof JvmLabel) {

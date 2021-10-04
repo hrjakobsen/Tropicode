@@ -82,6 +82,13 @@ public class InstructionGraph {
         Stack<List<String>> exceptionHandlerStack = new Stack<>();
 
         for (JvmInstruction instruction : instructions) {
+            if (!exceptionHandlerStack.empty()) {
+                if (lastNode.getBlock().getInstructions().size() != 0) {
+                    lastNode = new InstructionGraph(new BasicBlock(), depth);
+                    nodes.add(lastNode);
+                }
+            }
+
             if (instruction instanceof JvmLabel) {
                 if (lastNode.getBlock().getInstructions().size() != 0) {
                     lastNode = new InstructionGraph(new BasicBlock(), depth);
