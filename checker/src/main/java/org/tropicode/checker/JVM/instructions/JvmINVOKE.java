@@ -15,6 +15,7 @@ import org.tropicode.checker.JVM.JvmObject;
 import org.tropicode.checker.JVM.JvmOpCode;
 import org.tropicode.checker.JVM.JvmValue;
 import org.tropicode.checker.JVM.JvmValue.Reference;
+import org.tropicode.checker.JVM.MethodDescriptorExtractor;
 import org.tropicode.checker.checker.exceptions.InvalidProtocolOperationException;
 
 @Log4j2
@@ -45,7 +46,9 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
 
     @Override
     public void evaluateInstruction(JvmContext ctx) {
-        int numParams = countParameters(this.descriptor);
+        MethodDescriptorExtractor descriptorExtractor =
+                new MethodDescriptorExtractor(this.descriptor);
+        int numParams = descriptorExtractor.getArgumentTypes().size();
         boolean shouldTaint = false;
         List<JvmValue> args = new ArrayList<>();
         for (int i = 0; i < numParams; i++) {
@@ -65,6 +68,11 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
                         String.format(
                                 "Unchecked call to method {%s} on class {%s} on an unknown reference. Beware.",
                                 this.name, this.owner));
+                if (descriptorExtractor.returnsObject()) {
+                    ctx.push(JvmValue.UNKNOWN_REFERENCE);
+                } else if (descriptorExtractor.returnsBaseType()) {
+                    ctx.push(JvmValue.UNKNOWN);
+                }
             } else {
                 JvmObject object = ctx.getObject(objRef.getIdentifier());
                 if (shouldTaint) {
@@ -127,28 +135,6 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
 
     public boolean isInterface() {
         return isInterface;
-    }
-
-    private int countParameters(String descriptor) {
-        if (descriptor.length() < 2 || descriptor.charAt(0) != '(') {
-            throw new CheckerException("Invalid parameter string: " + descriptor);
-        }
-        char[] chars = descriptor.toCharArray();
-        int index = 1;
-        int result = 0;
-        while (chars[index] != ')') {
-            char current = chars[index];
-            if (current == 'L') {
-                while (chars[index] != ';') {
-                    index++;
-                }
-                result++;
-            } else if (current != '[') {
-                result++;
-            }
-            index++;
-        }
-        return result;
     }
 
     @Override
