@@ -8,7 +8,6 @@ package org.tropicode.examples.trycatch;
 
 import org.tropicode.checker.annotations.Protocol;
 
-@Protocol("{doMethodCall; {nextMethod; {finalMethod; end}}}")
 public class Main {
     @Protocol("{doMethodCall; {nextMethod; {finalMethod; end}}}")
     private static class ClassWithProtocol {
@@ -17,6 +16,8 @@ public class Main {
         public void nextMethod() {}
 
         public void finalMethod() {}
+
+        public void cleanup() {}
     }
 
     public static void main(String[] args) {
