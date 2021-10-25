@@ -471,7 +471,7 @@ public abstract class Typestate implements Cloneable {
         }
     }
 
-    public static final class Invalid extends Typestate {
+    private static final class Invalid extends Typestate {
 
         @Override
         public String toString() {
