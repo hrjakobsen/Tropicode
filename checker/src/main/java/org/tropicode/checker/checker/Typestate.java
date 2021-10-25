@@ -47,6 +47,10 @@ public abstract class Typestate {
         return other.toString().equals(this.toString());
     }
 
+    public boolean isFinished() {
+        return this.getOperations().isEmpty();
+    }
+
     public abstract List<String> getOperations();
 
     private static class End extends Typestate {
@@ -448,6 +452,11 @@ public abstract class Typestate {
         }
 
         @Override
+        public boolean isFinished() {
+            return this.intended.isFinished();
+        }
+
+        @Override
         public String toString() {
             return String.format(
                     "try %s except %s", this.intended.toString(), this.continuation.toString());
@@ -489,6 +498,53 @@ public abstract class Typestate {
         @Override
         public List<String> getOperations() {
             return new ArrayList<>();
+        }
+    }
+
+    public static final class Sequential extends Typestate {
+        private final Typestate left;
+        private final Typestate right;
+
+        public Sequential(Typestate left, Typestate right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public Typestate deepCopy() {
+            return new Sequential(this.left.deepCopy(), this.right.deepCopy());
+        }
+
+        @Override
+        public boolean isAllowed(String action) {
+            return this.left.isAllowed(action)
+                    || (this.left.isFinished() && this.right.isAllowed(action));
+        }
+
+        @Override
+        public Typestate perform(String action) {
+            if (!this.left.isAllowed(action) && this.left.isFinished()) {
+                return this.right.perform(action);
+            }
+            return new Sequential(this.left.perform(action), this.right.deepCopy());
+        }
+
+        @Override
+        protected Typestate unfoldRecursive(String identifier, Typestate ts) {
+            return new Sequential(this.left.unfoldRecursive(identifier, ts), this.right);
+        }
+
+        @Override
+        public List<String> getOperations() {
+            if (this.left.isFinished()) {
+                return this.right.getOperations();
+            }
+            return this.left.getOperations();
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s;%s", this.left.toString(), this.right.toString());
         }
     }
 }

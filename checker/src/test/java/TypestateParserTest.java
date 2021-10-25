@@ -85,7 +85,7 @@ public class TypestateParserTest {
 
     @Test
     void parsesParallelTypestate() {
-        Typestate actualTypestate = Typestate.fromString("(end | X).end");
+        Typestate actualTypestate = Typestate.fromString("(end | X)");
         Typestate expectedTypestate =
                 new Typestate.Parallel(
                         new ArrayList<>() {
@@ -100,7 +100,7 @@ public class TypestateParserTest {
 
     @Test
     void parsesNestedParallelTypestate() {
-        Typestate actualTypestate = Typestate.fromString("(end | (end | end))).end");
+        Typestate actualTypestate = Typestate.fromString("(end | (end | end))");
         Typestate expectedTypestate =
                 new Typestate.Parallel(
                         new ArrayList<>() {

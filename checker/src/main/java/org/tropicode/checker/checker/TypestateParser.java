@@ -13,6 +13,7 @@ import java.util.Stack;
 import lombok.extern.log4j.Log4j2;
 import org.tropicode.checker.checker.Typestate.BooleanChoice;
 import org.tropicode.checker.checker.Typestate.ExceptionPath;
+import org.tropicode.checker.checker.Typestate.Sequential;
 import org.tropicode.checker.checker.TypestateLexer.Token;
 import org.tropicode.checker.checker.TypestateLexer.TokenType;
 import org.tropicode.checker.checker.exceptions.CheckerException;
@@ -20,7 +21,7 @@ import org.tropicode.checker.checker.exceptions.CheckerException;
 
 /*
  * Parsed grammar for typestates
- * u ::= (u_0 | ... | u_i).u { m_i ; w_i } | end | rec X. u | X
+ * u ::= u_0|...|u_i | { m_i ; w_i } | end | rec X. u | X | u;u
  * w ::= < l_i : u_i > | [u_1, u_2] | u
  * */
 @Log4j2
@@ -31,20 +32,46 @@ public class TypestateParser {
 
     public Typestate parse(Stack<TypestateLexer.Token> tokens) {
         Typestate parsed = parseU(tokens);
+        if (!tokens.empty()) {
+            throw new CheckerException(String.format("Unexpected character in typestate %s", (tokens.peek())));
+        }
         return parsed;
     }
 
     private Typestate parseU(Stack<TypestateLexer.Token> tokens) {
         TypestateLexer.Token next = tokens.peek();
-        return switch (next.getType()) {
+        Typestate current = switch (next.getType()) {
             case BRACKET_OPEN -> parseBranch(tokens);
             case TRY -> parseTry(tokens);
-            case PAREN_OPEN -> parseParallel(tokens);
+            case PAREN_OPEN -> parseParenthesis(tokens);
             case END -> parseEnd(tokens);
             case REC -> parseRec(tokens);
             case IDENTIFIER -> parseVariable(tokens);
             default -> throw new CheckerException("Invalid next token " + next.getText());
         };
+        if (tokens.empty()) return current;
+        next = tokens.peek();
+        switch (next.getType()) {
+            case SEMICOLON -> {
+                tokens.pop();
+                return new Sequential(current, parseU(tokens));
+            }
+            case PIPE -> {
+                return parseParallel(current, tokens);
+            }
+            default -> {
+                return current;
+            }
+        }
+    }
+
+    private Typestate parseParenthesis(Stack<Token> tokens) {
+        TypestateLexer.Token startParen = tokens.pop();
+        ensureToken(TokenType.PAREN_OPEN, startParen);
+        Typestate next = parseU(tokens);
+        TypestateLexer.Token endParen = tokens.pop();
+        ensureToken(TokenType.PAREN_CLOSE, endParen);
+        return next;
     }
 
     private Typestate parseTry(Stack<Token> tokens) {
@@ -61,13 +88,11 @@ public class TypestateParser {
         return new ExceptionPath(intended, continuation);
     }
 
-    private Typestate parseParallel(Stack<TypestateLexer.Token> tokens) {
+    private Typestate parseParallel(Typestate current,
+        Stack<Token> tokens) {
         List<Typestate> locals = new ArrayList<>();
+        locals.add(current);
 
-        TypestateLexer.Token parOpen = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.PAREN_OPEN, parOpen);
-
-        locals.add(parseU(tokens));
         TypestateLexer.TokenType next = tokens.peek().getType();
         if (next == TypestateLexer.TokenType.PIPE) {
             do {
@@ -77,18 +102,7 @@ public class TypestateParser {
             } while (next == TypestateLexer.TokenType.PIPE);
         }
 
-        TypestateLexer.Token parClose = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.PAREN_CLOSE, parClose);
-
-        if (tokens.isEmpty() || tokens.peek().getType() != TokenType.DOT) {
-            return new Typestate.Parallel(locals, Typestate.END);
-        }
-
-        TypestateLexer.Token dot = tokens.pop();
-        ensureToken(TypestateLexer.TokenType.DOT, dot);
-
-        Typestate continuation = parseU(tokens);
-        return new Typestate.Parallel(locals, continuation);
+        return new Typestate.Parallel(locals, Typestate.END);
     }
 
     private Typestate parseVariable(Stack<TypestateLexer.Token> tokens) {
