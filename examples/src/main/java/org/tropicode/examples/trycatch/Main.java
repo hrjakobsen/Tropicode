@@ -42,6 +42,7 @@ public class Main {
             obj.finalMethod();
             int a = 1 / 0;
         } catch (ArithmeticException e) {
+            obj.cleanup();
             System.out.println("Error");
         }
         obj.after();
