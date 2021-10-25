@@ -7,18 +7,19 @@
 package org.tropicode.checker.JVM;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 public class JvmExceptionFrame implements Cloneable {
     private List<JvmExceptionHandler> handlers;
-    private List<JvmObject> taintedObjects = new ArrayList<>();
+    private Set<String> taintedObjects = new HashSet<>();
 
     public JvmExceptionFrame(List<JvmExceptionHandler> handlers) {
         this.handlers = handlers;
     }
 
-    public JvmExceptionFrame(List<JvmExceptionHandler> handlers, List<JvmObject> taintedObjects) {
+    public JvmExceptionFrame(List<JvmExceptionHandler> handlers, Set<String> taintedObjects) {
         this.handlers = handlers;
         this.taintedObjects = taintedObjects;
     }
@@ -27,7 +28,7 @@ public class JvmExceptionFrame implements Cloneable {
         return handlers;
     }
 
-    public List<JvmObject> getTaintedObjects() {
+    public Set<String> getTaintedObjects() {
         return taintedObjects;
     }
 
@@ -36,8 +37,7 @@ public class JvmExceptionFrame implements Cloneable {
         try {
             JvmExceptionFrame clone = (JvmExceptionFrame) super.clone();
             clone.handlers = new ArrayList<>(handlers);
-            clone.taintedObjects =
-                    taintedObjects.stream().map(JvmObject::copy).collect(Collectors.toList());
+            clone.taintedObjects = new HashSet<>(taintedObjects);
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

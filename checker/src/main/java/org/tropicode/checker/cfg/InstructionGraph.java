@@ -82,13 +82,6 @@ public class InstructionGraph {
         Stack<List<String>> exceptionHandlerStack = new Stack<>();
 
         for (JvmInstruction instruction : instructions) {
-            if (!exceptionHandlerStack.empty()) {
-                if (lastNode.getBlock().getInstructions().size() != 0) {
-                    lastNode = new InstructionGraph(new BasicBlock(), depth);
-                    nodes.add(lastNode);
-                }
-            }
-
             if (instruction instanceof JvmLabel) {
                 if (lastNode.getBlock().getInstructions().size() != 0) {
                     lastNode = new InstructionGraph(new BasicBlock(), depth);
@@ -107,7 +100,14 @@ public class InstructionGraph {
             }
 
             if (instruction instanceof JvmExitTryBlock) {
-                exceptionHandlerStack.pop();
+                for (String label : exceptionHandlerStack.pop()) {
+                    if (!forwardJumps.containsKey(label)) {
+                        forwardJumps.put(label, new ArrayList<>());
+                    }
+                    if (!forwardJumps.get(label).contains(lastNode)) {
+                        forwardJumps.get(label).add(lastNode);
+                    }
+                }
             }
 
             if (instruction instanceof JvmEnterTryBlock
@@ -119,17 +119,6 @@ public class InstructionGraph {
                 }
             }
             lastNode.getBlock().insertInstruction(instruction);
-
-            if (!exceptionHandlerStack.empty()) {
-                for (String label : exceptionHandlerStack.peek()) {
-                    if (!forwardJumps.containsKey(label)) {
-                        forwardJumps.put(label, new ArrayList<>());
-                    }
-                    if (!forwardJumps.get(label).contains(lastNode)) {
-                        forwardJumps.get(label).add(lastNode);
-                    }
-                }
-            }
 
             if (instruction instanceof JvmJUMP) {
                 JvmJUMP jmpInstruction = (JvmJUMP) instruction;

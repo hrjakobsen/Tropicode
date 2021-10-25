@@ -71,4 +71,8 @@ public class JvmObject {
         boolean fieldEquality = this.fields.equals(other.fields);
         return protocolEquality && fieldEquality;
     }
+
+    public String getIdentifier() {
+        return identifier;
+    }
 }

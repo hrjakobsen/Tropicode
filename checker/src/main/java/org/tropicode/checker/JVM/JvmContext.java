@@ -228,7 +228,7 @@ public class JvmContext {
             return;
         }
         JvmObject obj = this.getObject(objectReference.getIdentifier());
-        exceptionHandlerStack.peek().getTaintedObjects().add(obj);
+        exceptionHandlerStack.peek().getTaintedObjects().add(obj.getIdentifier());
     }
 
     public void exitTryBlock() {
@@ -236,9 +236,9 @@ public class JvmContext {
     }
 
     public void enterExceptionHandler() {
-        // FIXME: Not *all* objects should be moved to exception state. Only those affected by the
-        //  handler. However I am unsure of the best way to find the affected objects.
-        for (JvmObject obj : heap.values()) {
+        // Iterate over the objects that were used in the try-block
+        for (String objectIdentifier : exceptionHandlerStack.peek().getTaintedObjects()) {
+            JvmObject obj = getObject(objectIdentifier);
             if (obj.getProtocol() != null) {
                 if (obj.getProtocol().isAllowed("$EXCEPTION")) {
                     obj.setProtocol(obj.getProtocol().perform("$EXCEPTION"));
