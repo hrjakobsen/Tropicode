@@ -28,7 +28,6 @@ public class MethodDescriptorExtractor {
         if (descriptor.length() < 2 || descriptor.charAt(0) != '(') {
             throw new CheckerException("Invalid parameter string: " + descriptor);
         }
-        log.debug("Parsing descriptor: " + descriptor);
         chars = descriptor.toCharArray();
         index = 0;
         argumentTypes = parseArguments();
