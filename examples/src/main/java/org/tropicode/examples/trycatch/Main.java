@@ -9,25 +9,35 @@ package org.tropicode.examples.trycatch;
 import org.tropicode.checker.annotations.Protocol;
 
 public class Main {
-    @Protocol("{doMethodCall; {nextMethod; {finalMethod; end}}}")
+    @Protocol("try {doMethodCall; {nextMethod; {finalMethod; end}}} except {cleanup; end}")
     private static class ClassWithProtocol {
-        public void doMethodCall() {}
+        public void doMethodCall() {
+            System.out.println("doMethodCall");
+        }
 
-        public void nextMethod() {}
+        public void nextMethod() {
+            System.out.println("nextMethod");
+        }
 
-        public void finalMethod() {}
+        public void finalMethod() {
+            System.out.println("finalMethod");
+        }
 
-        public void cleanup() {}
+        public void cleanup() {
+            System.out.println("cleanup");
+        }
     }
 
     public static void main(String[] args) {
         ClassWithProtocol obj = new ClassWithProtocol();
         try {
             obj.doMethodCall();
+            obj.nextMethod();
+            obj.finalMethod();
             int a = 1 / 0;
         } catch (ArithmeticException e) {
+            obj.cleanup();
             System.out.println("Error");
         }
-        obj.nextMethod();
     }
 }
