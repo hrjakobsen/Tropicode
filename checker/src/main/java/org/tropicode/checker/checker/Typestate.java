@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.tropicode.checker.checker.exceptions.CheckerException;
 
-public abstract class Typestate implements Cloneable {
+public abstract class Typestate {
 
     public static Typestate END = new End();
     public static Typestate INVALID = new Invalid();
@@ -28,8 +28,7 @@ public abstract class Typestate implements Cloneable {
     public static Typestate fromString(String protocol) {
         TypestateLexer lexer = new TypestateLexer(protocol);
         TypestateParser parser = new TypestateParser();
-        Typestate parsedProtocol = parser.parse(lexer.getTokens());
-        return parsedProtocol;
+        return parser.parse(lexer.getTokens());
     }
 
     public abstract Typestate deepCopy();
@@ -136,9 +135,9 @@ public abstract class Typestate implements Cloneable {
 
     static class Choice extends Typestate {
 
-        private HashMap<String, Typestate> choices;
+        private final HashMap<String, Typestate> choices;
 
-        Choice(HashMap<String, Typestate> choice) {
+        Choice(HashMap<String, Typestate> choices) {
             this.choices = choices;
         }
 
@@ -356,27 +355,11 @@ public abstract class Typestate implements Cloneable {
     }
 
     public static final class BooleanChoice extends Typestate {
-        private Typestate trueBranch;
-        private Typestate falseBranch;
+        private final Typestate trueBranch;
+        private final Typestate falseBranch;
 
         public BooleanChoice(Typestate trueBranch, Typestate falseBranch) {
             this.trueBranch = trueBranch;
-            this.falseBranch = falseBranch;
-        }
-
-        public Typestate getTrueBranch() {
-            return trueBranch;
-        }
-
-        public void setTrueBranch(Typestate trueBranch) {
-            this.trueBranch = trueBranch;
-        }
-
-        public Typestate getFalseBranch() {
-            return falseBranch;
-        }
-
-        public void setFalseBranch(Typestate falseBranch) {
             this.falseBranch = falseBranch;
         }
 
@@ -420,8 +403,8 @@ public abstract class Typestate implements Cloneable {
     }
 
     public static final class ExceptionPath extends Typestate {
-        private Typestate intended;
-        private Typestate continuation;
+        private final Typestate intended;
+        private final Typestate continuation;
 
         public ExceptionPath(Typestate intended, Typestate continuation) {
             this.intended = intended;
