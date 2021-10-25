@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.tropicode.checker.checker.exceptions.CheckerException;
 
 public abstract class Typestate implements Cloneable {
 
@@ -58,7 +59,7 @@ public abstract class Typestate implements Cloneable {
 
         @Override
         public Typestate perform(String action) {
-            return null;
+            throw new CheckerException("Tried to perform an operation on an ended protocol");
         }
 
         @Override
