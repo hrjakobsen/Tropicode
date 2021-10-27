@@ -107,7 +107,11 @@ public class TropicodeRunner implements Runnable {
         try {
             if (ignoreFileLocation == null) {
                 String ignoreFile =
-                        System.getProperty("user.home") + File.separator + ".tropicodeignore";
+                        System.getProperty("user.home")
+                                + File.separator
+                                + ".tropicode"
+                                + File.separator
+                                + ".tropicodeignore";
                 if (Files.exists(Path.of(ignoreFile))) {
                     classFilter.addFile(Path.of(ignoreFile));
                 }
