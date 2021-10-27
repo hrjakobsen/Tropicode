@@ -6,12 +6,17 @@
 
 package org.tropicode.checker.checker;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.tropicode.checker.checker.exceptions.CheckerException;
+import org.tropicode.checker.checker.exceptions.ParserException;
 
 public abstract class Typestate {
 
@@ -29,6 +34,14 @@ public abstract class Typestate {
         TypestateLexer lexer = new TypestateLexer(protocol);
         TypestateParser parser = new TypestateParser();
         return parser.parse(lexer.getTokens());
+    }
+
+    public static Optional<Typestate> fromFile(Path filepath) {
+        try {
+            return Optional.of(getInitialObjectProtocol(Files.readString(filepath)));
+        } catch (ParserException | IOException ignored) {
+            return Optional.empty();
+        }
     }
 
     public abstract Typestate deepCopy();

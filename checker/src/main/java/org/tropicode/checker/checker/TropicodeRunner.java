@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
@@ -60,6 +61,17 @@ public class TropicodeRunner implements Runnable {
     @Option(names = "-i", description = "Classpath ignore file location")
     String ignoreFileLocation = null;
 
+    @Option(
+            names = "-p",
+            description =
+                    "Base directories for protocols. Multiple directories are separated by :.")
+    String protocolsDirectory = null;
+
+    @Option(
+            names = "--ignore-default-protocol-directory",
+            description = "Ignore the protocols found in $HOME/.tropicode/protocols ")
+    boolean ignoreDefaultProtocolDirectory = false;
+
     private static final Set<String> ignoreDependencies =
             new HashSet<>() {
                 {
@@ -104,6 +116,8 @@ public class TropicodeRunner implements Runnable {
     public void run() {
         classFilter = new ClassFilter();
         classFilter.addPatterns(TropicodeRunner.ignoreDependencies);
+        ProtocolResolver resolver =
+                new ProtocolResolver(protocolsDirectory, ignoreDefaultProtocolDirectory);
         try {
             if (ignoreFileLocation == null) {
                 String ignoreFile =
@@ -133,6 +147,13 @@ public class TropicodeRunner implements Runnable {
                     continue;
                 }
                 JvmClass klass = parseClass(compiledClassName, classesToLoad);
+                if (klass.getProtocol() == null) {
+                    // try to resolve the protocol elsewhere
+                    Optional<Typestate> protocol = resolver.resolve(nextClass);
+                    if (protocol.isPresent()) {
+                        klass.setProtocol(protocol.get());
+                    }
+                }
                 ctx.getClasses().put(nextClass, klass);
             }
 
