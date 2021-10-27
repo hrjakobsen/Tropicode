@@ -16,7 +16,7 @@ import org.tropicode.checker.checker.Typestate.ExceptionPath;
 import org.tropicode.checker.checker.Typestate.Sequential;
 import org.tropicode.checker.checker.TypestateLexer.Token;
 import org.tropicode.checker.checker.TypestateLexer.TokenType;
-import org.tropicode.checker.checker.exceptions.CheckerException;
+import org.tropicode.checker.checker.exceptions.ParserException;
 
 
 /*
@@ -33,7 +33,7 @@ public class TypestateParser {
     public Typestate parse(Stack<TypestateLexer.Token> tokens) {
         Typestate parsed = parseU(tokens);
         if (!tokens.empty()) {
-            throw new CheckerException(String.format("Unexpected character in typestate %s", (tokens.peek())));
+            throw new ParserException(String.format("Unexpected character in typestate %s", (tokens.peek())));
         }
         return parsed;
     }
@@ -47,7 +47,7 @@ public class TypestateParser {
             case END -> parseEnd(tokens);
             case REC -> parseRec(tokens);
             case IDENTIFIER -> parseVariable(tokens);
-            default -> throw new CheckerException("Invalid next token " + next.getText());
+            default -> throw new ParserException("Invalid next token " + next.getText());
         };
         if (tokens.empty()) return current;
         next = tokens.peek();
@@ -213,7 +213,7 @@ public class TypestateParser {
 
     private void ensureToken(TypestateLexer.TokenType expected, TypestateLexer.Token actual) {
         if (actual.getType() != expected) {
-            throw new CheckerException(
+            throw new ParserException(
                 "Invalid token encountered while parsing " + expected + " token. Got " + actual.getType()
                     + " with text " + actual.getText());
         }
