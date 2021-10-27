@@ -9,8 +9,8 @@ package org.tropicode.checker.checker.extractor;
 import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
+import org.tropicode.checker.JVM.JvmAnnotation;
 import org.tropicode.checker.JVM.JvmClass;
-import org.tropicode.checker.checker.Typestate;
 
 @Log4j2
 public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
@@ -18,7 +18,6 @@ public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
     private final String descriptor;
     private final boolean visible;
     private final JvmClass klass;
-    private boolean isProtocol = false;
 
     public CodeExtractorAnnotationExtractor(
             AnnotationVisitor annotationVisitor,
@@ -29,15 +28,17 @@ public class CodeExtractorAnnotationExtractor extends AnnotationVisitor {
         this.klass = klass;
         this.descriptor = descriptor;
         this.visible = visible;
-        if (descriptor.equals("Lorg/tropicode/checker/annotations/Protocol;")) {
-            isProtocol = true;
-        }
     }
 
     @Override
     public void visit(String name, Object value) {
-        if (isProtocol && name.equals("value")) {
-            klass.setProtocol(Typestate.getInitialObjectProtocol(value.toString()));
+        /*
+        FIXME: This only captures primitive values
+          (see https://asm.ow2.io/javadoc/org/objectweb/asm/AnnotationVisitor.html#visit(java.lang.String,java.lang.Object))
+        */
+        if (name.equals("value")) {
+            klass.getAnnotations()
+                    .put(this.descriptor, new JvmAnnotation(this.descriptor, this.visible, value));
         }
         super.visit(name, value);
     }

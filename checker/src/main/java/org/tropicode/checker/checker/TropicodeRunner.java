@@ -149,7 +149,7 @@ public class TropicodeRunner implements Runnable {
                 JvmClass klass = parseClass(compiledClassName, classesToLoad);
                 if (klass.getProtocol() == null) {
                     // try to resolve the protocol elsewhere
-                    Optional<Typestate> protocol = resolver.resolve(nextClass);
+                    Optional<Typestate> protocol = resolver.resolve(klass);
                     if (protocol.isPresent()) {
                         klass.setProtocol(protocol.get());
                     }

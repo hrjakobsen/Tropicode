@@ -25,6 +25,11 @@ public class JvmClass {
     List<String> fields = new ArrayList<>();
     Map<String, JvmValue> staticFields = new HashMap<>();
     Typestate protocol = null;
+    Map<String, JvmAnnotation> annotations = new HashMap<>();
+
+    public Map<String, JvmAnnotation> getAnnotations() {
+        return annotations;
+    }
 
     public boolean is(int access_flag) {
         return (this.access_flags & access_flag) == access_flag;

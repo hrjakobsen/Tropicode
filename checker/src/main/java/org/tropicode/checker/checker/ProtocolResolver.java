@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.tropicode.checker.JVM.JvmClass;
 
 @Log4j2
 public class ProtocolResolver {
@@ -55,5 +56,19 @@ public class ProtocolResolver {
         }
 
         return Optional.empty();
+    }
+
+    public Optional<Typestate> resolve(JvmClass klass) {
+        if (klass.getAnnotations().containsKey("Lorg/tropicode/checker/annotations/Protocol;")) {
+            // We should use the Protocol annotation
+            return Optional.of(
+                    Typestate.getInitialObjectProtocol(
+                            klass.getAnnotations()
+                                    .get("Lorg/tropicode/checker/annotations/Protocol;")
+                                    .getValue()
+                                    .toString()));
+        } else {
+            return resolve(klass.getName());
+        }
     }
 }
