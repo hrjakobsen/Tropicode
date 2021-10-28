@@ -86,6 +86,19 @@ defined in the program text, for other languages this may not be the case. The `
 annotation is currently provided by the tool for use in Java programs. In the future this will
 expanded to other languages as well.
 
+# Running the tool
+
+To run Tropicode, both Tropicode and the classes to typecheck must be in the classpath. The easiest
+way of achieving that, is to add Tropicode to the classpath of the compiled program, and invoking
+the `TropicodeRunner` class manually.
+
+```shell
+  java -cp target/classes/:tropicode.jar \
+    org.tropicode.checker.checker.TropicodeRunner \
+    "org/tropicode/examples/simplecall/Main" "main([Ljava/lang/String;)V" \
+    -d -f
+```
+
 # Todo
 
 * Add choice typestates
