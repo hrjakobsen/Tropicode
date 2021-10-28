@@ -45,11 +45,12 @@ public class TropicodeRunner implements Runnable {
                             + "\"org/tropicode/examples/simpleclass/Main\".")
     private String entryClass;
 
-    @Parameters(
-            index = "1",
+    @Option(
+            names = {"-m", "--entry-method"},
             description =
                     "The fully qualified method signature of the entry method. Specified with"
-                            + "JVM types like \"main([Ljava/lang/String;)V\"")
+                            + "JVM types like \"main([Ljava/lang/String;)V\"",
+            defaultValue = "main([Ljava/lang/String;)V")
     private String entryMethod;
 
     @Option(names = "-d", description = "Display the instruction graph of the entry method")
@@ -58,7 +59,9 @@ public class TropicodeRunner implements Runnable {
     @Option(names = "-f", description = "Use flow analysis ")
     boolean useFlowAnalysis = false;
 
-    @Option(names = "-i", description = "Classpath ignore file location")
+    @Option(
+            names = {"-i", "--ignore-file-location"},
+            description = "Classpath ignore file location")
     String ignoreFileLocation = null;
 
     @Option(
@@ -142,6 +145,7 @@ public class TropicodeRunner implements Runnable {
             JvmContext ctx = new JvmContext();
             while (!classesToLoad.isEmpty()) {
                 String nextClass = classesToLoad.poll();
+                // Classes can be specified with both / and . as separators
                 String compiledClassName = nextClass.replaceAll("/", ".");
                 if (ctx.getClasses().containsKey(nextClass)) {
                     continue;
