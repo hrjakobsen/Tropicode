@@ -99,9 +99,15 @@ public class TropicodeRunner implements Runnable {
         System.exit(exitCode);
     }
 
-    private JvmClass parseClass(String classname, Queue<String> classesToLoad) throws IOException {
-        log.debug("Parsing " + classname);
-        ClassReader classReader = new ClassReader(classname);
+    private JvmClass parseClass(String classname, Queue<DependencyNode> classesToLoad)
+            throws IOException {
+        return parseClass(new DependencyNode(classname), classesToLoad);
+    }
+
+    private JvmClass parseClass(DependencyNode node, Queue<DependencyNode> classesToLoad)
+            throws IOException {
+        log.debug("Parsing " + node.getClassName());
+        ClassReader classReader = new ClassReader(node.getClassName());
         CodeExtractorClassVisitor cv = new CodeExtractorClassVisitor();
         classReader.accept(cv, ClassReader.SKIP_DEBUG);
         JvmClass klass = cv.getJvmClass();
@@ -109,7 +115,9 @@ public class TropicodeRunner implements Runnable {
             if (classFilter.rejects(dependency)) {
                 continue;
             }
-            classesToLoad.add(dependency);
+            DependencyNode depNode = new DependencyNode(dependency);
+            node.getChildren().add(depNode);
+            classesToLoad.add(depNode);
             log.debug("Adding " + dependency);
         }
         return klass;
@@ -139,18 +147,17 @@ public class TropicodeRunner implements Runnable {
                     throw new CheckerException("Invalid ignore path");
                 }
             }
-            Queue<String> classesToLoad = new ArrayDeque<>();
-            classesToLoad.add(this.entryClass);
+            Queue<DependencyNode> classesToLoad = new ArrayDeque<>();
+            DependencyNode mainDependencyNode = new DependencyNode(this.entryClass);
+            classesToLoad.add(mainDependencyNode);
 
             JvmContext ctx = new JvmContext();
             while (!classesToLoad.isEmpty()) {
-                String nextClass = classesToLoad.poll();
-                // Classes can be specified with both / and . as separators
-                String compiledClassName = nextClass.replaceAll("/", ".");
-                if (ctx.getClasses().containsKey(nextClass)) {
+                DependencyNode nextClass = classesToLoad.poll();
+                if (ctx.getClasses().containsKey(nextClass.getClassName())) {
                     continue;
                 }
-                JvmClass klass = parseClass(compiledClassName, classesToLoad);
+                JvmClass klass = parseClass(nextClass, classesToLoad);
                 if (klass.getProtocol() == null) {
                     // try to resolve the protocol elsewhere
                     Optional<Typestate> protocol = resolver.resolve(klass);
@@ -158,10 +165,10 @@ public class TropicodeRunner implements Runnable {
                         klass.setProtocol(protocol.get());
                     }
                 }
-                ctx.getClasses().put(nextClass, klass);
+                ctx.getClasses().put(nextClass.getClassName(), klass);
             }
 
-            JvmClass klass = ctx.getClasses().get(entryClass);
+            JvmClass klass = ctx.getClasses().get(mainDependencyNode.getClassName());
             JvmMethod m = klass.getMethods().get(entryMethod);
 
             if (!m.is(AccessFlags.ACC_STATIC)) {
