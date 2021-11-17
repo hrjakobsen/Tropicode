@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -22,6 +23,9 @@ import org.tropicode.checker.JVM.JvmClass;
 import org.tropicode.checker.JVM.JvmContext;
 import org.tropicode.checker.JVM.JvmMethod;
 import org.tropicode.checker.JVM.JvmMethod.AccessFlags;
+import org.tropicode.checker.JVM.JvmOpCode;
+import org.tropicode.checker.JVM.instructions.JvmINVOKE;
+import org.tropicode.checker.cfg.BasicBlock;
 import org.tropicode.checker.cfg.InstructionGraph;
 import org.tropicode.checker.checker.exceptions.CheckerException;
 import org.tropicode.checker.checker.extractor.CodeExtractorClassVisitor;
@@ -179,6 +183,9 @@ public class TropicodeRunner implements Runnable {
             ctx.allocateFrame(null, m, new ArrayList<>());
 
             InstructionGraph iGraph = m.getInstructionGraph();
+            InstructionGraph staticInitializers =
+                    staticInitializationGraph(ctx, mainDependencyNode.getDependencyList());
+            iGraph = iGraph.prepend(staticInitializers);
             iGraph.explodeGraph(ctx);
 
             if (displayGraph) {
@@ -196,5 +203,34 @@ public class TropicodeRunner implements Runnable {
         } catch (CheckerException | IOException ex) {
             System.err.println(ex);
         }
+    }
+
+    InstructionGraph staticInitializationGraph(JvmContext ctx, List<String> classOrdering) {
+        List<InstructionGraph> callNodes = new ArrayList<>();
+        for (String className : classOrdering) {
+            JvmClass klass = ctx.getClasses().get(className);
+            if (klass.hasStaticConstructor()) {
+                InstructionGraph fakeCallNode =
+                        new InstructionGraph(
+                                new BasicBlock(
+                                        new JvmINVOKE(
+                                                JvmOpCode.INVOKESTATIC,
+                                                className,
+                                                "<clinit>",
+                                                "()V",
+                                                false)));
+                fakeCallNode.setDepth(0);
+                callNodes.add(fakeCallNode);
+            }
+        }
+
+        for (int i = 0; i < callNodes.size() - 1; i++) {
+            callNodes.get(i).getConnections().add(callNodes.get(i + 1));
+        }
+
+        if (callNodes.size() > 0) {
+            return callNodes.get(0);
+        }
+        return null;
     }
 }

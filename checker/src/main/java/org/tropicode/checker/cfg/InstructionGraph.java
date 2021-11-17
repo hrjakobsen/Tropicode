@@ -24,7 +24,6 @@ import org.tropicode.checker.JVM.JvmContext;
 import org.tropicode.checker.JVM.JvmExceptionHandler;
 import org.tropicode.checker.JVM.JvmMethod;
 import org.tropicode.checker.JVM.JvmOpCode;
-import org.tropicode.checker.JVM.instructions.ClassReference;
 import org.tropicode.checker.JVM.instructions.JvmEnterTryBlock;
 import org.tropicode.checker.JVM.instructions.JvmExitTryBlock;
 import org.tropicode.checker.JVM.instructions.JvmHandleException;
@@ -34,7 +33,6 @@ import org.tropicode.checker.JVM.instructions.JvmJUMP;
 import org.tropicode.checker.JVM.instructions.JvmLOOKUPSWITCH;
 import org.tropicode.checker.JVM.instructions.JvmLabel;
 import org.tropicode.checker.JVM.instructions.JvmNEW;
-import org.tropicode.checker.JVM.instructions.JvmOperation;
 import org.tropicode.checker.JVM.instructions.JvmReturnOperation;
 import org.tropicode.checker.JVM.instructions.JvmStaticFieldOperation;
 import org.tropicode.checker.JVM.instructions.JvmTABLESWITCH;
@@ -460,54 +458,10 @@ public class InstructionGraph {
                 expandedMethods.pop();
             }
 
-            if (shouldInitialiseStaticMembers(
-                    ctx, current.block.getLastInstruction(), initialised)) {
-                String className =
-                        ((ClassReference) current.block.getLastInstruction()).getClassReference();
-                JvmClass klass = ctx.getClasses().get(className);
-                if (klass != null) {
-                    InstructionGraph fakeCallNode =
-                            new InstructionGraph(
-                                    new BasicBlock(
-                                            new JvmINVOKE(
-                                                    JvmOpCode.INVOKESTATIC,
-                                                    className,
-                                                    "<clinit>",
-                                                    "()V",
-                                                    false)));
-                    fakeCallNode.setDepth(current.depth);
-                    fakeCallNode.setConnections(current.connections);
-                    current.connections =
-                            new ArrayList<>() {
-                                {
-                                    add(fakeCallNode);
-                                }
-                            };
-                    next.push(fakeCallNode);
-                }
-            }
             for (InstructionGraph child : current.getConnections()) {
                 next.push(child);
             }
         }
-    }
-
-    private static boolean shouldInitialiseStaticMembers(
-            JvmContext ctx, JvmInstruction instruction, Set<JvmClass> initialised) {
-        if (!(instruction instanceof JvmOperation)) return false;
-        JvmOperation operation = (JvmOperation) instruction;
-        if (operation instanceof ClassReference) {
-            JvmClass klass = ctx.getClasses().get(((ClassReference) operation).getClassReference());
-            if (klass == null) {
-                return false;
-            }
-            if (initialised.contains(klass)) {
-                return false;
-            }
-            initialised.add(klass);
-            return klass.hasStaticConstructor();
-        }
-        return false;
     }
 
     private void insertFinalConnections(
@@ -526,5 +480,12 @@ public class InstructionGraph {
     @Override
     public String toString() {
         return block.toString();
+    }
+
+    public InstructionGraph prepend(InstructionGraph staticInitializers) {
+        List<InstructionGraph> previousStart = new ArrayList<>();
+        previousStart.add(this);
+        staticInitializers.insertFinalConnections(previousStart, new HashSet<>());
+        return staticInitializers;
     }
 }
