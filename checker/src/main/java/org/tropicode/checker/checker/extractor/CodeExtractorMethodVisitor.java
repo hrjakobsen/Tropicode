@@ -26,6 +26,7 @@ import org.tropicode.checker.JVM.instructions.JvmBinaryOperation;
 import org.tropicode.checker.JVM.instructions.JvmCONST;
 import org.tropicode.checker.JVM.instructions.JvmDUP;
 import org.tropicode.checker.JVM.instructions.JvmINVOKE;
+import org.tropicode.checker.JVM.instructions.JvmINVOKEDYNAMIC;
 import org.tropicode.checker.JVM.instructions.JvmInstanceFieldOperation;
 import org.tropicode.checker.JVM.instructions.JvmInstruction;
 import org.tropicode.checker.JVM.instructions.JvmJSR;
@@ -320,7 +321,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
             String descriptor,
             Handle bootstrapMethodHandle,
             Object... bootstrapMethodArguments) {
-        addOperation(new JvmUnsupportedOperation(JvmOpCode.INVOKEDYNAMIC));
+        addOperation(new JvmINVOKEDYNAMIC(name, descriptor));
         super.visitInvokeDynamicInsn(
                 name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     }
