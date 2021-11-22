@@ -34,7 +34,6 @@ public class JvmJUMP extends JvmOperation {
         if (ctx.peek() instanceof TaggedBoolean taggedBoolean) {
             ctx.pop();
             ctx.setConditional(taggedBoolean);
-            System.out.println("Tagged boolean! Choice typestate?");
             for (int i = 0; i < stackValues - 1; i++) {
                 ctx.pop();
             }
