@@ -92,9 +92,10 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
                 if (object.getProtocol() != null
                         && ctx.getCurrentFrame().getCalleeReference() != objRef) {
                     // perform typestate check
-                    if (object.getProtocol().isAllowed(name.trim())) {
+                    JvmMethod m = ctx.findMethod(this.owner, this.name, this.descriptor);
+                    if (!m.isUnrestricted() && object.getProtocol().isAllowed(name.trim())) {
                         object.setProtocol(object.getProtocol().perform(name));
-                    } else {
+                    } else if (!m.isUnrestricted()) {
                         throw new InvalidProtocolOperationException(
                                 object.getProtocol(), name.trim());
                     }
