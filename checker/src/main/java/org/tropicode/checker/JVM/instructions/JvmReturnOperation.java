@@ -8,6 +8,8 @@ package org.tropicode.checker.JVM.instructions;
 
 import org.tropicode.checker.JVM.JvmContext;
 import org.tropicode.checker.JVM.JvmOpCode;
+import org.tropicode.checker.JVM.JvmValue;
+import org.tropicode.checker.JVM.JvmValue.TaggedBoolean;
 
 public class JvmReturnOperation extends JvmOperation {
 
@@ -17,6 +19,13 @@ public class JvmReturnOperation extends JvmOperation {
 
     @Override
     public void evaluateInstruction(JvmContext ctx) {
+        String returnType = ctx.popReturnType();
+        JvmValue.Reference object = ctx.getCurrentFrame().getCalleeReference();
+        if (returnType.equals("Z") && object != null) {
+            // Boolean type
+            ctx.pop();
+            ctx.push(new TaggedBoolean(object));
+        }
         ctx.deallocateFrame();
     }
 

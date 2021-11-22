@@ -23,4 +23,8 @@ public class JvmArray {
     public String getIdentifier() {
         return identifier;
     }
+
+    public JvmArray copy() {
+        return new JvmArray(this.type, this.identifier);
+    }
 }

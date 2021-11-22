@@ -35,7 +35,7 @@ public class JvmDUP extends JvmOperation {
             default:
                 throw new IllegalStateException("Invalid opcode");
         }
-        JvmValue element = ctx.peek();
+        JvmValue element = ctx.pop();
         Queue<JvmValue> popped = new ArrayDeque<>();
 
         for (int i = 0; i < depth; i++) {
@@ -47,6 +47,7 @@ public class JvmDUP extends JvmOperation {
         for (int i = 0; i < depth; i++) {
             ctx.push(popped.poll());
         }
+        ctx.push(element);
     }
 
     @Override

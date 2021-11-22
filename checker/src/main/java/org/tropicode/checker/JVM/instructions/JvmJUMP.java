@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.objectweb.asm.Label;
 import org.tropicode.checker.JVM.JvmContext;
 import org.tropicode.checker.JVM.JvmOpCode;
+import org.tropicode.checker.JVM.JvmValue.TaggedBoolean;
 
 @Log4j2
 public class JvmJUMP extends JvmOperation {
@@ -30,9 +31,22 @@ public class JvmJUMP extends JvmOperation {
     @Override
     public void evaluateInstruction(JvmContext ctx) {
         // Remove values used for jump check
-        for (int i = 0; i < stackValues; i++) {
+        if (ctx.peek() instanceof TaggedBoolean taggedBoolean) {
             ctx.pop();
+            ctx.setConditional(taggedBoolean);
+            System.out.println("Tagged boolean! Choice typestate?");
+            for (int i = 0; i < stackValues - 1; i++) {
+                ctx.pop();
+            }
+        } else {
+            for (int i = 0; i < stackValues; i++) {
+                ctx.pop();
+            }
         }
+    }
+
+    public boolean isConditional() {
+        return this.opcode != JvmOpCode.GOTO && this.opcode != JvmOpCode.GOTO_W;
     }
 
     @Override

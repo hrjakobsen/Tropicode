@@ -22,6 +22,9 @@ public class ClassFilter {
     }
 
     public boolean rejects(String className) {
+        if (className.equals("java/util/Iterator")) {
+            return false;
+        }
         for (String pattern : patterns) {
             if (className.matches(pattern)) {
                 return true;

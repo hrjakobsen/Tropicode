@@ -36,4 +36,9 @@ public class JvmInstanceFieldOperation extends JvmFieldOperation {
                 throw new IllegalStateException();
         }
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + fieldName;
+    }
 }

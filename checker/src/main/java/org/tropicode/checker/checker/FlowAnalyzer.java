@@ -14,7 +14,9 @@ import java.util.Queue;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.tropicode.checker.JVM.JvmContext;
+import org.tropicode.checker.JVM.JvmObject;
 import org.tropicode.checker.JVM.instructions.JvmInstruction;
+import org.tropicode.checker.JVM.instructions.JvmJUMP;
 import org.tropicode.checker.JVM.instructions.JvmLabel;
 import org.tropicode.checker.cfg.InstructionGraph;
 import org.tropicode.checker.cfg.Pair;
@@ -32,7 +34,15 @@ public class FlowAnalyzer implements GraphAnalyzer {
 
         while (!queue.isEmpty()) {
             Pair<InstructionGraph, JvmContext> next = queue.poll();
-            if (cache.contains(next)) {
+            boolean found = false;
+            for (Pair<InstructionGraph, JvmContext> instructionGraphJvmContextPair : cache) {
+                if (instructionGraphJvmContextPair.getLeft().equals(next.getLeft())
+                        && instructionGraphJvmContextPair.getRight().equals(next.getRight())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
                 continue;
             }
             cache.add(next);
@@ -53,9 +63,28 @@ public class FlowAnalyzer implements GraphAnalyzer {
             }
 
             next.getLeft().getBlock().evaluate(ctx);
-            for (InstructionGraph child : next.getLeft().getConnections()) {
-                queue.add(new Pair<>(child, ctx));
+
+            if (next.getLeft().getBlock().getLastInstruction() instanceof JvmJUMP jumpInstruction
+                && jumpInstruction.isConditional()
+                && ctx.getConditional() != null
+                && ctx.getObject(ctx.getConditional().getIdentifier()).getProtocol() != null) {
+                JvmContext trueCtx = ctx.copy();
+                JvmObject objTrue = trueCtx.getObject(trueCtx.getConditional().getIdentifier());
+                objTrue.setProtocol(objTrue.getProtocol().perform("true"));
+
+                JvmContext falseCtx = ctx.copy();
+                JvmObject objFalse = falseCtx.getObject(falseCtx.getConditional().getIdentifier());
+                objFalse.setProtocol(objFalse.getProtocol().perform("false"));
+
+                queue.add(new Pair<>(next.getLeft().getConnections().get(1), trueCtx));
+                queue.add(new Pair<>(next.getLeft().getConnections().get(0), falseCtx));
+
+            } else {
+                for (InstructionGraph child : next.getLeft().getConnections()) {
+                    queue.add(new Pair<>(child, ctx));
+                }
             }
+
         }
     }
 }

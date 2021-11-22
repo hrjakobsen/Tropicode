@@ -17,19 +17,22 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.tropicode.checker.JVM.JvmMethod.AccessFlags;
 import org.tropicode.checker.JVM.JvmValue.Reference;
+import org.tropicode.checker.JVM.JvmValue.TaggedBoolean;
 import org.tropicode.checker.checker.Typestate;
 import org.tropicode.checker.checker.exceptions.CheckerException;
 
 @Log4j2
 public class JvmContext {
 
-    private final Map<String, JvmArray> arrays = new HashMap<>();
+    private Map<String, JvmArray> arrays = new HashMap<>();
     private Stack<JvmFrame> frames = new Stack<>();
     private Map<String, JvmObject> heap = new HashMap<>();
     private Map<String, String> keys = new HashMap<>();
     private Map<String, JvmClass> classes = new HashMap<>();
     private Map<String, JvmHeapSnapshot> snapshots = new HashMap<>();
     private Stack<JvmExceptionFrame> exceptionHandlerStack = new Stack<>();
+    private Stack<String> returnTypeStack = new Stack<>();
+    private JvmValue.Reference conditional;
 
     public Map<String, JvmClass> getClasses() {
         return classes;
@@ -125,11 +128,21 @@ public class JvmContext {
         Stack<JvmFrame> newFrames = new Stack<>();
         newFrames.addAll(frames.stream().map(JvmFrame::copy).collect(Collectors.toList()));
         newContext.frames = newFrames;
+        newContext.returnTypeStack = new Stack<>();
+        newContext.returnTypeStack.addAll(returnTypeStack);
+        if (conditional != null) {
+            newContext.conditional = conditional;
+        }
         HashMap<String, JvmObject> newHeap = new HashMap<>();
         for (String s : heap.keySet()) {
             newHeap.put(s, heap.get(s).copy());
         }
         newContext.heap = newHeap;
+        HashMap<String, JvmArray> newArrays = new HashMap<>();
+        for (String s : arrays.keySet()) {
+            newArrays.put(s, arrays.get(s).copy());
+        }
+        newContext.arrays = newArrays;
         newContext.snapshots = snapshots;
         newContext.classes = classes;
         HashMap<String, String> newKeys = new HashMap<>();
@@ -148,7 +161,7 @@ public class JvmContext {
     public JvmValue allocateArray(String type) {
         String identifier = UUID.randomUUID().toString();
         arrays.put(identifier, new JvmArray(identifier, type));
-        return new JvmValue.Reference(identifier);
+        return new JvmValue.ArrayReference(identifier);
     }
 
     public String getKey(String key) {
@@ -169,8 +182,7 @@ public class JvmContext {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof JvmContext)) return false;
-        JvmContext other = (JvmContext) obj;
+        if (!(obj instanceof JvmContext other)) return false;
         boolean frameEquality = other.frames.equals(frames);
         boolean heapEquality = other.heap.equals(heap);
         return frameEquality && heapEquality;
@@ -261,7 +273,27 @@ public class JvmContext {
         }
     }
 
+    public void addReturnType(String returnType) {
+        this.returnTypeStack.push(returnType);
+    }
+
+    public String popReturnType() {
+        return this.returnTypeStack.pop();
+    }
+
     public int heapSize() {
         return heap.size();
+    }
+
+    public JvmContext() {
+        this.returnTypeStack.push("V"); // void main(String[] args) return type
+    }
+
+    public void setConditional(TaggedBoolean taggedBoolean) {
+        conditional = taggedBoolean.getObjectReference();
+    }
+
+    public Reference getConditional() {
+        return conditional;
     }
 }

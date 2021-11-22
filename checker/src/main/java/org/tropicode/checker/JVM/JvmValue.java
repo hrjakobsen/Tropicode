@@ -6,12 +6,18 @@
 
 package org.tropicode.checker.JVM;
 
+import java.util.Objects;
+
 public abstract class JvmValue implements Cloneable {
 
     public static final JvmValue UNKNOWN = new UnknownByte();
     public static final JvmValue UNKNOWN_REFERENCE = new UnknownReference();
 
     public boolean isUnknownReference() {
+        return false;
+    }
+
+    public boolean isArrayReference() {
         return false;
     }
 
@@ -43,6 +49,82 @@ public abstract class JvmValue implements Cloneable {
         @Override
         protected Object clone() throws CloneNotSupportedException {
             return super.clone();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            Reference reference = (Reference) o;
+
+            return Objects.equals(identifer, reference.identifer);
+        }
+
+        @Override
+        public int hashCode() {
+            return identifer != null ? identifer.hashCode() : 0;
+        }
+    }
+
+    public static class ArrayReference extends Reference implements Cloneable {
+
+        public ArrayReference(String identifer) {
+            super(identifer);
+        }
+
+        @Override
+        public boolean isArrayReference() {
+            return true;
+        }
+
+        @Override
+        public ArrayReference clone() {
+            try {
+                return (ArrayReference) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError();
+            }
+        }
+    }
+
+    public static class TaggedBoolean extends JvmValue implements Cloneable {
+        private Reference objectReference;
+
+        public TaggedBoolean(Reference objectReference) {
+            this.objectReference = objectReference;
+        }
+
+        public Reference getObjectReference() {
+            return objectReference;
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return super.clone();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            TaggedBoolean that = (TaggedBoolean) o;
+
+            return Objects.equals(objectReference, that.objectReference);
+        }
+
+        @Override
+        public int hashCode() {
+            return objectReference != null ? objectReference.hashCode() : 0;
         }
     }
 

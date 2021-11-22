@@ -35,6 +35,7 @@ import org.tropicode.checker.JVM.instructions.JvmLOAD;
 import org.tropicode.checker.JVM.instructions.JvmLOOKUPSWITCH;
 import org.tropicode.checker.JVM.instructions.JvmLabel;
 import org.tropicode.checker.JVM.instructions.JvmNEW;
+import org.tropicode.checker.JVM.instructions.JvmNEWARRAY;
 import org.tropicode.checker.JVM.instructions.JvmNoEffectOperation;
 import org.tropicode.checker.JVM.instructions.JvmPOP;
 import org.tropicode.checker.JVM.instructions.JvmReturnOperation;
@@ -193,6 +194,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
                 break;
             case ARRAYLENGTH:
                 addOperation(new JvmCONST(jvmop));
+                break;
             case ATHROW:
             case MONITORENTER:
             case MONITOREXIT:
@@ -226,7 +228,7 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
                 addOperation(new JvmCONST(jvmop));
                 break;
             case NEWARRAY:
-                addOperation(new JvmUnsupportedOperation(jvmop));
+                addOperation(new JvmNEWARRAY());
                 break;
         }
         super.visitIntInsn(opcode, operand);

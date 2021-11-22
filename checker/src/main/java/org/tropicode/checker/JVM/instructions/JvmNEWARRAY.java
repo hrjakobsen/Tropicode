@@ -9,15 +9,15 @@ package org.tropicode.checker.JVM.instructions;
 import org.tropicode.checker.JVM.JvmContext;
 import org.tropicode.checker.JVM.JvmOpCode;
 
-public class JvmASTORECONST extends JvmOperation {
+public class JvmNEWARRAY extends JvmOperation {
 
-    public JvmASTORECONST(JvmOpCode opcode) {
-        super(opcode);
+    public JvmNEWARRAY() {
+        super(JvmOpCode.NEWARRAY);
     }
 
     @Override
     public void evaluateInstruction(JvmContext ctx) {
-        ctx.pop(); // value
-        ctx.pop(); // index
+        ctx.pop(); // size of the array
+        ctx.push(ctx.allocateArray(null));
     }
 }

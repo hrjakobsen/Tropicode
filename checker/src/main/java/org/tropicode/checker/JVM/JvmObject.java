@@ -61,8 +61,7 @@ public class JvmObject {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof JvmObject)) return false;
-        JvmObject other = (JvmObject) obj;
+        if (!(obj instanceof JvmObject other)) return false;
         // catches null == null
         boolean protocolEquality = this.protocol == other.protocol;
         if (this.protocol != null) {

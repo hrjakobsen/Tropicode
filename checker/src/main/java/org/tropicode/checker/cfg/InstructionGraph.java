@@ -483,6 +483,9 @@ public class InstructionGraph {
     }
 
     public InstructionGraph prepend(InstructionGraph staticInitializers) {
+        if (staticInitializers == null) {
+            return this;
+        }
         List<InstructionGraph> previousStart = new ArrayList<>();
         previousStart.add(this);
         staticInitializers.insertFinalConnections(previousStart, new HashSet<>());

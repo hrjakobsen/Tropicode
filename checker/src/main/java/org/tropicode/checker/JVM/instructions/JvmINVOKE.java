@@ -54,7 +54,7 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
         for (int i = 0; i < numParams; i++) {
             JvmValue val = ctx.pop();
             args.add(val);
-            if (val instanceof Reference && !(val.isUnknownReference())) {
+            if (val instanceof Reference && !val.isUnknownReference() && !val.isArrayReference()) {
                 if (ctx.getObject(((Reference) val).getIdentifier()).isTainted()) {
                     shouldTaint = true;
                 }
@@ -76,13 +76,14 @@ public class JvmINVOKE extends JvmOperation implements ClassReference {
                 }
             } else {
                 JvmObject object = ctx.getObject(objRef.getIdentifier());
+                ctx.addReturnType(descriptorExtractor.getReturnType());
                 if (shouldTaint) {
                     object.setTainted(true);
                 }
                 if (object.isTainted()) {
                     args.forEach(
                             arg -> {
-                                if (arg instanceof Reference) {
+                                if (arg instanceof Reference && !arg.isArrayReference()) {
                                     ctx.getObject(((Reference) arg).getIdentifier())
                                             .setTainted(true);
                                 }

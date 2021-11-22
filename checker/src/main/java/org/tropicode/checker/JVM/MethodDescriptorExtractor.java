@@ -111,6 +111,10 @@ public class MethodDescriptorExtractor {
         return hasReturnValue() && isObjectDescriptor(returnType);
     }
 
+    public boolean returnsBoolean() {
+        return getReturnType().equals("Z");
+    }
+
     public boolean returnsBaseType() {
         return hasReturnValue() && !isObjectDescriptor(returnType);
     }
