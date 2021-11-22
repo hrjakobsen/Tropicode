@@ -7,6 +7,7 @@
 package org.tropicode.examples.iterator;
 
 import org.tropicode.checker.annotations.Protocol;
+import org.tropicode.checker.annotations.Unrestricted;
 
 public class Main {
     @Protocol("rec X.{hasNext; [{next; X}, end]}")
@@ -25,12 +26,19 @@ public class Main {
         public int next() {
             return arr[index++];
         }
+
+        @Override
+        @Unrestricted
+        public String toString() {
+            return String.format("Iterator is at index %s", index);
+        }
     }
 
     public static void main(String[] args) {
         int[] nums = {1, 2, 3, 4, 5};
         IntIterator i = new IntIterator(nums);
         while (i.hasNext()) {
+            System.out.println(i);
             System.out.println(i.next());
         }
         //        while (true) {
