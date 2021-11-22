@@ -16,6 +16,7 @@ import org.tropicode.checker.cfg.InstructionGraph;
 public class JvmMethod {
 
     int access;
+    boolean unrestricted = false;
     String name;
     String descriptor;
     String signature;
@@ -129,6 +130,14 @@ public class JvmMethod {
                 + ", instructions=\n"
                 + str
                 + '}';
+    }
+
+    public boolean isUnrestricted() {
+        return unrestricted;
+    }
+
+    public void setUnrestricted(boolean unrestricted) {
+        this.unrestricted = unrestricted;
     }
 
     public boolean hasReturnValue() {

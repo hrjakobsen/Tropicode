@@ -416,4 +416,12 @@ class CodeExtractorMethodVisitor extends MethodVisitor {
     public Set<String> getDependencies() {
         return dependencies;
     }
+
+    @Override
+    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        if (descriptor.equals("Lorg/tropicode/checker/annotations/Unrestricted;")) {
+            method.setUnrestricted(true);
+        }
+        return super.visitAnnotation(descriptor, visible);
+    }
 }
