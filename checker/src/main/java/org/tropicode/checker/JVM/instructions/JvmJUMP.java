@@ -31,7 +31,7 @@ public class JvmJUMP extends JvmOperation {
     @Override
     public void evaluateInstruction(JvmContext ctx) {
         // Remove values used for jump check
-        if (ctx.peek() instanceof TaggedBoolean taggedBoolean) {
+        if (!ctx.isEmpty() && ctx.peek() instanceof TaggedBoolean taggedBoolean) {
             ctx.pop();
             ctx.setConditional(taggedBoolean);
             for (int i = 0; i < stackValues - 1; i++) {

@@ -76,6 +76,10 @@ public class JvmContext {
         return getCurrentFrame().getStack().peek();
     }
 
+    public boolean isEmpty() {
+        return getCurrentFrame().getStack().size() == 0;
+    }
+
     public void addKey(String key, String identifier) {
         keys.put(key, identifier);
     }
