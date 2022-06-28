@@ -30,7 +30,7 @@ public class Main {
         @Override
         @Unrestricted
         public String toString() {
-            return String.format("Iterator is at index %s", index);
+            return "Iterator is at index " +  index;
         }
     }
 
@@ -38,7 +38,6 @@ public class Main {
         int[] nums = {1, 2, 3, 4, 5};
         IntIterator i = new IntIterator(nums);
         while (i.hasNext()) {
-            System.out.println(i);
             System.out.println(i.next());
         }
     }
