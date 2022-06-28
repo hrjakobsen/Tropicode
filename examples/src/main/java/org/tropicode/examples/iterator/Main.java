@@ -41,8 +41,5 @@ public class Main {
             System.out.println(i);
             System.out.println(i.next());
         }
-        //        while (true) {
-        //            System.out.println(i.next());
-        //        }
     }
 }
